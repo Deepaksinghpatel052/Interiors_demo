@@ -1,0 +1,115 @@
+{% extends "studio/base.html" %}
+{% block page_title %}Automations{% endblock %}
+{% block heading %}Automations{% endblock %}
+{% block actions %}
+<form method="post" action="{% url 'automations:run' %}" class="d-inline" data-loading>{% csrf_token %}
+  <button class="btn btn-accent btn-sm" data-loading-text="Checking…" title="Runs automatically every morning in the live system"><i class="bi bi-play-circle"></i><span class="d-none d-sm-inline ms-1">Run daily checks now</span></button>
+</form>
+{% endblock %}
+
+{% block erp_content %}
+<div class="auto-intro panel mb-3"><div class="panel-body d-flex flex-wrap gap-3 align-items-center">
+  <span class="auto-intro-icon"><i class="bi bi-whatsapp"></i></span>
+  <div class="flex-grow-1 min-w-0" style="flex-basis:18rem">
+    <div class="fw-semibold">Every client message, written for you</div>
+    <div class="small text-muted">Bookings, quotations, payments and leads trigger ready-to-send WhatsApp messages from your own templates. In this demo nothing is sent — each message is logged with a <strong>Send via WhatsApp</strong> button that opens it pre-filled.</div>
+  </div>
+  <div class="d-flex gap-2">
+    <div class="auto-stat"><b>{{ active_count }}/{{ cards|length }}</b><span>switched on</span></div>
+    <div class="auto-stat"><b>{{ total }}</b><span>messages prepared</span></div>
+  </div>
+</div></div>
+
+<h2 class="h6 text-uppercase text-muted fw-semibold mb-2" style="letter-spacing:.06em">Working in the demo</h2>
+<div class="row g-3 mb-4">
+  {% for c in cards %}
+  <div class="col-md-6 col-xxl-4">
+    <section class="panel auto-card h-100 {% if not c.t.is_active %}is-off{% endif %}" id="auto-{{ c.t.key }}">
+      <div class="panel-body d-flex flex-column h-100">
+        <div class="d-flex align-items-start gap-2 mb-2">
+          <span class="auto-icon"><i class="bi bi-{{ c.icon }}"></i></span>
+          <div class="flex-grow-1 min-w-0">
+            <div class="fw-semibold lh-sm">{{ c.t.get_key_display }}</div>
+            <div class="small text-muted">{{ c.when }}</div>
+          </div>
+          {% if erp_role == "owner" %}
+          <form method="post" action="{% url 'automations:toggle' c.t.key %}">{% csrf_token %}
+            <button class="auto-switch {% if c.t.is_active %}on{% endif %}" role="switch" aria-checked="{% if c.t.is_active %}true{% else %}false{% endif %}" aria-label="Switch {{ c.t.get_key_display }} {% if c.t.is_active %}off{% else %}on{% endif %}"><span></span></button>
+          </form>
+          {% else %}<span class="pill {% if c.t.is_active %}pill-green{% else %}pill-grey{% endif %}">{% if c.t.is_active %}On{% else %}Off{% endif %}</span>{% endif %}
+        </div>
+        <div class="wa-preview flex-grow-1">
+          <div class="wa-head"><i class="bi bi-whatsapp"></i> {% if c.owner_msg %}To you (owner){% else %}To the client{% endif %} · preview</div>
+          <div class="wa-bubble">{{ c.preview|linebreaksbr }}<span class="wa-time">10:42 <i class="bi bi-check2-all"></i></span></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-2 small">
+          <a href="?kind={{ c.t.key }}#log" class="text-muted">{{ c.count }} logged</a>
+          {% if erp_role == "owner" %}<button class="btn btn-link btn-sm p-0" data-bs-toggle="collapse" data-bs-target="#edit-{{ c.t.key }}" aria-expanded="false"><i class="bi bi-pencil me-1"></i>Edit message</button>{% endif %}
+        </div>
+        {% if erp_role == "owner" %}
+        <div class="collapse" id="edit-{{ c.t.key }}">
+          <form method="post" action="{% url 'automations:save' c.t.key %}" class="mt-2">{% csrf_token %}
+            <label class="visually-hidden" for="body-{{ c.t.key }}">Message</label>
+            <textarea class="form-control form-control-sm" id="body-{{ c.t.key }}" name="body" rows="5" maxlength="{{ max_body }}">{{ c.t.body }}</textarea>
+            <div class="form-text">Placeholders: {% for p in c.placeholders %}<code>{{ "{" }}{{ p }}{{ "}" }}</code>{% if not forloop.last %} {% endif %}{% endfor %}</div>
+            <div class="d-flex justify-content-end gap-2 mt-2">
+              <button class="btn btn-light btn-sm" name="action" value="reset">Restore default</button>
+              <button class="btn btn-ink btn-sm" name="action" value="save">Save</button>
+            </div>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-3">
+  <div class="col-xl-8" id="log">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+      <h2 class="h6 text-uppercase text-muted fw-semibold mb-0" style="letter-spacing:.06em">Automation log</h2>
+      <form method="get" action="#log"><select class="form-select form-select-sm" name="kind" onchange="this.form.submit()" aria-label="Filter by automation">
+        <option value="">All automations</option>{% for v, l in kinds %}<option value="{{ v }}" {% if kind == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+      </select></form>
+    </div>
+    <div class="panel"><div class="panel-body py-1">
+      {% for log in page %}
+      <div class="auto-log">
+        <div class="d-flex flex-wrap align-items-center gap-2 small">
+          <span class="fw-semibold">{{ log.get_automation_display }}</span>
+          <span class="text-muted">→ {% if log.to_owner %}you (about {{ log.recipient_name }}){% else %}{{ log.recipient_name }}{% endif %}</span>
+          <span class="pill pill-grey ms-auto">Prepared · not sent</span>
+        </div>
+        <div class="auto-log-msg">{{ log.message|linebreaksbr }}</div>
+        <div class="d-flex flex-wrap gap-3 align-items-center small mt-1">
+          <span class="text-muted">{{ log.created_at|date:"d M Y, h:i A" }}</span>
+          {% if log.lead %}<a href="{% url 'studio:lead_detail' log.lead.pk %}">Lead</a>{% endif %}
+          {% if log.quotation %}<a href="{% url 'finance:quotation_detail' log.quotation.pk %}">{{ log.quotation.display_number }}</a>{% endif %}
+          {% if log.invoice %}<a href="{% url 'finance:invoice_detail' log.invoice.pk %}">{{ log.invoice.number }}</a>{% endif %}
+          <a class="btn btn-wa btn-sm ms-auto" href="{{ log.wa_url }}" target="_blank" rel="noopener"><i class="bi bi-whatsapp me-1"></i>Send via WhatsApp</a>
+        </div>
+      </div>
+      {% empty %}<div class="empty-mini py-5"><i class="bi bi-inbox"></i>No messages yet. Book a consultation on the website or press “Run daily checks now”.</div>{% endfor %}
+    </div></div>
+    {% if page.has_other_pages %}<div class="d-flex justify-content-between mt-2 small">
+      {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}&kind={{ kind }}#log">← Newer</a>{% else %}<span></span>{% endif %}
+      <span class="text-muted">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+      {% if page.has_next %}<a href="?page={{ page.next_page_number }}&kind={{ kind }}#log">Older →</a>{% else %}<span></span>{% endif %}
+    </div>{% endif %}
+  </div>
+
+  <div class="col-xl-4">
+    <h2 class="h6 text-uppercase text-muted fw-semibold mb-2" style="letter-spacing:.06em">In the full version</h2>
+    <div class="d-flex flex-column gap-2">
+      {% for f in locked_items %}
+      <button type="button" class="locked-row" data-locked="{{ f.key }}">
+        <i class="bi bi-lock-fill"></i>
+        <span class="flex-grow-1 text-start min-w-0"><span class="fw-semibold d-block">{{ f.title }}</span><span class="small text-muted">{{ f.benefit }}</span></span>
+        <span class="badge-locked">Full version</span>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

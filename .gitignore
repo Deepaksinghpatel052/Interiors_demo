@@ -1,0 +1,12 @@
+venv/
+.env
+media/
+*.sqlite3
+__pycache__/
+*.pyc
+staticfiles/
+.idea/
+.vscode/
+.env_server
+docker-data/
+deploy/

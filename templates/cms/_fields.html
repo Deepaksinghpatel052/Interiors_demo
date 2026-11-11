@@ -1,0 +1,18 @@
+{% if form.non_field_errors %}<div class="col-12"><div class="alert alert-danger small py-2 mb-0">{{ form.non_field_errors.0 }}</div></div>{% endif %}
+{% for field in form %}
+{% if field.widget_type == "checkbox" %}
+<div class="col-sm-6 d-flex align-items-end"><div class="form-check mb-1">{{ field }}<label class="form-check-label small" for="{{ field.id_for_label }}">{{ field.label }}</label></div></div>
+{% else %}
+<div class="{% if field.widget_type == 'textarea' or field.widget_type == 'clearablefile' or field.name == 'title' or field.name == 'question' or field.name == 'summary' or field.name == 'hero_title' %}col-12{% elif field.name == 'order' or field.name == 'year' or field.name == 'area_sqft' or field.name == 'duration_weeks' or field.name == 'icon' or field.name == 'founded_year' %}col-6 col-md-3{% else %}col-sm-6{% endif %}">
+  <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-accent">*</span>{% endif %}</label>
+  {% if field.widget_type == "clearablefile" %}
+  <div class="d-flex gap-3 align-items-center">
+    {% if field.value and field.value.url %}<img src="{{ field.value.url }}" alt="" class="cms-thumb">{% endif %}
+    <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" accept="image/jpeg,image/png,image/webp" class="form-control {% if field.errors %}is-invalid{% endif %}">
+  </div>
+  {% else %}{{ field }}{% endif %}
+  {% for e in field.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+  {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+</div>
+{% endif %}
+{% endfor %}

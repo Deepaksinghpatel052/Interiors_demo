@@ -1,0 +1,17 @@
+{% extends "studio/base.html" %}
+{% block page_title %}{{ plural }}{% endblock %}
+{% block heading %}<a href="{% url 'cms:index' %}" class="text-muted text-decoration-none" aria-label="Back"><i class="bi bi-arrow-left"></i></a> {{ plural }}{% endblock %}
+{% block actions %}<a class="btn btn-accent btn-sm" href="{% url 'cms:new' kind %}"><i class="bi bi-plus-lg"></i><span class="d-none d-sm-inline ms-1">Add {{ singular }}</span></a>{% endblock %}
+{% block erp_content %}
+<div class="panel" style="max-width:56rem"><div class="panel-body py-1">
+  {% for it in items %}
+  <a class="doc-row" href="{% url 'cms:edit' kind it.obj.pk %}">
+    <i class="bi bi-{{ icon }}"></i>
+    <span class="flex-grow-1 min-w-0"><span class="fw-semibold d-block text-truncate">{{ it.title }}</span>{% if it.meta %}<span class="small text-muted d-block text-truncate">{{ it.meta }}</span>{% endif %}</span>
+    {% if it.obj.is_sample %}<span class="badge-sample">Sample</span>{% endif %}
+    {% if not it.obj.is_active %}<span class="pill pill-grey">Hidden</span>{% endif %}
+    <i class="bi bi-chevron-right small text-muted"></i>
+  </a>
+  {% empty %}<div class="empty-mini py-5"><i class="bi bi-{{ icon }}"></i>No {{ plural|lower }} yet. <a href="{% url 'cms:new' kind %}">Add the first one</a>.</div>{% endfor %}
+</div></div>
+{% endblock %}

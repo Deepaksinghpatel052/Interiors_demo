@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Portfolio — {{ studio.name }}{% endblock %}
+{% block meta_description %}Interior design projects by {{ studio.name }}: living rooms, bedrooms, modular kitchens, offices and complete homes in {{ studio.city }}.{% endblock %}
+
+{% block content %}
+<header class="page-hero pb-4">
+  <div class="container">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-6">
+        <span class="eyebrow">Portfolio</span>
+        <h1>Homes and workplaces we’ve designed</h1>
+        <p class="lead-text">Filter by room, style or budget. Open any project to see the full story — before and after, materials and timeline.</p>
+        <div class="d-flex flex-wrap gap-4 mt-3">
+          <div><div class="stat-num" style="font-size:2rem">{{ projects|length }}</div><div class="stat-label">projects</div></div>
+          <div><div class="stat-num" style="font-size:2rem">{{ rooms|length }}</div><div class="stat-label">types of spaces</div></div>
+          <div><div class="stat-num" style="font-size:2rem">{{ styles|length }}</div><div class="stat-label">design styles</div></div>
+        </div>
+      </div>
+      <div class="col-lg-6 d-none d-md-block">
+        <div class="hero-collage">
+          {% for p in collage %}<a href="{{ p.get_absolute_url }}" class="hc-{{ forloop.counter }}"><img src="{{ p.cover.url }}" alt="{{ p.title }}" width="600" height="450" decoding="async"></a>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <div class="container d-flex flex-column gap-2">
+    <div class="filter-group" role="group" aria-label="Filter by room">
+      <span class="filter-label align-self-center me-1">Room</span>
+      <a href="{% query_replace room='' %}" class="chip {% if not current.room %}active{% endif %}" data-key="room" data-val="">All</a>
+      {% for v, l, n in rooms %}{% if n %}<a href="{% query_replace room=v %}" class="chip {% if current.room == v %}active{% endif %}" data-key="room" data-val="{{ v }}">{{ l }} <span class="chip-count">{{ n }}</span></a>{% endif %}{% endfor %}
+    </div>
+    <div class="filter-group" role="group" aria-label="Filter by style">
+      <span class="filter-label align-self-center me-1">Style</span>
+      <a href="{% query_replace style='' %}" class="chip {% if not current.style %}active{% endif %}" data-key="style" data-val="">All</a>
+      {% for v, l, n in styles %}{% if n %}<a href="{% query_replace style=v %}" class="chip {% if current.style == v %}active{% endif %}" data-key="style" data-val="{{ v }}">{{ l }} <span class="chip-count">{{ n }}</span></a>{% endif %}{% endfor %}
+    </div>
+    <div class="filter-group" role="group" aria-label="Filter by budget">
+      <span class="filter-label align-self-center me-1">Budget</span>
+      <a href="{% query_replace budget='' %}" class="chip {% if not current.budget %}active{% endif %}" data-key="budget" data-val="">Any</a>
+      {% for v, l, n in budgets %}{% if n %}<a href="{% query_replace budget=v %}" class="chip {% if current.budget == v %}active{% endif %}" data-key="budget" data-val="{{ v }}">{{ l }} <span class="chip-count">{{ n }}</span></a>{% endif %}{% endfor %}
+    </div>
+  </div>
+</div>
+
+<section class="section-sm">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4 small text-muted">
+      <span id="portfolioCount">{{ visible_count }} project{{ visible_count|pluralize }}</span>
+      <a href="#" id="resetFilters" class="text-muted">Clear filters</a>
+    </div>
+    <div class="masonry" id="portfolioGrid" data-room="{{ current.room }}" data-style="{{ current.style }}" data-budget="{{ current.budget }}">
+      {% for p in projects %}
+      <div class="masonry-item{% if not p.visible %} is-hidden{% endif %}" data-room="{{ p.room_type }}" data-style="{{ p.style }}" data-budget="{{ p.budget_band }}">
+        {% include "partials/project_card.html" with p=p tall=p.tall %}
+      </div>
+      {% endfor %}
+    </div>
+    <div id="portfolioEmpty" class="empty-state {% if visible_count %}d-none{% endif %}">
+      <i class="bi bi-search"></i>
+      <p class="mb-3">No projects match these filters yet — but we design every style and budget.</p>
+      <a class="btn btn-accent" href="{% url 'bookings:book' %}">Tell us what you have in mind</a>
+    </div>
+  </div>
+</section>
+
+{% include "partials/cta_band.html" with cta_title="Seen something you love? Let’s make it yours." %}
+<div class="pb-5"></div>
+{% endblock %}

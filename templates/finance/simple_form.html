@@ -1,0 +1,27 @@
+{% extends "studio/base.html" %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block heading %}<a href="{% url back %}" class="text-muted text-decoration-none"><i class="bi bi-arrow-left"></i></a> {{ title }}{% endblock %}
+{% block erp_content %}
+<div class="panel" style="max-width:52rem">
+  <div class="panel-body">
+    <form method="post" class="form-compact row g-2" novalidate data-loading>
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="{% if field.name == 'notes' or field.name == 'description' or field.name == 'is_active' %}col-12{% else %}col-sm-6{% endif %}">
+        {% if field.name == 'is_active' %}<div class="form-check">{{ field }}<label class="form-check-label small" for="{{ field.id_for_label }}">Active</label></div>
+        {% else %}<label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% endif %}
+        {% for e in field.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+      </div>
+      {% endfor %}
+      <div class="col-12 d-flex gap-2 justify-content-end mt-2">
+        <a class="btn btn-light" href="{% url back %}">Cancel</a>
+        <button class="btn btn-accent" data-loading-text="Saving…">Save</button>
+      </div>
+    </form>
+    {% if erp_role == "owner" %}
+    <form method="post" action="{% url delete_url obj.pk %}" class="mt-3 pt-3 border-top" data-confirm="Delete “{{ obj }}”? This can’t be undone.">
+      {% csrf_token %}<button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash3 me-1"></i> Delete</button></form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

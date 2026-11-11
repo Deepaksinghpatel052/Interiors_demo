@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Not available — {{ studio.name }}{% endblock %}
+{% block content %}
+<section class="section"><div class="container text-center" style="max-width:36rem">
+  <i class="bi bi-puzzle fs-1 text-accent"></i>
+  <h1 class="h3 mt-3">This page is not available</h1>
+  <p class="text-muted">The {{ module_label }} module is not switched on for {{ studio.name }}.</p>
+  <a class="btn btn-ink" href="{{ site_home }}">Go to the home page</a>
+</div></section>
+{% endblock %}

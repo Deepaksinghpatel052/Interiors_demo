@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Photo credits — {{ studio.name }}{% endblock %}
+{% block content %}
+<header class="page-hero"><div class="container"><span class="eyebrow">Credits</span><h1>Photo credits</h1>
+<p class="lead-text mb-0">Images used on this site and where they come from.</p></div></header>
+<section class="pb-5">
+  <div class="container prose">
+    {% if credits %}
+    <ul class="list-unstyled">
+      {% for c in credits %}<li class="contact-line"><i class="bi bi-camera"></i><span><strong>{{ c.description }}</strong><br><span class="text-muted">by {{ c.author }} · {{ c.source }}{% if c.url %} · <a href="{{ c.url }}" target="_blank" rel="noopener">source</a>{% endif %}</span></span></li>{% endfor %}
+    </ul>
+    {% else %}
+    <p>All images on this demo are illustrations generated for the demo. No photographs from other designers or websites are used.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

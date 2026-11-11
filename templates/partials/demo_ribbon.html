@@ -1,0 +1,29 @@
+<div class="demo-ribbon" role="region" aria-label="Demo notice">
+  <div class="container d-flex align-items-center gap-2 gap-md-3">
+    <i class="bi bi-stars text-warning d-none d-sm-inline"></i>
+    <span class="flex-grow-1 small">
+      <strong>Demo by {{ DEVNIX_NAME }}</strong><span class="d-none d-md-inline"> — this system can be built for your studio.</span>
+    </span>
+    <button type="button" class="btn btn-sm btn-light-outline" data-tour-start title="Guided tour of the whole system"><i class="bi bi-signpost-2"></i><span class="d-none d-sm-inline ms-1">Tour</span></button>
+    {% if not request.resolver_match.url_name == "why" %}<a class="btn btn-sm btn-light-outline d-none d-lg-inline-block" href="{% url 'website:why' %}"><i class="bi bi-lightbulb"></i> Why this system</a>{% endif %}
+    <div class="dropdown">
+      <button class="btn btn-sm btn-light-outline dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-person-badge"></i><span class="d-none d-sm-inline ms-1">View as: {% if erp_role == "owner" %}Owner{% elif erp_role == "team" %}Team member{% elif erp_role == "client" %}Client{% else %}Visitor{% endif %}</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="z-index:1100">
+        <li><h6 class="dropdown-header">Switch demo role</h6></li>
+        {% for key, label, icon in demo_roles %}
+        <li><form method="post" action="{% url 'core:switch_role' key %}">{% csrf_token %}
+          <button class="dropdown-item d-flex gap-2 {% if erp_role == key or erp_role == 'team' and key == 'designer' %}active{% endif %}"><i class="bi bi-{{ icon }}"></i>{{ label }}</button></form></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% if DEVNIX_WHATSAPP %}
+    <a class="btn btn-wa btn-sm" target="_blank" rel="noopener"
+       href="{% wa_link DEVNIX_WHATSAPP 'Hi '|add:DEVNIX_NAME|add:', I saw the interior studio demo and want this for my studio.' %}">
+      <i class="bi bi-whatsapp"></i><span class="d-none d-sm-inline ms-1">Talk to {{ DEVNIX_NAME }}</span>
+    </a>
+    {% endif %}
+    <button type="button" class="ribbon-close" aria-label="Hide demo notice"><i class="bi bi-x-lg"></i></button>
+  </div>
+</div>

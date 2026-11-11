@@ -1,0 +1,69 @@
+{% extends "studio/base.html" %}
+{% block page_title %}{{ inv.number }}{% endblock %}
+{% block heading %}<a href="{% url 'finance:invoices' %}" class="text-muted text-decoration-none"><i class="bi bi-arrow-left"></i></a> {{ inv.number }}{% endblock %}
+{% block actions %}<a class="btn btn-light btn-sm" href="{% url 'finance:invoice_pdf' inv.pk %}" target="_blank" rel="noopener"><i class="bi bi-filetype-pdf"></i><span class="d-none d-sm-inline ms-1">PDF</span></a>{% endblock %}
+
+{% block erp_content %}
+<div class="row g-3">
+  <div class="col-xl-8">
+    <div class="panel mb-3">
+      <div class="panel-body d-flex flex-wrap gap-3 align-items-center">
+        <div class="flex-grow-1">
+          <span class="pill {% if inv.status == 'paid' %}pill-green{% elif inv.is_overdue %}pill-red{% elif inv.status == 'partial' %}pill-accent{% elif inv.status == 'cancelled' %}pill-grey{% else %}pill-blue{% endif %}">{% if inv.is_overdue %}Overdue{% else %}{{ inv.get_status_display }}{% endif %}</span>
+          <div class="fw-semibold mt-1">{{ inv.client_name }} · <a href="{{ inv.project.get_absolute_url }}?tab=billing">{{ inv.project.name }}</a></div>
+          <div class="small text-muted">{{ inv.description }} · dated {{ inv.date|date:"d-m-Y" }} · due {{ inv.due_date|date:"d-m-Y" }}</div>
+        </div>
+        {% if inv.balance and inv.project.client_mobile %}
+        <a class="btn btn-wa btn-sm" target="_blank" rel="noopener" href="{% wa_link inv.project.client_mobile|india reminder_text %}"><i class="bi bi-whatsapp me-1"></i> Payment reminder</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="panel mb-3">
+      <div class="panel-head"><h2>Amounts</h2></div>
+      <div class="panel-body">
+        <dl class="summary-list mb-0">
+          <div><dt>Taxable value</dt><dd>{{ inv.taxable_amount|inr2 }}</dd></div>
+          {% if inv.inter_state %}<div><dt>IGST</dt><dd>{{ inv.igst|inr2 }}</dd></div>
+          {% else %}<div><dt>CGST</dt><dd>{{ inv.cgst|inr2 }}</dd></div><div><dt>SGST</dt><dd>{{ inv.sgst|inr2 }}</dd></div>{% endif %}
+          <div><dt>Invoice total</dt><dd>{{ inv.total|inr2 }}</dd></div>
+          <div><dt>Received</dt><dd class="text-success">{{ inv.paid|inr2 }}</dd></div>
+        </dl>
+        <div class="qt-grand"><span>Balance due</span><strong>{{ inv.balance|inr }}</strong></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Payments</h2></div>
+      <div class="panel-body py-1">
+        {% for p in payments %}
+        <div class="list-row"><i class="bi bi-check-circle-fill text-success"></i>
+          <div class="flex-grow-1 small"><span class="fw-semibold">{{ p.amount|inr2 }}</span> · {{ p.get_mode_display }}{% if p.reference %} · {{ p.reference }}{% endif %}
+            <div class="text-muted">{{ p.date|date:"d-m-Y" }}{% if p.recorded_by %} · recorded by {{ p.recorded_by.first_name }}{% endif %}{% if p.notes %} · {{ p.notes }}{% endif %}</div></div></div>
+        {% empty %}<div class="empty-mini"><i class="bi bi-wallet2"></i>No payments recorded yet.</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    {% if can_record and inv.balance %}
+    <div class="panel mb-3">
+      <div class="panel-head"><h2>Record a payment</h2></div>
+      <div class="panel-body">
+        <form method="post" action="{% url 'finance:invoice_pay' inv.pk %}" class="form-compact" novalidate data-loading>
+          {% csrf_token %}
+          {% for field in form %}<div class="mb-2"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endfor %}
+          <button class="btn btn-accent w-100 mt-1" data-loading-text="Saving…"><i class="bi bi-check2 me-1"></i> Record payment</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+    {% if inv.balance and studio.show_locked_teasers %}
+    <button type="button" class="locked-row mb-3" data-locked="online_payments"><i class="bi bi-lock-fill"></i>
+      <span class="flex-grow-1 text-start min-w-0"><span class="fw-semibold d-block">Send a UPI / card payment link</span><span class="small text-muted">Client pays online from the portal; the payment is recorded here automatically.</span></span>
+      <span class="badge-locked">Full version</span></button>
+    {% endif %}
+    {% if can_record and inv.status == 'issued' and not payments %}
+    <form method="post" action="{% url 'finance:invoice_cancel' inv.pk %}" data-confirm="Cancel {{ inv.number }}? The number stays used; you can raise a fresh invoice for this milestone.">
+      {% csrf_token %}<button class="btn btn-light btn-sm w-100"><i class="bi bi-x-circle me-1"></i> Cancel invoice</button></form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

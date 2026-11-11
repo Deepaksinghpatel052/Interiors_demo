@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% block page_title %}My project{% endblock %} — {{ studio.name }}{% endblock %}
+{% block extra_head %}<link href="{% static 'css/erp.css' %}" rel="stylesheet"><link href="{% static 'css/portal.css' %}" rel="stylesheet"><meta name="robots" content="noindex">{% endblock %}
+{% block body_class %}portal{% endblock %}
+
+{% block nav %}
+<header class="portal-top">
+  <div class="container d-flex align-items-center gap-3">
+    {% include "partials/brand.html" %}
+    <div class="ms-auto d-flex align-items-center gap-2">
+      {% if projects|length > 1 %}
+      <div class="dropdown">
+        <button class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-house"></i><span class="d-none d-sm-inline ms-1">{{ project.name|truncatechars:22 }}</span></button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+          {% for p in projects %}<li><a class="dropdown-item {% if p.pk == project.pk %}active{% endif %}" href="?p={{ p.pk }}">{{ p.name }}</a></li>{% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      <div class="dropdown">
+        <button class="btn btn-light btn-sm erp-user" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account">
+          <span class="avatar">{{ user.first_name|first|default:user.username|first|upper }}</span>
+          <span class="d-none d-md-inline">{{ user.get_full_name|default:user.username }}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+          <li><a class="dropdown-item" href="{{ site_home }}">Studio website</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><form method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button class="dropdown-item">Sign out</button></form></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  {% if project %}
+  <nav class="portal-tabs d-none d-md-block" aria-label="Project sections">
+    <div class="container d-flex gap-1">
+      {% include "portal/_nav_links.html" %}
+    </div>
+  </nav>
+  {% endif %}
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="container portal-content">{% block portal_content %}{% endblock %}</div>
+{% endblock %}
+
+{% block chat_widget %}{% endblock %}
+{% block footer %}
+<footer class="portal-footer"><div class="container small text-muted d-flex flex-wrap gap-2 justify-content-between">
+  <span>{{ studio.legal_name }} · {{ studio.phone }}</span><span>Your private project portal</span></div></footer>
+{% endblock %}
+
+{% block floating %}
+{% if project %}
+<nav class="portal-tabbar d-md-none" aria-label="Project sections">
+  <a class="{% active 'overview' %}" href="{% url 'portal:overview' %}"><i class="bi bi-house"></i>Home</a>
+  <a class="{% active 'designs' 'design_detail' %}" href="{% url 'portal:designs' %}"><i class="bi bi-images"></i>Designs{% if waiting_designs %}<span class="tab-dot"></span>{% endif %}</a>
+  <a class="{% active 'updates' %}" href="{% url 'portal:updates' %}"><i class="bi bi-camera"></i>Updates</a>
+  <a class="{% active 'payments' %}" href="{% url 'portal:payments' %}"><i class="bi bi-wallet2"></i>Payments{% if due_invoices %}<span class="tab-dot"></span>{% endif %}</a>
+  <a class="{% active 'timeline' 'documents' 'requests' %}" href="#" data-bs-toggle="offcanvas" data-bs-target="#portalMore"><i class="bi bi-grid"></i>More</a>
+</nav>
+<div class="offcanvas offcanvas-bottom portal-more" tabindex="-1" id="portalMore" aria-label="More">
+  <div class="offcanvas-body">
+    <a href="{% url 'portal:timeline' %}"><i class="bi bi-flag"></i> Timeline</a>
+    <a href="{% url 'portal:documents' %}"><i class="bi bi-folder2-open"></i> Documents</a>
+    <a href="{% url 'portal:requests' %}"><i class="bi bi-chat-square-dots"></i> Requests &amp; snags</a>
+    {% if project.designer %}<a target="_blank" rel="noopener" href="{% wa_link studio.whatsapp 'Hi, this is '|add:user.get_full_name|add:' about my project '|add:project.name|add:'.' %}"><i class="bi bi-whatsapp"></i> Message the studio</a>{% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

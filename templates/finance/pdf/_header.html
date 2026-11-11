@@ -1,0 +1,21 @@
+<table class="brandbar">
+  <tr>
+    <td width="48">{% if logo_path %}<img src="{{ logo_path }}" width="40" height="40">{% else %}<div class="mark">{{ studio.initials }}</div>{% endif %}</td>
+    <td>
+      <div class="studio-name">{{ studio.name }}</div>
+      <div class="small" style="color:#C9D2DD">{{ studio.tagline }}</div>
+    </td>
+    <td width="200" class="doc-title">{{ doc_title }}</td>
+  </tr>
+</table>
+<div class="stripe">&nbsp;</div>
+<table class="meta" style="margin-top:8pt">
+  <tr>
+    <td width="60%" class="small muted">
+      {{ studio.legal_name }}<br>{{ studio.address }}<br>
+      {{ studio.phone }} · {{ studio.email }}<br>
+      {% if studio.gstin %}<b style="color:{{ studio.dark_color }}">GSTIN: {{ studio.gstin }}</b> · State: {{ studio.state_name }}{% endif %}
+    </td>
+    <td width="40%" class="small" style="text-align:right"></td>
+  </tr>
+</table>

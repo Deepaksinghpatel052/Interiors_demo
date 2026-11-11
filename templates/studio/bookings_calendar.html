@@ -1,0 +1,76 @@
+{% extends "studio/base.html" %}
+{% load static %}
+{% block page_title %}Bookings{% endblock %}
+{% block heading %}Bookings calendar{% endblock %}
+{% block actions %}{% if erp_role == "owner" %}<a class="btn btn-light btn-sm" href="{% url 'studio:availability' %}"><i class="bi bi-clock"></i><span class="d-none d-sm-inline ms-1">Availability</span></a>{% endif %}{% endblock %}
+
+{% block erp_content %}
+<div class="row g-3">
+  <div class="col-xl-9">
+    <div class="panel"><div class="panel-body">
+      <div class="d-flex flex-wrap gap-3 small text-muted mb-2">
+        <span><span class="legend-dot" style="background:#111212"></span>At studio</span>
+        <span><span class="legend-dot" style="background:#0081F6"></span>Online</span>
+        <span><span class="legend-dot" style="background:#12A06A"></span>Site visit</span>
+        <span><span class="legend-dot" style="background:rgba(0,129,246,.18)"></span>Blocked day</span>
+        <span class="ms-auto d-none d-md-inline"><i class="bi bi-arrows-move me-1"></i>Drag a booking to reschedule</span>
+      </div>
+      <div id="calendar" data-events-url="{% url 'studio:booking_events' %}" data-move-url-template="{% url 'studio:booking_move' 0 %}"></div>
+    </div></div>
+  </div>
+  <div class="col-xl-3">
+    <div class="panel">
+      <div class="panel-head"><h2>Next 14 days</h2><span class="pill pill-accent">{{ upcoming|length }}</span></div>
+      <div class="panel-body py-1">
+        {% for b in upcoming %}
+        <div class="list-row">
+          <span class="when">{{ b.date|date:"D d M" }}<br>{{ b.start_time|time:"h:i A" }}</span>
+          <div class="small flex-grow-1 min-w-0">
+            {% if b.lead_id %}<a class="fw-semibold" href="{% url 'studio:lead_detail' b.lead_id %}">{{ b.name }}</a>{% else %}<span class="fw-semibold">{{ b.name }}</span>{% endif %}
+            <div class="text-muted">{{ b.get_mode_display }}</div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="empty-mini"><i class="bi bi-calendar"></i>No bookings yet. Share your booking link: <a href="{% url 'bookings:book' %}" target="_blank">/book/</a></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bmTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0" style="border-radius:16px">
+      <div class="modal-header border-0 pb-0">
+        <div><div class="small text-muted" id="bmRef"></div><h2 class="h5 mb-0" id="bmTitle"></h2></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <dl class="detail-grid row mb-0">
+          <div class="col-6"><dt>When</dt><dd id="bmWhen"></dd></div>
+          <div class="col-6"><dt>Meeting</dt><dd id="bmMode"></dd></div>
+          <div class="col-6"><dt>Mobile</dt><dd id="bmMobile"></dd></div>
+          <div class="col-6"><dt>Status</dt><dd id="bmStatus"></dd></div>
+          <div class="col-12" id="bmAddressWrap"><dt>Site address</dt><dd id="bmAddress"></dd></div>
+          <div class="col-12" id="bmNotesWrap"><dt>Notes</dt><dd id="bmNotes"></dd></div>
+        </dl>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-sm btn-outline-ink" id="bmCall" href="#"><i class="bi bi-telephone me-1"></i> Call</a>
+          <a class="btn btn-sm btn-wa" id="bmWa" target="_blank" rel="noopener" href="#"><i class="bi bi-whatsapp me-1"></i> WhatsApp</a>
+          <a class="btn btn-sm btn-light" id="bmLead" href="#">Open lead</a>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <span class="small text-muted me-auto">Mark as:</span>
+        {% for v, l in statuses %}{% if v != "confirmed" %}<button type="button" class="btn btn-sm btn-light bm-status" data-status="{{ v }}">{{ l }}</button>{% endif %}{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+<span id="bmStatusUrl" data-template="{% url 'studio:booking_status' 0 %}" hidden></span>
+<span id="studioWa" data-name="{{ studio.name }}" hidden></span>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js" defer></script>
+<script src="{% static 'js/erp.js' %}" defer></script>
+{% endblock %}

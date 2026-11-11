@@ -1,0 +1,20 @@
+{% extends "portal/base.html" %}
+{% block page_title %}Site updates{% endblock %}
+{% block portal_content %}
+<div class="portal-head"><h1 class="h3 mb-1">Site updates</h1><p class="text-muted mb-0">Photos and notes from your site, posted by the team.</p></div>
+<div class="feed">
+  {% for u in updates %}
+  <article class="panel mb-3">
+    <div class="panel-body">
+      <div class="d-flex align-items-center gap-2 mb-2"><span class="avatar">{{ u.author.first_name|first }}</span>
+        <div class="small"><span class="fw-semibold">{{ u.author.get_full_name }}</span><div class="text-muted">{{ u.created_at|date:"d M Y, h:i A" }}</div></div></div>
+      <p class="mb-2">{{ u.message|linebreaksbr }}</p>
+      {% if u.photos.all %}<div class="thumb-grid">{% for ph in u.photos.all %}<a href="{{ ph.image.url }}" data-lightbox="u{{ u.pk }}"><img src="{{ ph.image.url }}" alt="Site photo" loading="lazy" width="300" height="200"></a>{% endfor %}</div>{% endif %}
+    </div>
+  </article>
+  {% empty %}
+  <div class="panel"><div class="empty-mini py-5"><i class="bi bi-camera"></i>Site updates start once work begins on site. You'll see photos here every week.</div></div>
+  {% endfor %}
+</div>
+{% include "partials/lightbox.html" %}
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "studio/base.html" %}
+{% block page_title %}AI chat logs{% endblock %}
+{% block heading %}AI chat logs{% endblock %}
+{% block erp_content %}
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-chat-dots"></i> Conversations</div><div class="kpi-value">{{ page.paginator.count }}</div><div class="kpi-sub">{% if channel %}in this filter{% else %}all channels{% endif %}</div></div></div>
+  <div class="col-6 col-lg-3"><a class="kpi" href="{% url 'studio:leads' %}?source=ai_assistant"><div class="kpi-label"><i class="bi bi-person-plus"></i> Leads from AI</div><div class="kpi-value">{{ leads_from_ai }}</div><div class="kpi-sub">visitors who shared a number</div></a></div>
+</div>
+<nav class="erp-tabs"><a class="{% if not channel %}active{% endif %}" href="?">All</a><a class="{% if channel == 'public' %}active{% endif %}" href="?channel=public">Website assistant</a><a class="{% if channel == 'internal' %}active{% endif %}" href="?channel=internal">Studio assistant</a></nav>
+<div class="panel"><div class="panel-body py-1">
+  {% for s in page %}
+  <a class="doc-row" href="{{ s.get_absolute_url }}">
+    <i class="bi {% if s.channel == 'internal' %}bi-person-workspace{% else %}bi-globe2{% endif %}"></i>
+    <span class="flex-grow-1 min-w-0"><span class="fw-semibold">{{ s.first_question.text|truncatechars:90|default:"(no question)" }}</span><br>
+      <span class="small text-muted">{{ s.get_channel_display }} · {{ s.n }} messages · {{ s.last_at|date:"d M Y, h:i A" }}{% if s.user %} · {{ s.user.get_full_name|default:s.user.username }}{% endif %}</span></span>
+    {% if s.lead %}<span class="pill pill-green">Lead: {{ s.lead.name }}</span>{% endif %}
+  </a>
+  {% empty %}<div class="empty-mini py-5"><i class="bi bi-chat-square-text"></i>No conversations yet. Try the assistant on the website.</div>{% endfor %}
+</div></div>
+{% if page.has_other_pages %}<div class="d-flex justify-content-between mt-2 small">
+  {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}&channel={{ channel }}">← Previous</a>{% else %}<span></span>{% endif %}
+  {% if page.has_next %}<a href="?page={{ page.next_page_number }}&channel={{ channel }}">Next →</a>{% endif %}
+</div>{% endif %}
+{% endblock %}

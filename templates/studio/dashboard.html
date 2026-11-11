@@ -1,0 +1,145 @@
+{% extends "studio/base.html" %}
+{% load static %}
+{% block page_title %}Dashboard{% endblock %}
+{% block heading %}Good {% now "A" as ampm %}{% if ampm == "AM" %}morning{% else %}afternoon{% endif %}, {{ user.first_name|default:user.username }}{% endblock %}
+{% block actions %}<a class="btn btn-accent btn-sm d-none d-sm-inline-flex" href="{% url 'studio:lead_create' %}"><i class="bi bi-plus-lg me-1"></i> New lead</a>{% endblock %}
+
+{% block erp_content %}
+<div class="row g-3 mb-3">
+  <div class="col-6 col-xl"><a class="kpi" href="{% url 'studio:leads' %}">
+    <div class="kpi-label"><i class="bi bi-person-plus"></i> New leads this week</div>
+    <div class="kpi-value">{{ kpis.new_leads_week }}</div><div class="kpi-sub">since Monday</div></a></div>
+  <div class="col-6 col-xl"><a class="kpi" href="{% url 'studio:bookings' %}">
+    <div class="kpi-label"><i class="bi bi-calendar-check"></i> Consultations booked</div>
+    <div class="kpi-value">{{ kpis.consultations }}</div><div class="kpi-sub">upcoming</div></a></div>
+  <div class="col-6 col-xl"><a class="kpi" href="{% url 'studio:projects' %}">
+    <div class="kpi-label"><i class="bi bi-house-gear"></i> Active projects</div>
+    <div class="kpi-value">{{ kpis.active_projects }}</div><div class="kpi-sub">in design or on site</div></a></div>
+  <div class="col-6 col-xl"><a class="kpi" href="{% url 'studio:leads' %}">
+    <div class="kpi-label"><i class="bi bi-graph-up-arrow"></i> Lead → client</div>
+    <div class="kpi-value">{{ kpis.conversion }}%</div><div class="kpi-sub">of decided leads won</div></a></div>
+  <div class="col-12 col-sm-6 col-xl"><a class="kpi" href="{% url 'studio:tasks' %}?show=all">
+    <div class="kpi-label"><i class="bi bi-check2-square"></i> Open tasks</div>
+    <div class="kpi-value">{{ kpis.open_tasks }}</div><div class="kpi-sub">across all projects</div></a></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-sm-4"><a class="kpi kpi-money" href="{% url 'finance:quotations' %}?status=sent">
+    <div class="kpi-label"><i class="bi bi-send"></i> Quotations sent · last 30 days</div>
+    <div class="kpi-value">{{ kpis.quotes_sent }}</div><div class="kpi-sub">worth {{ kpis.quotes_sent_value|inr_short }}</div></a></div>
+  <div class="col-sm-4"><a class="kpi kpi-money" href="{% url 'finance:invoices' %}?show=outstanding">
+    <div class="kpi-label"><i class="bi bi-hourglass-split"></i> Pending payments</div>
+    <div class="kpi-value">{{ kpis.pending_payments|inr_short }}</div><div class="kpi-sub">{% if kpis.overdue_invoices %}<span class="text-overdue">{{ kpis.overdue_invoices }} overdue</span>{% else %}nothing overdue{% endif %}</div></a></div>
+  <div class="col-sm-4"><a class="kpi kpi-money kpi-highlight" href="{% url 'finance:invoices' %}">
+    <div class="kpi-label"><i class="bi bi-graph-up"></i> Revenue this month</div>
+    <div class="kpi-value">{{ kpis.revenue_month|inr_short }}</div><div class="kpi-sub">payments received</div></a></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-7">
+    <div class="panel h-100">
+      <div class="panel-head"><h2>Today</h2><span class="small text-muted">{% now "l, d-m-Y" %}</span></div>
+      <div class="panel-body">
+        {% for b in today.bookings %}
+        <div class="list-row">
+          <span class="when">{{ b.start_time|time:"h:i A" }}</span>
+          <div class="flex-grow-1"><a class="fw-semibold text-decoration-none" href="{% if b.lead_id %}{% url 'studio:lead_detail' b.lead_id %}{% else %}{% url 'studio:bookings' %}{% endif %}">{{ b.name }}</a>
+            <div class="small text-muted">{{ b.get_mode_display }}{% if b.site_address %} · {{ b.site_address }}{% endif %}</div></div>
+          <a class="btn btn-sm btn-wa" target="_blank" rel="noopener" href="{% wa_link b.mobile|india 'Hi '|add:b.name|add:', this is '|add:studio.name|add:'. Looking forward to meeting you today for your consultation.' %}"><i class="bi bi-whatsapp"></i></a>
+        </div>
+        {% endfor %}
+        {% for t in today.tasks %}
+        <div class="list-row">
+          <span class="when">Due today</span>
+          <div class="flex-grow-1"><span class="fw-semibold">{{ t.title }}</span>
+            <div class="small text-muted"><a href="{{ t.project.get_absolute_url }}?tab=tasks" class="text-muted">{{ t.project.name }}</a>{% if t.assigned_to %} · {{ t.assigned_to.first_name }}{% endif %}</div></div>
+        </div>
+        {% endfor %}
+        {% if not today.bookings and not today.tasks %}
+        <div class="empty-mini"><i class="bi bi-sun"></i>Nothing scheduled today. A good day for follow-ups.</div>
+        {% endif %}
+        {% if upcoming %}
+        <div class="small fw-semibold text-muted mt-3 mb-1">Coming up</div>
+        {% for b in upcoming %}{% if b.date != today_date %}
+        <div class="list-row py-2"><span class="when">{{ b.date|date:"D d M" }}</span><div class="small flex-grow-1"><span class="fw-semibold">{{ b.start_time|time:"h:i A" }}</span> · {{ b.name }} · {{ b.get_mode_display }}</div></div>
+        {% endif %}{% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="panel h-100">
+      <div class="panel-head"><h2>Needs attention</h2>
+        {% if attention_count %}<span class="pill pill-red">{{ attention_count }}</span>{% endif %}</div>
+      <div class="panel-body">
+        {% for t in overdue.tasks %}
+        <div class="list-row"><i class="bi bi-exclamation-circle text-overdue"></i>
+          <div class="flex-grow-1 small"><span class="fw-semibold">{{ t.title }}</span> <span class="text-overdue">· due {{ t.due_date|date:"d-m" }}</span>
+            <div class="text-muted"><a class="text-muted" href="{{ t.project.get_absolute_url }}?tab=tasks">{{ t.project.name }}</a></div></div></div>
+        {% endfor %}
+        {% for m in overdue.milestones %}
+        <div class="list-row"><i class="bi bi-flag text-overdue"></i>
+          <div class="flex-grow-1 small"><span class="fw-semibold">{{ m.title }}</span> <span class="text-overdue">· was due {{ m.due_date|date:"d-m" }}</span>
+            <div class="text-muted"><a class="text-muted" href="{{ m.project.get_absolute_url }}">{{ m.project.name }}</a></div></div></div>
+        {% endfor %}
+        {% for l in overdue.followups %}
+        <div class="list-row"><i class="bi bi-telephone-outbound text-accent"></i>
+          <div class="flex-grow-1 small">Follow up <a class="fw-semibold" href="{% url 'studio:lead_detail' l.pk %}">{{ l.name }}</a> <span class="text-overdue">· since {{ l.follow_up_date|date:"d-m" }}</span>
+            <div class="text-muted">{{ l.get_stage_display }}</div></div></div>
+        {% endfor %}
+        {% for l in overdue.untouched %}
+        <div class="list-row"><i class="bi bi-hourglass-split text-accent"></i>
+          <div class="flex-grow-1 small"><a class="fw-semibold" href="{% url 'studio:lead_detail' l.pk %}">{{ l.name }}</a> has not been contacted for 3+ days</div></div>
+        {% endfor %}
+        {% if not overdue.tasks and not overdue.milestones and not overdue.followups and not overdue.untouched %}
+        <div class="empty-mini"><i class="bi bi-check2-circle"></i>All caught up — nothing overdue.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel mb-3"><div class="panel-head"><h2>Monthly revenue</h2><span class="small text-muted">Payments received, last 6 months</span></div>
+  <div class="panel-body"><div class="chart-box" style="height:220px"><canvas id="chartRevenue" aria-label="Monthly revenue chart" role="img"></canvas></div></div></div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-6 col-xl-4"><div class="panel h-100"><div class="panel-head"><h2>Leads by source</h2></div>
+    <div class="panel-body"><div class="chart-box"><canvas id="chartSources" aria-label="Leads by source chart" role="img"></canvas></div></div></div></div>
+  <div class="col-md-6 col-xl-4"><div class="panel h-100"><div class="panel-head"><h2>Lead → client funnel</h2></div>
+    <div class="panel-body"><div class="chart-box"><canvas id="chartFunnel" aria-label="Conversion funnel chart" role="img"></canvas></div></div></div></div>
+  <div class="col-xl-4"><div class="panel h-100"><div class="panel-head"><h2>Projects by stage</h2></div>
+    <div class="panel-body"><div class="chart-box"><canvas id="chartStages" aria-label="Projects by stage chart" role="img"></canvas></div></div></div></div>
+</div>
+
+{% if client_feed %}
+<div class="panel mb-3">
+  <div class="panel-head"><h2><i class="bi bi-broadcast text-accent me-1"></i> From your clients</h2><span class="small text-muted">Updates live while this page is open</span></div>
+  <div class="panel-body py-1">
+    {% for e in client_feed %}
+    <div class="list-row align-items-center">
+      <i class="bi {% if e.kind == 'approved' %}bi-patch-check-fill text-success{% elif e.kind == 'changes' %}bi-pencil-square text-accent{% elif e.kind == 'request' %}bi-flag text-overdue{% else %}bi-chat-left-text text-accent{% endif %}"></i>
+      <a class="flex-grow-1 small fw-semibold" href="{{ e.url }}">{{ e.text }}</a>
+      <span class="small text-muted text-nowrap">{{ e.at|timesince }} ago</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="panel">
+  <div class="panel-head"><h2>Recent activity</h2><a class="small" href="{% url 'studio:leads' %}">All leads</a></div>
+  <div class="panel-body">
+    <ul class="activity">
+      {% for a in activity %}
+      <li><a class="fw-semibold" href="{% url 'studio:lead_detail' a.lead_id %}">{{ a.lead.name }}</a> — {{ a.text }}
+        <div class="meta">{{ a.created_at|timesince }} ago{% if a.user %} · {{ a.user.first_name }}{% endif %}</div></li>
+      {% empty %}<li class="text-muted">No activity yet.</li>{% endfor %}
+    </ul>
+  </div>
+</div>
+{{ charts|json_script:"chartData" }}
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+<script src="{% static 'js/erp.js' %}" defer></script>
+{% endblock %}

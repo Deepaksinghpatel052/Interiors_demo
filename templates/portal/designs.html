@@ -1,0 +1,24 @@
+{% extends "portal/base.html" %}
+{% block page_title %}Designs{% endblock %}
+{% block portal_content %}
+<div class="portal-head"><h1 class="h3 mb-1">Your designs</h1><p class="text-muted mb-0">Every version we share appears here. Approve it, or tell us what to change — right on the image.</p></div>
+<div class="row g-3">
+  {% for p in proposals %}
+  <div class="col-md-6 col-xl-4">
+    <a class="panel d-block text-decoration-none h-100 design-teaser" href="{% url 'portal:design_detail' p.pk %}">
+      {% with img=p.images.first %}{% if img %}<img src="{{ img.image.url }}" alt="{{ p.title }}" loading="lazy" width="600" height="400">{% endif %}{% endwith %}
+      <div class="panel-body">
+        <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
+          <span class="small text-muted">Version {{ p.version }} · {{ p.shared_at|date:"d M Y" }}</span>
+          <span class="pill {% if p.status == 'approved' %}pill-green{% elif p.status == 'changes' %}pill-red{% else %}pill-blue{% endif %}">{% if p.status == 'shared' %}Waiting for you{% else %}{{ p.get_status_display }}{% endif %}</span>
+        </div>
+        <div class="fw-semibold text-body">{{ p.title }}</div>
+        <div class="small text-muted">{{ p.images.all|length }} image{{ p.images.all|length|pluralize }}</div>
+      </div>
+    </a>
+  </div>
+  {% empty %}
+  <div class="col-12"><div class="panel"><div class="empty-mini py-5"><i class="bi bi-images"></i>Your designer hasn't shared designs yet. You'll see them here — with a WhatsApp nudge — as soon as they’re ready.</div></div></div>
+  {% endfor %}
+</div>
+{% endblock %}

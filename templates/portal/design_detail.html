@@ -1,0 +1,87 @@
+{% extends "portal/base.html" %}
+{% block page_title %}Design v{{ proposal.version }}{% endblock %}
+{% block portal_content %}
+<div class="portal-head d-flex flex-wrap gap-3 align-items-start">
+  <div class="flex-grow-1">
+    <a class="small text-muted text-decoration-none" href="{% url 'portal:designs' %}"><i class="bi bi-arrow-left"></i> All designs</a>
+    <h1 class="h3 mb-1 mt-1">{{ proposal.title }}</h1>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <span class="pill pill-grey">Version {{ proposal.version }}</span>
+      <span class="pill {% if proposal.status == 'approved' %}pill-green{% elif proposal.status == 'changes' %}pill-red{% else %}pill-blue{% endif %}">{% if proposal.status == 'shared' %}Waiting for your approval{% else %}{{ proposal.get_status_display }}{% endif %}</span>
+      <span class="small text-muted">Shared {{ proposal.shared_at|date:"d M Y" }}</span>
+    </div>
+  </div>
+</div>
+
+{% if not is_latest %}<div class="alert alert-info small"><i class="bi bi-info-circle me-1"></i>A newer version of this design is available. <a href="{% url 'portal:designs' %}">See the latest</a>.</div>{% endif %}
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    {% if proposal.notes %}<div class="panel mb-3"><div class="panel-body"><div class="small text-muted mb-1">Note from your designer</div>{{ proposal.notes|linebreaksbr }}</div></div>{% endif %}
+    {% for img in images %}
+    <figure class="panel design-image mb-3" id="img-{{ img.pk }}">
+      <a href="{{ img.image.url }}" data-lightbox="design" data-caption="{{ img.caption }}"><img src="{{ img.image.url }}" alt="{{ img.caption|default:'Design image' }}" width="1200" height="800" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"></a>
+      <figcaption class="panel-body">
+        <div class="d-flex justify-content-between align-items-center gap-2">
+          <span class="fw-semibold small">{{ forloop.counter }}. {{ img.caption|default:"Design view" }}</span>
+          <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#c{{ img.pk }}" aria-expanded="false"><i class="bi bi-chat-left-text me-1"></i> Comment on this</button>
+        </div>
+        {% for c in img.comments.all %}<div class="comment mt-2"><div class="meta">{{ c.author.get_full_name|default:c.author.username }} · {{ c.created_at|date:"d M, h:i A" }}</div>{{ c.text }}</div>{% endfor %}
+        <form method="post" action="{% url 'portal:design_action' proposal.pk %}" class="collapse mt-2" id="c{{ img.pk }}" data-loading>
+          {% csrf_token %}<input type="hidden" name="action" value="comment"><input type="hidden" name="image" value="{{ img.pk }}">
+          <div class="d-flex gap-2"><input class="form-control" name="text" maxlength="1500" required placeholder="e.g. Can this wall be a lighter shade?" aria-label="Comment on image {{ forloop.counter }}">
+            <button class="btn btn-ink" aria-label="Send comment"><i class="bi bi-send"></i></button></div>
+        </form>
+      </figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+
+  <div class="col-lg-4">
+    <div class="decision-box panel mb-3" id="decision" style="scroll-margin-top:90px">
+      <div class="panel-body">
+        {% if proposal.status == "shared" and is_latest %}
+          <h2 class="h5 mb-1">What do you think?</h2>
+          <p class="small text-muted">Approving lets us move to material selection and ordering.</p>
+          <form method="post" action="{% url 'portal:design_action' proposal.pk %}" class="mb-2" data-confirm="Approve design v{{ proposal.version }}? Your designer will start the next step.">
+            {% csrf_token %}<input type="hidden" name="action" value="approve">
+            <input class="form-control mb-2" name="text" maxlength="500" placeholder="Optional message, e.g. Looks perfect!" aria-label="Optional message">
+            <button class="btn btn-accent w-100"><i class="bi bi-check2-circle me-1"></i> Approve this design</button>
+          </form>
+          <button class="btn btn-outline-ink w-100" type="button" data-bs-toggle="collapse" data-bs-target="#changesForm" aria-expanded="false"><i class="bi bi-pencil me-1"></i> Request changes</button>
+          <form method="post" action="{% url 'portal:design_action' proposal.pk %}" class="collapse mt-2" id="changesForm" data-loading>
+            {% csrf_token %}<input type="hidden" name="action" value="changes">
+            <textarea class="form-control mb-2" name="text" rows="4" minlength="5" maxlength="1500" required placeholder="Tell us what you’d like to change"></textarea>
+            <button class="btn btn-ink w-100" data-loading-text="Sending…">Send to my designer</button>
+          </form>
+        {% elif proposal.status == "approved" %}
+          <div class="text-center py-2"><i class="bi bi-patch-check-fill text-success fs-1"></i>
+            <h2 class="h5 mt-2 mb-1">You approved this design</h2><p class="small text-muted mb-0">{{ proposal.decided_at|date:"d M Y, h:i A" }}</p></div>
+          {% if proposal.decision_comment %}<div class="comment mt-3">{{ proposal.decision_comment }}</div>{% endif %}
+        {% elif proposal.status == "changes" %}
+          <h2 class="h5 mb-1">Changes requested</h2><p class="small text-muted">{{ proposal.decided_at|date:"d M Y" }} · your designer is working on the next version.</p>
+          <div class="comment">{{ proposal.decision_comment }}</div>
+        {% else %}
+          <p class="small text-muted mb-0">This version is no longer open for approval.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Conversation</h2></div>
+      <div class="panel-body">
+        {% for c in comments %}{% if not c.image %}<div class="comment"><div class="meta">{{ c.author.get_full_name|default:c.author.username }} · {{ c.created_at|date:"d M, h:i A" }}</div>{{ c.text }}</div>{% endif %}{% empty %}<p class="small text-muted">No messages yet.</p>{% endfor %}
+        <form method="post" action="{% url 'portal:design_action' proposal.pk %}" class="mt-2" data-loading>
+          {% csrf_token %}<input type="hidden" name="action" value="comment">
+          <textarea class="form-control mb-2" name="text" rows="2" maxlength="1500" required placeholder="Ask a question about this design"></textarea>
+          <button class="btn btn-light w-100" data-loading-text="Sending…">Send message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% if proposal.status == "shared" and is_latest %}
+<a href="#decision" class="approve-bar d-lg-none"><span><strong>Ready to decide?</strong><br><span class="small">Approve or request changes</span></span><i class="bi bi-arrow-down-circle-fill fs-3"></i></a>
+{% endif %}
+{% include "partials/lightbox.html" %}
+{% endblock %}

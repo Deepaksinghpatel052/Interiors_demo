@@ -1,0 +1,299 @@
+{% extends "studio/base.html" %}
+{% load static %}
+{% block page_title %}{{ project.name }}{% endblock %}
+{% block heading %}<a href="{% url 'studio:projects' %}" class="text-muted text-decoration-none"><i class="bi bi-arrow-left"></i></a> {{ project.name }}{% endblock %}
+
+{% block erp_content %}
+<div class="panel mb-3">
+  <div class="panel-body d-flex flex-wrap gap-3 align-items-center">
+    <div class="flex-grow-1">
+      <div class="d-flex flex-wrap gap-2 mb-1"><span class="pill pill-accent">{{ project.get_stage_display }}</span><span class="pill pill-grey">{{ project.code }}</span></div>
+      <div class="small text-muted">{{ project.client_name }}{% if project.property_type %} · {{ project.get_property_type_display }}{% endif %}{% if project.site_address %} · {{ project.site_address }}{% endif %}</div>
+    </div>
+    <div style="min-width:12rem">
+      <div class="d-flex justify-content-between small mb-1"><span class="text-muted">Progress</span><span class="fw-semibold">{{ project.progress }}%</span></div>
+      <div class="progress-thin"><span style="width:{{ project.progress }}%"></span></div>
+    </div>
+    <div class="d-flex gap-2">
+      {% if project.client_mobile %}
+      <a class="btn btn-sm btn-outline-ink" href="{{ project.client_mobile|india|tel }}" aria-label="Call client"><i class="bi bi-telephone"></i></a>
+      <a class="btn btn-sm btn-wa" target="_blank" rel="noopener" href="{% wa_link project.client_mobile|india 'Hi '|add:project.client_name|add:', a quick update on your project from '|add:studio.name|add:': ' %}" aria-label="WhatsApp client"><i class="bi bi-whatsapp"></i></a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<nav class="erp-tabs" aria-label="Project sections">
+  {% for key, label, count in tabs %}
+  <a class="{% if tab == key %}active{% endif %}" href="?tab={{ key }}">{{ label }}{% if count %} <span class="pill pill-grey ms-1">{{ count }}</span>{% endif %}</a>
+  {% endfor %}
+</nav>
+
+{% if tab == "overview" %}
+<div class="row g-3">
+  <div class="col-xl-7">
+    <div class="panel mb-3">
+      <div class="panel-head"><h2>Milestones</h2>{% if project.next_milestone %}<span class="small text-muted">Next: {{ project.next_milestone.title }}</span>{% endif %}</div>
+      <div class="panel-body py-1">
+        {% for m in milestones %}
+        <div class="milestone">
+          <span class="ms-dot {{ m.status }}"></span>
+          <div class="flex-grow-1"><div class="fw-semibold small">{{ m.title }}</div>
+            <div class="small {% if m.is_overdue %}text-overdue{% else %}text-muted{% endif %}">{% if m.status == 'done' %}Done {{ m.completed_on|date:"d-m-Y" }}{% elif m.due_date %}Due {{ m.due_date|date:"d-m-Y" }}{% else %}No date{% endif %}</div></div>
+          <form method="post" action="{% url 'studio:milestone_status' m.pk %}">{% csrf_token %}
+            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" aria-label="Status of {{ m.title }}">
+              {% for v, l in milestone_statuses %}<option value="{{ v }}" {% if m.status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+            </select></form>
+        </div>
+        {% empty %}<div class="empty-mini"><i class="bi bi-flag"></i>No milestones yet.</div>{% endfor %}
+        <form method="post" action="{% url 'studio:milestone_add' project.pk %}" class="row g-2 py-3 form-compact border-top">
+          {% csrf_token %}
+          <div class="col-sm-6">{{ milestone_form.title }}</div><div class="col-7 col-sm-4">{{ milestone_form.due_date }}</div>
+          <div class="col-5 col-sm-2"><button class="btn btn-light w-100">Add</button></div>
+        </form>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Rooms in scope</h2></div>
+      <div class="panel-body py-1">
+        {% for s in spaces %}
+        <div class="list-row align-items-center">
+          <div class="flex-grow-1"><span class="fw-semibold small">{{ s.name }}</span>{% if s.area_sqft %} <span class="small text-muted">· {{ s.area_sqft }} sq ft</span>{% endif %}<div class="small text-muted">{{ s.scope }}</div></div>
+          <form method="post" action="{% url 'studio:space_delete' s.pk %}" data-confirm="Remove {{ s.name }} from this project?">{% csrf_token %}<button class="btn btn-sm btn-light" aria-label="Remove room"><i class="bi bi-trash3"></i></button></form>
+        </div>
+        {% empty %}<div class="empty-mini"><i class="bi bi-door-open"></i>Add the rooms you are designing.</div>{% endfor %}
+        <form method="post" action="{% url 'studio:space_add' project.pk %}" class="row g-2 py-3 form-compact border-top">
+          {% csrf_token %}
+          <div class="col-sm-4">{{ space_form.name }}</div><div class="col-4 col-sm-2">{{ space_form.area_sqft }}</div>
+          <div class="col-8 col-sm-4">{{ space_form.scope }}</div><div class="col-sm-2"><button class="btn btn-light w-100">Add</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="panel mb-3">
+      <div class="panel-head"><h2>Budget vs actual</h2></div>
+      <div class="panel-body">
+        <div class="d-flex justify-content-between mb-1"><span class="text-muted small">Spent {{ project.actual_cost|inr }}</span><span class="small fw-semibold">of {{ project.budget|inr }}</span></div>
+        <div class="progress-thin mb-2" style="height:10px"><span style="width:{% if project.budget_used_pct > 100 %}100{% else %}{{ project.budget_used_pct }}{% endif %}%;{% if project.budget_used_pct > 100 %}background:#A12C1F{% endif %}"></span></div>
+        <div class="small {% if project.budget_used_pct > 100 %}text-overdue{% else %}text-muted{% endif %}">{{ project.budget_used_pct }}% of budget used{% if project.budget_used_pct > 100 %} — over budget{% endif %}</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Details</h2></div>
+      <div class="panel-body">
+        <dl class="detail-grid row mb-0">
+          <div class="col-6"><dt>Designer</dt><dd>{{ project.designer.get_full_name|default:"—" }}</dd></div>
+          <div class="col-6"><dt>Client portal</dt><dd>{% if project.client %}<span class="pill pill-green">{{ project.client.username }}</span>{% else %}—{% endif %}</dd></div>
+          <div class="col-6"><dt>Start</dt><dd>{{ project.start_date|date:"d-m-Y" }}</dd></div>
+          <div class="col-6"><dt>Target handover</dt><dd>{{ project.target_date|date:"d-m-Y"|default:"—" }}</dd></div>
+          <div class="col-6"><dt>Area</dt><dd>{% if project.area_sqft %}{{ project.area_sqft|num }} sq ft{% else %}—{% endif %}</dd></div>
+          <div class="col-6"><dt>From lead</dt><dd>{% if project.lead %}<a href="{% url 'studio:lead_detail' project.lead_id %}">{{ project.lead.get_source_display }}</a>{% else %}—{% endif %}</dd></div>
+          {% if project.notes %}<div class="col-12"><dt>Notes</dt><dd class="small">{{ project.notes|linebreaksbr }}</dd></div>{% endif %}
+        </dl>
+        {% if edit_form %}
+        <button class="btn btn-light btn-sm" data-bs-toggle="collapse" data-bs-target="#editProject" aria-expanded="false"><i class="bi bi-pencil me-1"></i> Edit details</button>
+        <div class="collapse mt-3" id="editProject">
+          <form method="post" action="{% url 'studio:project_edit' project.pk %}" class="form-compact row g-2" novalidate>
+            {% csrf_token %}
+            {% for field in edit_form %}
+            <div class="{% if field.name == 'notes' or field.name == 'site_address' or field.name == 'name' %}col-12{% else %}col-6{% endif %}">
+              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>
+            {% endfor %}
+            <div class="col-12 text-end"><button class="btn btn-ink btn-sm">Save details</button></div>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% elif tab == "tasks" %}
+<div class="panel">
+  <div class="panel-body">
+    <form method="post" action="{% url 'studio:task_add' project.pk %}" class="row g-2 form-compact mb-2" novalidate>
+      {% csrf_token %}<input type="hidden" name="tab" value="tasks">
+      <div class="col-md-5">{{ task_form.title }}</div>
+      <div class="col-6 col-md-3">{{ task_form.assigned_to }}</div>
+      <div class="col-6 col-md-2">{{ task_form.due_date }}</div>
+      <div class="col-6 col-md-1">{{ task_form.priority }}</div>
+      <div class="col-6 col-md-1"><button class="btn btn-accent w-100" aria-label="Add task"><i class="bi bi-plus-lg"></i></button></div>
+    </form>
+    {% for t in tasks %}{% include "studio/_task_row.html" with t=t %}
+    {% empty %}<div class="empty-mini py-4"><i class="bi bi-check2-square"></i>No tasks yet. Add the first one above.</div>{% endfor %}
+  </div>
+</div>
+{% if requests %}
+<div class="panel mt-3">
+  <div class="panel-head"><h2>Requests from the client</h2></div>
+  <div class="panel-body py-1">
+    {% for r in requests %}
+    <div class="list-row">
+      {% if r.photo %}<a href="{{ r.photo.url }}" target="_blank"><img src="{{ r.photo.url }}" alt="" width="64" height="48" style="object-fit:cover;border-radius:8px"></a>{% endif %}
+      <div class="flex-grow-1 small"><span class="fw-semibold">{{ r.title }}</span><div class="text-muted">{{ r.description|truncatechars:140 }}</div><div class="text-muted">{{ r.created_at|date:"d-m-Y" }}</div></div>
+      <span class="pill {% if r.status == 'resolved' %}pill-green{% elif r.status == 'open' %}pill-red{% else %}pill-accent{% endif %}">{{ r.get_status_display }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% elif tab == "designs" %}
+<div class="row g-3">
+  <div class="col-xl-8">
+    {% for p in proposals %}
+    <div class="panel mb-3">
+      <div class="panel-head">
+        <h2>v{{ p.version }} · {{ p.title }}</h2>
+        <span class="pill {% if p.status == 'approved' %}pill-green{% elif p.status == 'changes' %}pill-red{% elif p.status == 'shared' %}pill-blue{% else %}pill-grey{% endif %}">{{ p.get_status_display }}</span>
+      </div>
+      <div class="panel-body">
+        {% if p.notes %}<p class="small text-muted">{{ p.notes }}</p>{% endif %}
+        <div class="thumb-grid mb-3">
+          {% for img in p.images.all %}<a href="{{ img.image.url }}" data-lightbox="v{{ p.version }}" data-caption="{{ img.caption }}"><img src="{{ img.image.url }}" alt="{{ img.caption|default:'Design image' }}" loading="lazy" width="300" height="200"></a>{% endfor %}
+        </div>
+        {% if p.decision_comment %}
+        <div class="comment" style="background:{% if p.status == 'approved' %}rgba(79,178,134,.14){% else %}rgba(224,121,107,.14){% endif %}"><div class="meta">Client decision · {{ p.decided_at|date:"d-m-Y, h:i A" }}</div>{{ p.decision_comment }}</div>
+        {% endif %}
+        {% for c in p.comments.all %}
+        <div class="comment"><div class="meta">{{ c.author.get_full_name|default:c.author.username }} · {{ c.created_at|date:"d-m-Y, h:i A" }}{% if c.image %} · on image {{ c.image.order|add:1 }}{% endif %}</div>{{ c.text }}</div>
+        {% endfor %}
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <span class="small text-muted">{% if p.shared_at %}Shared {{ p.shared_at|date:"d-m-Y" }}{% else %}Not shared yet{% endif %}</span>
+          {% if p.status == 'draft' %}<form method="post" action="{% url 'studio:proposal_share' p.pk %}">{% csrf_token %}<button class="btn btn-sm btn-accent"><i class="bi bi-send me-1"></i> Share with client</button></form>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="panel"><div class="empty-mini py-5"><i class="bi bi-images"></i>No designs yet. Upload v1 to share it with the client.</div></div>
+    {% endfor %}
+  </div>
+  <div class="col-xl-4">
+    <div class="panel">
+      <div class="panel-head"><h2>Upload a new version</h2></div>
+      <div class="panel-body">
+        <form method="post" action="{% url 'studio:proposal_add' project.pk %}" enctype="multipart/form-data" class="form-compact" novalidate data-loading>
+          {% csrf_token %}
+          <div class="mb-2"><label class="form-label" for="{{ proposal_form.title.id_for_label }}">Title</label>{{ proposal_form.title }}</div>
+          <div class="mb-2"><label class="form-label" for="{{ proposal_form.notes.id_for_label }}">Notes for the client</label>{{ proposal_form.notes }}</div>
+          <div class="mb-2"><label class="form-label" for="{{ proposal_form.images.id_for_label }}">Images (JPG/PNG, up to 12)</label>{{ proposal_form.images }}</div>
+          <div class="form-check mb-3">{{ proposal_form.share }}<label class="form-check-label small" for="{{ proposal_form.share.id_for_label }}">Share with the client now</label></div>
+          <button class="btn btn-accent w-100" data-loading-text="Uploading…">Upload design</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% elif tab == "updates" %}
+<div class="row g-3">
+  <div class="col-xl-8">
+    {% for u in updates %}
+    <div class="panel mb-3"><div class="panel-body">
+      <div class="small text-muted mb-1">{{ u.created_at|date:"d-m-Y, h:i A" }} · {{ u.author.get_full_name|default:u.author.username }}</div>
+      <p class="mb-2">{{ u.message|linebreaksbr }}</p>
+      {% if u.photos.all %}<div class="thumb-grid">{% for ph in u.photos.all %}<a href="{{ ph.image.url }}" data-lightbox="u{{ u.pk }}"><img src="{{ ph.image.url }}" alt="Site photo" loading="lazy" width="300" height="200"></a>{% endfor %}</div>{% endif %}
+    </div></div>
+    {% empty %}<div class="panel"><div class="empty-mini py-5"><i class="bi bi-camera"></i>No site updates yet. Post photos so the client sees progress without calling.</div></div>{% endfor %}
+  </div>
+  <div class="col-xl-4">
+    <div class="panel"><div class="panel-head"><h2>Post an update</h2></div><div class="panel-body">
+      <form method="post" action="{% url 'studio:update_add' project.pk %}" enctype="multipart/form-data" class="form-compact" novalidate data-loading>
+        {% csrf_token %}
+        <div class="mb-2">{{ update_form.message }}</div>
+        <div class="mb-3"><label class="form-label" for="{{ update_form.photos.id_for_label }}">Photos</label>{{ update_form.photos }}</div>
+        <button class="btn btn-accent w-100" data-loading-text="Posting…">Post to client portal</button>
+      </form>
+    </div></div>
+  </div>
+</div>
+
+{% elif tab == "documents" %}
+<div class="row g-3">
+  <div class="col-xl-8">
+    <div class="panel"><div class="panel-body py-1">
+      {% for d in documents %}
+      <div class="list-row align-items-center">
+        <i class="bi bi-file-earmark-{% if d.file.name|slice:'-4:' == '.pdf' %}pdf{% else %}image{% endif %} fs-4 text-accent"></i>
+        <div class="flex-grow-1 small"><a class="fw-semibold" href="{{ d.file.url }}" target="_blank" rel="noopener">{{ d.title }}</a>
+          <div class="text-muted">{{ d.get_kind_display }} · {{ d.created_at|date:"d-m-Y" }} · {% if d.visible_to_client %}Visible to client{% else %}Internal{% endif %}</div></div>
+        <form method="post" action="{% url 'studio:document_delete' d.pk %}" data-confirm="Delete “{{ d.title }}”? This cannot be undone.">{% csrf_token %}<button class="btn btn-sm btn-light" aria-label="Delete document"><i class="bi bi-trash3"></i></button></form>
+      </div>
+      {% empty %}<div class="empty-mini py-5"><i class="bi bi-folder2-open"></i>No documents yet. Upload agreements and drawings here.</div>{% endfor %}
+    </div></div>
+    <p class="small text-muted mt-2"><i class="bi bi-info-circle me-1"></i>Quotation and invoice PDFs are on the <a href="?tab=billing">Billing</a> tab.</p>
+  </div>
+  <div class="col-xl-4">
+    <div class="panel"><div class="panel-head"><h2>Upload document</h2></div><div class="panel-body">
+      <form method="post" action="{% url 'studio:document_add' project.pk %}" enctype="multipart/form-data" class="form-compact" novalidate data-loading>
+        {% csrf_token %}
+        <div class="mb-2"><label class="form-label" for="{{ document_form.title.id_for_label }}">Title</label>{{ document_form.title }}</div>
+        <div class="mb-2"><label class="form-label" for="{{ document_form.kind.id_for_label }}">Type</label>{{ document_form.kind }}</div>
+        <div class="mb-2"><label class="form-label" for="{{ document_form.file.id_for_label }}">File (PDF or image, max 8 MB)</label>{{ document_form.file }}</div>
+        <div class="form-check mb-3">{{ document_form.visible_to_client }}<label class="form-check-label small" for="{{ document_form.visible_to_client.id_for_label }}">Show in the client portal</label></div>
+        <button class="btn btn-accent w-100" data-loading-text="Uploading…">Upload</button>
+      </form>
+    </div></div>
+  </div>
+</div>
+{% elif tab == "billing" %}
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-file-earmark-check"></i> Contract value</div><div class="kpi-value">{{ billing.contract|inr_short }}</div><div class="kpi-sub">accepted quotation</div></div></div>
+  <div class="col-6 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-receipt-cutoff"></i> Invoiced</div><div class="kpi-value">{{ billing.invoiced|inr_short }}</div><div class="kpi-sub">so far</div></div></div>
+  <div class="col-6 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-wallet2"></i> Received</div><div class="kpi-value">{{ billing.received|inr_short }}</div><div class="kpi-sub">{{ billing.pct }}% of contract</div></div></div>
+  <div class="col-6 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-hourglass-split"></i> Outstanding</div><div class="kpi-value {% if billing.outstanding %}text-overdue{% endif %}">{{ billing.outstanding|inr_short }}</div><div class="kpi-sub">on issued invoices</div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-xl-7">
+    <div class="panel mb-3">
+      <div class="panel-head"><h2>Payment schedule</h2>{% if billing.contract %}<div class="progress-thin" style="width:140px"><span style="width:{{ billing.pct }}%"></span></div>{% endif %}</div>
+      <div class="panel-body py-1">
+        {% for s in schedule %}{% with inv=s.invoice %}
+        <div class="list-row align-items-center">
+          <span class="ms-dot {% if inv.status == 'paid' %}done{% elif inv %}in_progress{% endif %}"></span>
+          <div class="flex-grow-1 small"><span class="fw-semibold">{{ s.label }}</span> · {{ s.percent|pct }}% · {{ s.amount|inr }}
+            <div class="text-muted">{% if inv %}<a href="{{ inv.get_absolute_url }}">{{ inv.number }}</a> · {{ inv.get_status_display }}{% if inv.balance %} · balance {{ inv.balance|inr }}{% endif %}{% elif s.due_date %}Due {{ s.due_date|date:"d-m-Y" }}{% else %}Not invoiced yet{% endif %}</div></div>
+          {% if not inv and erp_role == "owner" %}
+          <form method="post" action="{% url 'finance:schedule_invoice' s.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-sm btn-outline-ink">Raise invoice</button></form>
+          {% elif inv.balance and erp_role == "owner" %}
+          <a class="btn btn-sm btn-accent" href="{{ inv.get_absolute_url }}">Record payment</a>
+          {% elif inv.status == 'paid' %}<span class="pill pill-green">Paid</span>{% endif %}
+        </div>
+        {% endwith %}{% empty %}
+        <div class="empty-mini py-4"><i class="bi bi-calendar2-week"></i>The payment schedule is created when the client accepts a quotation.</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Invoices</h2><a class="small" href="{% url 'finance:invoices' %}">All invoices</a></div>
+      <div class="panel-body py-1">
+        {% for inv in invoices %}
+        <div class="list-row align-items-center">
+          <i class="bi bi-receipt text-accent"></i>
+          <div class="flex-grow-1 small"><a class="fw-semibold" href="{{ inv.get_absolute_url }}">{{ inv.number }}</a> · {{ inv.total|inr }}<div class="text-muted">{{ inv.date|date:"d-m-Y" }} · {{ inv.description|truncatechars:50 }}</div></div>
+          <span class="pill {% if inv.status == 'paid' %}pill-green{% elif inv.is_overdue %}pill-red{% elif inv.status == 'partial' %}pill-accent{% elif inv.status == 'cancelled' %}pill-grey{% else %}pill-blue{% endif %}">{% if inv.is_overdue %}Overdue{% else %}{{ inv.get_status_display }}{% endif %}</span>
+          <a class="btn btn-sm btn-light" href="{% url 'finance:invoice_pdf' inv.pk %}" target="_blank" rel="noopener" aria-label="PDF"><i class="bi bi-filetype-pdf"></i></a>
+        </div>
+        {% empty %}<div class="empty-mini"><i class="bi bi-receipt-cutoff"></i>No invoices yet.</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="panel">
+      <div class="panel-head"><h2>Quotations</h2><a class="btn btn-sm btn-accent" href="{% url 'finance:quotation_new' %}?project={{ project.pk }}"><i class="bi bi-plus-lg me-1"></i>New</a></div>
+      <div class="panel-body py-1">
+        {% for q in quotations %}
+        <div class="list-row align-items-center">
+          <div class="flex-grow-1 small"><a class="fw-semibold" href="{{ q.get_absolute_url }}">{{ q.display_number }}</a> · {{ q.grand_total|inr }}<div class="text-muted">{{ q.date|date:"d-m-Y" }} · {{ q.title }}</div></div>
+          <span class="pill {% if q.status == 'accepted' %}pill-green{% elif q.status == 'sent' %}pill-blue{% elif q.status == 'rejected' %}pill-red{% else %}pill-grey{% endif %}">{{ q.get_status_display }}</span>
+        </div>
+        {% empty %}<div class="empty-mini py-4"><i class="bi bi-receipt"></i>No quotations yet.</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% include "partials/lightbox.html" %}
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/erp.js' %}" defer></script>{% endblock %}

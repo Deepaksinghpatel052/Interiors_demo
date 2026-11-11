@@ -1,0 +1,5 @@
+<a class="brand" href="{{ site_home }}" aria-label="{{ studio.name }} home">
+  {% if studio.logo %}<img class="brand-logo" src="{{ studio.logo.url }}" alt="{{ studio.name }} logo" width="40" height="40">
+  {% else %}<span class="brand-mark" aria-hidden="true">{{ studio.initials }}</span>{% endif %}
+  <span><span class="brand-name">{{ studio.name }}</span><span class="brand-sub">Interior design · {{ studio.city }}</span></span>
+</a>

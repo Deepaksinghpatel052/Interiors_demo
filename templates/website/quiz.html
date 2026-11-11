@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Find your interior style — {{ studio.name }}{% endblock %}
+{% block content %}
+<header class="page-hero pb-3">
+  <div class="container">
+    <span class="eyebrow">Style quiz · 1 minute</span>
+    <h1>Find your interior style</h1>
+    <p class="lead-text mb-0">Five pictures, five taps. We’ll show you your style and projects that match it.</p>
+  </div>
+</header>
+
+<section class="pb-5">
+  <div class="container" style="max-width:62rem">
+    <form method="post" action="{% url 'website:quiz_result' %}" id="quizForm">
+      {% csrf_token %}
+      <div class="quiz-progress mb-4" aria-hidden="true"><span id="quizBar" style="width:20%"></span></div>
+      {% for q in questions %}
+      <fieldset class="quiz-step {% if not forloop.first %}d-none{% endif %}" data-step="{{ forloop.counter }}">
+        <legend class="d-flex justify-content-between align-items-baseline gap-3 mb-3">
+          <span class="h3 mb-0">{{ q.title }}</span>
+          <span class="small text-muted text-nowrap">{{ forloop.counter }} / {{ questions|length }}</span>
+        </legend>
+        <div class="row g-2 g-md-3">
+          {% for o in q.options %}
+          <div class="col-6 col-md-4 {% if forloop.last %}col-md-4{% endif %}">
+            <label class="quiz-option">
+              <input type="radio" name="{{ q.key }}" value="{{ o.style }}" required>
+              <span class="quiz-visual">
+                {% if o.image %}<img src="{{ o.image }}" alt="Option {{ forloop.counter }}" loading="lazy" decoding="async" width="600" height="400">
+                {% elif o.colours %}<span class="palette-strip">{% for c in o.colours %}<span style="background:{{ c }}"></span>{% endfor %}</span>
+                {% else %}<span class="material-grid">{% for name, hex in o.materials %}<span style="background-color:{{ hex }}"><em>{{ name }}</em></span>{% endfor %}</span>{% endif %}
+              </span>
+              <span class="quiz-check"><i class="bi bi-check-lg"></i></span>
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="d-flex justify-content-between mt-4">
+          <button type="button" class="btn btn-outline-ink quiz-back" {% if forloop.first %}disabled{% endif %}><i class="bi bi-arrow-left me-1"></i> Back</button>
+          {% if forloop.last %}<button type="submit" class="btn btn-accent quiz-submit" disabled>See my style</button>
+          {% else %}<span class="small text-muted align-self-center">Tap a picture to continue</span>{% endif %}
+        </div>
+      </fieldset>
+      {% endfor %}
+    </form>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/showcase.js' %}" defer></script>{% endblock %}

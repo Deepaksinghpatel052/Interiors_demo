@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Sign in — {{ studio.name }}{% endblock %}
+{% block body_class %}{% endblock %}
+{% block floating %}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width:26rem">
+    <div class="card-soft form-card">
+      <h1 class="h3 mb-1">Sign in</h1>
+      <p class="text-muted small mb-4">Clients and studio team members.</p>
+      <form method="post" data-loading novalidate>
+        {% csrf_token %}
+        {% if form.errors %}<div class="alert alert-danger small py-2">Username or password is incorrect.</div>{% endif %}
+        <div class="mb-3"><label class="form-label" for="id_username">Username</label>
+          <input class="form-control" id="id_username" name="username" autocomplete="username" required value="{{ form.username.value|default:'' }}"></div>
+        <div class="mb-4"><label class="form-label" for="id_password">Password</label>
+          <input class="form-control" id="id_password" name="password" type="password" autocomplete="current-password" required></div>
+        <input type="hidden" name="next" value="{{ next }}">
+        <button class="btn btn-accent w-100" type="submit" data-loading-text="Signing in…">Sign in</button>
+      </form>
+      {% if DEMO_MODE %}<p class="small text-muted mt-4 mb-0"><i class="bi bi-info-circle me-1"></i>Demo logins: <code>owner</code>, <code>designer</code>, <code>client</code> — password <code>demo12345</code></p>{% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

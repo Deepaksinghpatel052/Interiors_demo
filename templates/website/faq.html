@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}FAQ — {{ studio.name }}{% endblock %}
+{% block content %}
+<header class="page-hero">
+  <div class="container">
+    <span class="eyebrow">FAQ</span>
+    <h1>Questions we hear often</h1>
+    <p class="lead-text mb-0">Can’t find your answer? <a href="{% url 'website:contact' %}">Ask us directly</a> — we’re happy to help.</p>
+  </div>
+</header>
+<section class="pb-5">
+  <div class="container" style="max-width:52rem">
+    {% for category, items in grouped.items %}
+    <h3 class="mt-4 mb-2">{{ category }}</h3>
+    <div class="accordion mb-4" id="faq{{ forloop.counter }}">
+      {% for f in items %}
+      <div class="accordion-item">
+        <h4 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f{{ f.pk }}" aria-expanded="false" aria-controls="f{{ f.pk }}">{{ f.question }}</button>
+        </h4>
+        <div id="f{{ f.pk }}" class="accordion-collapse collapse" data-bs-parent="#faq{{ forloop.parentloop.counter }}">
+          <div class="accordion-body">{{ f.answer|linebreaksbr }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% empty %}
+    <div class="empty-state"><i class="bi bi-question-circle"></i>FAQs will appear here once added in the CMS.</div>
+    {% endfor %}
+  </div>
+</section>
+{% include "partials/cta_band.html" with cta_title="Still have questions? Let’s talk." %}
+<div class="pb-5"></div>
+{% endblock %}

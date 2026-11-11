@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Booking confirmed — {{ studio.name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width:44rem">
+    <div class="text-center mb-4">
+      <div class="icon-circle mx-auto" style="width:72px;height:72px;font-size:2rem;background:rgba(79,178,134,.16);color:var(--success);border-color:rgba(79,178,134,.35)"><i class="bi bi-calendar2-check"></i></div>
+      <h1 class="h2 mb-2">You’re booked, {{ booking.name }}!</h1>
+      <p class="lead-text mx-auto mb-0">We’ve reserved this time for you. {{ studio.name }} will call you on {{ booking.mobile }} to confirm.</p>
+    </div>
+
+    <div class="card-soft p-4 p-md-5 ticket">
+      <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+          <div class="fact-label">Booking reference</div>
+          <div class="fact-value" style="letter-spacing:.04em">{{ booking.reference }}</div>
+        </div>
+        <span class="badge-soft"><i class="bi bi-check2 me-1"></i>{{ booking.get_status_display }}</span>
+      </div>
+      <div class="row g-4">
+        <div class="col-sm-6"><div class="fact-label">Date</div><div class="fw-semibold">{{ booking.date|date:"l, d-m-Y" }}</div></div>
+        <div class="col-sm-6"><div class="fact-label">Time</div><div class="fw-semibold">{{ booking.start_time|time:"h:i A" }} · {{ booking.duration_minutes }} min</div></div>
+        <div class="col-sm-6"><div class="fact-label">Meeting</div><div class="fw-semibold">{{ booking.get_mode_display }}</div></div>
+        <div class="col-sm-6"><div class="fact-label">Where</div><div class="fw-semibold">{{ location }}</div></div>
+      </div>
+      <hr class="divider my-4">
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-wa" target="_blank" rel="noopener" href="{% wa_link studio.whatsapp wa_text %}"><i class="bi bi-whatsapp me-1"></i> Confirm on WhatsApp</a>
+        <a class="btn btn-outline-ink" target="_blank" rel="noopener" href="{{ gcal_url }}"><i class="bi bi-google me-1"></i> Add to Google Calendar</a>
+        <a class="btn btn-outline-ink" href="{% url 'bookings:ics' booking.reference %}"><i class="bi bi-calendar-plus me-1"></i> Download .ics</a>
+      </div>
+    </div>
+
+    <div class="card-soft p-4 mt-4">
+      <h2 class="h5 mb-3" style="font-family:var(--font-sans)">To make the most of your consultation</h2>
+      <ul class="check-list mb-0">
+        <li>Keep your floor plan or a few photos of the space handy.</li>
+        <li>Save 3–5 pictures of interiors you like (Pinterest or Instagram is perfect).</li>
+        <li>Think about a comfortable budget range — we’ll plan around it.</li>
+      </ul>
+    </div>
+
+    <div class="text-center mt-4 d-flex flex-wrap gap-2 justify-content-center">
+      <a class="btn btn-ink" href="{% url 'website:quiz' %}">Take the style quiz</a>
+      <a class="btn btn-outline-ink" href="{% url 'website:portfolio' %}">Browse the portfolio</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "studio/base.html" %}
+{% block page_title %}AI knowledge base{% endblock %}
+{% block heading %}AI knowledge base{% endblock %}
+{% block actions %}
+{% if erp_role == "owner" %}
+<form method="post" action="{% url 'assistant:kb_reindex' %}" class="d-inline" data-loading>{% csrf_token %}<button class="btn btn-light btn-sm" data-loading-text="Indexing…"><i class="bi bi-arrow-repeat"></i><span class="d-none d-sm-inline ms-1">Re-index</span></button></form>
+<button class="btn btn-accent btn-sm" data-bs-toggle="collapse" data-bs-target="#addDoc" aria-expanded="{% if form.errors %}true{% else %}false{% endif %}"><i class="bi bi-plus-lg"></i><span class="d-none d-sm-inline ms-1">Add document</span></button>
+{% endif %}
+{% endblock %}
+
+{% block erp_content %}
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-journal-text"></i> Documents</div><div class="kpi-value">{{ total }}</div><div class="kpi-sub">guides, FAQs, services, projects</div></div></div>
+  <div class="col-6 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-grid-3x3-gap"></i> Indexed passages</div><div class="kpi-value">{{ chunks_total }}</div><div class="kpi-sub">~800 characters each</div></div></div>
+  <div class="col-12 col-lg-6"><div class="kpi kpi-highlight"><div class="kpi-label"><i class="bi bi-cpu"></i> Answer engine</div>
+    <div class="kpi-value" style="font-size:1.2rem">{% if ai_mock %}Offline demo mode{% else %}Claude · {{ model }}{% endif %}</div>
+    <div class="kpi-sub">{% if ai_mock %}Free extractive answers. Add ANTHROPIC_API_KEY and set AI_MOCK=False for Claude.{% else %}Answers only from these documents, with citations.{% endif %}</div></div></div>
+</div>
+
+{% if erp_role == "owner" %}
+<div class="collapse {% if form.errors %}show{% endif %} mb-3" id="addDoc">
+  <div class="panel"><div class="panel-head"><h2>New knowledge document</h2></div><div class="panel-body">
+    <form method="post" enctype="multipart/form-data" class="form-compact row g-2" novalidate data-loading>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="col-12"><div class="alert alert-danger small py-2">{{ form.non_field_errors.0 }}</div></div>{% endif %}
+      {% for field in form %}
+      <div class="{% if field.name == 'content' %}col-12{% elif field.name == 'is_active' %}col-12{% else %}col-sm-6 col-lg-4{% endif %}">
+        {% if field.name == 'is_active' %}<div class="form-check">{{ field }}<label class="form-check-label small" for="{{ field.id_for_label }}">Active</label></div>
+        {% else %}<label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% endif %}
+        {% for e in field.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        {% if field.help_text and field.name != 'is_active' %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+      </div>
+      {% endfor %}
+      <div class="col-12 text-end"><button class="btn btn-ink" data-loading-text="Indexing…">Save &amp; index</button></div>
+    </form>
+  </div></div>
+</div>
+{% endif %}
+
+<div class="row g-3">
+  <div class="col-xl-7">
+    <form class="d-flex flex-wrap gap-2 mb-3" method="get" role="search">
+      <div class="input-group" style="max-width:18rem"><span class="input-group-text"><i class="bi bi-search"></i></span><input class="form-control" name="q" value="{{ q }}" placeholder="Search documents" aria-label="Search documents"></div>
+      <select class="form-select" name="audience" style="max-width:12rem" onchange="this.form.submit()" aria-label="Audience"><option value="">All audiences</option>{% for v, l in audiences %}<option value="{{ v }}" {% if audience == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+      <select class="form-select" name="type" style="max-width:11rem" onchange="this.form.submit()" aria-label="Type"><option value="">All types</option>{% for v, l in types %}<option value="{{ v }}" {% if doc_type == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+    </form>
+    <div class="panel"><div class="panel-body py-1">
+      {% for d in page %}
+      <div class="list-row align-items-center">
+        <i class="bi {% if d.audience == 'internal' %}bi-lock text-overdue{% else %}bi-globe2 text-accent{% endif %}" title="{{ d.get_audience_display }}"></i>
+        <div class="flex-grow-1 small min-w-0">
+          {% if d.is_synced or erp_role != "owner" %}<span class="fw-semibold">{{ d.title }}</span>{% else %}<a class="fw-semibold" href="{% url 'assistant:kb_edit' d.pk %}">{{ d.title }}</a>{% endif %}
+          <div class="text-muted">{{ d.get_doc_type_display }} · {{ d.chunk_count }} passage{{ d.chunk_count|pluralize }} · updated {{ d.updated_at|date:"d M" }}{% if d.is_synced %} · <span class="pill pill-blue">Synced from website</span>{% endif %}{% if d.file %} · <span class="pill pill-grey">{{ d.file.name|slice:"10:" }}</span>{% endif %}{% if not d.is_active %} · <span class="pill pill-grey">Inactive</span>{% endif %}</div>
+        </div>
+      </div>
+      {% empty %}<div class="empty-mini py-4"><i class="bi bi-journal-x"></i>No documents match.</div>{% endfor %}
+    </div></div>
+    {% if page.has_other_pages %}<div class="d-flex justify-content-between mt-2 small">
+      {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}&q={{ q|urlencode }}&audience={{ audience }}&type={{ doc_type }}">← Previous</a>{% else %}<span></span>{% endif %}
+      <span class="text-muted">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+      {% if page.has_next %}<a href="?page={{ page.next_page_number }}&q={{ q|urlencode }}&audience={{ audience }}&type={{ doc_type }}">Next →</a>{% else %}<span></span>{% endif %}
+    </div>{% endif %}
+  </div>
+
+  <div class="col-xl-5">
+    <section class="panel kb-test" id="kbTest" data-url="{% url 'assistant:kb_test' %}">
+      <div class="panel-head"><h2><i class="bi bi-lightning-charge text-accent me-1"></i> Test the assistant</h2></div>
+      <div class="panel-body">
+        <form class="kb-test-form d-flex flex-column gap-2">
+          <div class="d-flex gap-2">
+            <select class="form-select" name="audience" style="max-width:9.5rem" aria-label="Ask as"><option value="public">As a visitor</option><option value="internal">As the team</option></select>
+            <input class="form-control" name="message" maxlength="500" placeholder="e.g. What warranty do you give?" required aria-label="Question">
+            <button class="btn btn-accent" aria-label="Test"><i class="bi bi-play-fill"></i></button>
+          </div>
+        </form>
+        <div class="kb-test-out mt-3" hidden>
+          <div class="small text-muted mb-1">Answer <span class="kb-mode pill pill-grey ms-1"></span></div>
+          <div class="kb-answer comment mb-3"></div>
+          <div class="small text-muted mb-1">Retrieved passages (BM25 score) — these are the only sources the assistant may use</div>
+          <ol class="kb-hits list-unstyled mb-0"></ol>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var box = document.getElementById("kbTest"); if (!box) return;
+  var form = box.querySelector(".kb-test-form"), out = box.querySelector(".kb-test-out");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var btn = form.querySelector("button"); btn.disabled = true;
+    fetch(box.dataset.url, { method: "POST", credentials: "same-origin",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content },
+      body: JSON.stringify({ message: form.message.value, audience: form.audience.value }) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        out.hidden = false;
+        if (d.error) { box.querySelector(".kb-answer").textContent = d.error; return; }
+        box.querySelector(".kb-answer").innerHTML = d.html;           // sanitised server-side
+        var LABELS = { mock: "Offline demo answer", claude: "Claude", fallback: "Offline fallback", no_match: "No matching source" };
+        box.querySelector(".kb-mode").textContent = (LABELS[d.mode] || d.mode) + (d.note ? " · " + d.note : "");
+        var list = box.querySelector(".kb-hits"); list.innerHTML = "";
+        (d.hits.length ? d.hits : [{ n: "–", title: "No passage matched", score: "", text: "", audience: "" }]).forEach(function (h) {
+          var li = document.createElement("li"); li.className = "kb-hit";
+          var head = document.createElement("div"); head.className = "d-flex justify-content-between gap-2 small fw-semibold";
+          var t = document.createElement("span"); t.textContent = "[" + h.n + "] " + h.title + (h.audience === "internal" ? " 🔒" : "");
+          var s = document.createElement("span"); s.className = "text-muted"; s.textContent = h.score;
+          head.appendChild(t); head.appendChild(s); li.appendChild(head);
+          if (h.text) { var p = document.createElement("div"); p.className = "small text-muted kb-hit-text"; p.textContent = h.text; li.appendChild(p); }
+          list.appendChild(li);
+        });
+      })
+      .catch(function () { window.Studio && window.Studio.toast("Could not run the test.", "error"); })
+      .then(function () { btn.disabled = false; });
+  });
+});
+</script>
+{% endblock %}

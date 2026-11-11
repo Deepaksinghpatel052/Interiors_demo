@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Thank you — {{ studio.name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container text-center" style="max-width:40rem">
+    <div class="icon-circle mx-auto" style="width:72px;height:72px;font-size:2rem;background:rgba(79,178,134,.16);color:var(--success);border-color:rgba(79,178,134,.35)"><i class="bi bi-check2"></i></div>
+    <h1 class="h2 mb-3">Thank you{% if lead %}, {{ lead.name }}{% endif %}!</h1>
+    <p class="lead-text mx-auto mb-4">We’ve received your request. Someone from {{ studio.name }} will call you{% if lead %} on {{ lead.mobile }}{% endif %} within one working day.</p>
+    {% if lead %}<p class="small text-muted mb-4">Reference: <strong>ENQ-{{ lead.pk|stringformat:"05d" }}</strong></p>{% endif %}
+    <div class="d-flex flex-wrap gap-2 justify-content-center">
+      <a class="btn btn-wa" target="_blank" rel="noopener" href="{% if lead %}{% wa_link studio.whatsapp 'Hi, I just sent an enquiry on your website. My name is '|add:lead.name %}{% else %}{% wa_link studio.whatsapp 'Hi, I just sent an enquiry on your website.' %}{% endif %}"><i class="bi bi-whatsapp me-1"></i> Message us on WhatsApp</a>
+      <a class="btn btn-outline-ink" href="{% url 'website:portfolio' %}">Browse the portfolio</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

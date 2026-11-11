@@ -1,0 +1,11 @@
+{% extends "studio/base.html" %}
+{% block page_title %}{{ module_label }}{% endblock %}
+{% block heading %}{{ module_label }}{% endblock %}
+{% block erp_content %}
+<div class="panel"><div class="panel-body text-center py-5">
+  <i class="bi bi-puzzle fs-1 text-accent"></i>
+  <h2 class="h5 mt-2">The {{ module_label }} module is not part of this package</h2>
+  <p class="text-muted mb-3">{% if erp_role == "owner" %}It can be switched on in Studio settings → Modules.{% else %}Ask the studio owner if you need it.{% endif %}</p>
+  {% if erp_role == "owner" %}<a class="btn btn-ink btn-sm" href="{% url 'studio:settings' %}#s-modules">Open modules</a>{% endif %}
+</div></div>
+{% endblock %}

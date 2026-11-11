@@ -1,0 +1,19 @@
+{{ locked_features|json_script:"lockedFeatures" }}
+<div class="modal fade" id="lockedModal" tabindex="-1" aria-labelledby="lockedTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content locked-modal">
+      <div class="modal-body p-4 p-md-5">
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+        <span class="badge-locked mb-3 d-inline-block"><i class="bi bi-lock-fill me-1"></i>Full version</span>
+        <h2 class="h3 mb-3" id="lockedTitle"></h2>
+        <p class="mb-2" id="lockedWhat"></p>
+        <p class="text-muted mb-4"><i class="bi bi-graph-up-arrow text-accent me-1"></i><span id="lockedBenefit"></span></p>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-accent" id="lockedWant" data-url-template="{% url 'core:feature_interest' 'KEY' %}"><i class="bi bi-hand-thumbs-up me-1"></i> I want this feature</button>
+          <button type="button" class="btn btn-outline-ink" data-bs-dismiss="modal">Maybe later</button>
+        </div>
+        <p class="small text-muted mt-3 mb-0">This module is part of the full system and can be added to your studio’s package.</p>
+      </div>
+    </div>
+  </div>
+</div>

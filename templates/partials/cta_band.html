@@ -1,0 +1,17 @@
+<section class="section-sm">
+  <div class="container">
+    <div class="cta-band reveal">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+          <span class="eyebrow" style="color:var(--accent-light)">Free, no-obligation</span>
+          <h2 class="mb-2">{{ cta_title|default:"Let’s talk about your space." }}</h2>
+          <p class="mb-0" style="color:rgba(255,255,255,.75)">A 30-minute consultation online, at our studio or at your site. Bring your floor plan and your ideas — we’ll bring honest advice.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end d-flex flex-wrap gap-2 justify-content-lg-end">
+          <a class="btn btn-accent btn-lg" href="{% url 'bookings:book' %}">Book a consultation</a>
+          <a class="btn btn-light-outline btn-lg" target="_blank" rel="noopener" href="{% wa_link studio.whatsapp 'Hi '|add:studio.name|add:', I would like to discuss my interiors.' %}"><i class="bi bi-whatsapp"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

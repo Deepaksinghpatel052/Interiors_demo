@@ -1,0 +1,29 @@
+{% extends "studio/base.html" %}
+{% block page_title %}{{ doc.title }}{% endblock %}
+{% block heading %}<a href="{% url 'assistant:kb' %}" class="text-muted text-decoration-none"><i class="bi bi-arrow-left"></i></a> {{ doc.title }}{% endblock %}
+{% block erp_content %}
+<div class="row g-3">
+  <div class="col-xl-7">
+    <div class="panel"><div class="panel-body">
+      <form method="post" enctype="multipart/form-data" class="form-compact row g-2" novalidate data-loading>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="col-12"><div class="alert alert-danger small py-2">{{ form.non_field_errors.0 }}</div></div>{% endif %}
+        {% for field in form %}
+        <div class="{% if field.name == 'content' or field.name == 'is_active' %}col-12{% else %}col-sm-6{% endif %}">
+          {% if field.name == 'is_active' %}<div class="form-check">{{ field }}<label class="form-check-label small" for="{{ field.id_for_label }}">Active</label></div>
+          {% else %}<label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% endif %}
+          {% for e in field.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+        {% endfor %}
+        <div class="col-12 d-flex gap-2 justify-content-end"><a class="btn btn-light" href="{% url 'assistant:kb' %}">Cancel</a><button class="btn btn-accent" data-loading-text="Indexing…">Save &amp; re-index</button></div>
+      </form>
+      <form method="post" action="{% url 'assistant:kb_delete' doc.pk %}" class="mt-3 pt-3 border-top" data-confirm="Remove “{{ doc.title }}” from the knowledge base?">{% csrf_token %}<button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash3 me-1"></i> Delete document</button></form>
+    </div></div>
+  </div>
+  <div class="col-xl-5">
+    <div class="panel"><div class="panel-head"><h2>Indexed passages</h2><span class="pill pill-grey">{{ chunks|length }}</span></div><div class="panel-body">
+      {% for c in chunks %}<div class="comment small"><div class="meta">Passage {{ c.index|add:1 }}</div>{{ c.text|linebreaksbr }}</div>{% empty %}<p class="small text-muted mb-0">No text indexed yet.</p>{% endfor %}
+    </div></div>
+  </div>
+</div>
+{% endblock %}

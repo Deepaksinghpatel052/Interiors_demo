@@ -1,0 +1,130 @@
+{% extends "studio/base.html" %}
+{% load static %}
+{% block page_title %}{{ q.display_number }}{% endblock %}
+{% block heading %}<a href="{% url 'finance:quotations' %}" class="text-muted text-decoration-none"><i class="bi bi-arrow-left"></i></a> {{ q.display_number }}{% endblock %}
+{% block actions %}
+<a class="btn btn-light btn-sm" href="{% url 'finance:quotation_pdf' q.pk %}" target="_blank" rel="noopener"><i class="bi bi-filetype-pdf"></i><span class="d-none d-sm-inline ms-1">PDF</span></a>
+{% endblock %}
+
+{% block erp_content %}
+<div class="panel mb-3">
+  <div class="panel-body d-flex flex-wrap gap-3 align-items-center">
+    <div class="flex-grow-1">
+      <div class="d-flex flex-wrap gap-2 mb-1">
+        <span class="pill {% if q.status == 'accepted' %}pill-green{% elif q.status == 'sent' %}pill-blue{% elif q.status == 'rejected' %}pill-red{% else %}pill-grey{% endif %}">{{ q.get_status_display }}</span>
+        {% if q.project %}<a class="pill pill-accent text-decoration-none" href="{{ q.project.get_absolute_url }}?tab=billing">{{ q.project.code }}</a>{% elif q.lead %}<a class="pill pill-accent text-decoration-none" href="{% url 'studio:lead_detail' q.lead_id %}">Lead</a>{% endif %}
+      </div>
+      <div class="fw-semibold">{{ q.client_name }} <span class="text-muted fw-normal">· {{ q.title }}</span></div>
+      <div class="small text-muted">Dated {{ q.date|date:"d-m-Y" }}{% if q.valid_until %} · valid until {{ q.valid_until|date:"d-m-Y" }}{% endif %}{% if q.sent_at %} · sent {{ q.sent_at|date:"d-m-Y" }}{% endif %}</div>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      {% if q.status == "draft" %}
+        <form method="post" action="{% url 'finance:quotation_send' q.pk %}" data-confirm="Mark {{ q.display_number }} as sent? It becomes read-only and appears in the client portal.">{% csrf_token %}
+          <button class="btn btn-accent btn-sm" id="sendBtn"><i class="bi bi-send me-1"></i> Send to client</button></form>
+      {% elif q.status == "sent" %}
+        {% if q.client_mobile %}<a class="btn btn-wa btn-sm" target="_blank" rel="noopener" href="{% wa_link q.client_mobile|india 'Hi '|add:q.client_name|add:', your quotation '|add:q.display_number|add:' from '|add:studio.name|add:' is ready. Please have a look and let us know if you have any questions.' %}"><i class="bi bi-whatsapp me-1"></i> Share</a>{% endif %}
+        {% if can_decide %}
+        <form method="post" action="{% url 'finance:quotation_accept' q.pk %}" data-confirm="Mark as accepted? This creates the payment schedule for the project.">{% csrf_token %}<button class="btn btn-ink btn-sm"><i class="bi bi-check2-circle me-1"></i> Client accepted</button></form>
+        <form method="post" action="{% url 'finance:quotation_reject' q.pk %}">{% csrf_token %}<button class="btn btn-light btn-sm">Rejected</button></form>
+        {% endif %}
+        <form method="post" action="{% url 'finance:quotation_revise' q.pk %}">{% csrf_token %}<button class="btn btn-outline-ink btn-sm"><i class="bi bi-files me-1"></i> Revise</button></form>
+      {% elif q.status == "rejected" or q.status == "superseded" %}
+        <form method="post" action="{% url 'finance:quotation_revise' q.pk %}">{% csrf_token %}<button class="btn btn-outline-ink btn-sm"><i class="bi bi-files me-1"></i> New revision</button></form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="{% if q.editable %}col-xl-9{% else %}col-xl-8{% endif %}">
+    {% if q.editable %}
+      <div id="quoteBuilder" data-save-url="{% url 'finance:quotation_save' q.pk %}"></div>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <button type="button" class="btn btn-outline-ink" id="addRoom"><i class="bi bi-plus-lg me-1"></i> Add room</button>
+        <span class="small text-muted align-self-center ms-auto" id="saveState">All changes saved</span>
+      </div>
+    {% else %}
+      {% for room in rooms %}
+      <div class="panel mb-3">
+        <div class="panel-head"><h2>{{ room.name }}</h2><span class="fw-semibold">{{ room.total|inr2 }}</span></div>
+        <div class="table-responsive"><table class="table table-sm align-middle mb-0 qt-table">
+          <thead class="small text-muted"><tr><th>Item</th><th class="text-end">Qty</th><th class="text-end">Rate</th><th class="text-end">Disc.</th><th class="text-end">GST</th><th class="text-end">Amount</th></tr></thead>
+          <tbody>{% for it in room.items.all %}
+            <tr><td>{{ it.description }}</td><td class="text-end">{{ it.quantity|pct }} {{ it.get_unit_display }}</td><td class="text-end">{{ it.rate|inr2 }}</td>
+              <td class="text-end">{% if it.discount_percent %}{{ it.discount_percent|pct }}%{% else %}—{% endif %}</td><td class="text-end">{{ it.gst_percent|pct }}%</td><td class="text-end fw-semibold">{{ it.taxable|inr2 }}</td></tr>
+          {% endfor %}</tbody>
+        </table></div>
+      </div>
+      {% empty %}<div class="panel"><div class="empty-mini py-4"><i class="bi bi-receipt"></i>This quotation has no items.</div></div>{% endfor %}
+      {% if q.notes %}<div class="panel"><div class="panel-body small"><span class="text-muted">Notes:</span> {{ q.notes|linebreaksbr }}</div></div>{% endif %}
+    {% endif %}
+  </div>
+
+  <div class="{% if q.editable %}col-xl-3{% else %}col-xl-4{% endif %}">
+    <aside class="panel mb-3 qt-totals">
+      <div class="panel-head"><h2>Totals</h2><span class="small text-muted" id="taxMode">{% if q.inter_state %}IGST{% else %}CGST + SGST{% endif %}</span></div>
+      <div class="panel-body">
+        <dl class="summary-list mb-0">
+          <div><dt>Subtotal</dt><dd data-total="subtotal">{{ q.subtotal|inr2 }}</dd></div>
+          <div><dt>Discount</dt><dd data-total="discount_total">{{ q.discount_total|inr2 }}</dd></div>
+          <div><dt>Taxable value</dt><dd data-total="taxable_total">{{ q.taxable_total|inr2 }}</dd></div>
+          <div class="cgst-row"><dt>CGST</dt><dd data-total="cgst">{{ q.cgst|inr2 }}</dd></div>
+          <div class="cgst-row"><dt>SGST</dt><dd data-total="sgst">{{ q.sgst|inr2 }}</dd></div>
+          <div class="igst-row"><dt>IGST</dt><dd data-total="igst">{{ q.igst|inr2 }}</dd></div>
+          <div><dt>Round off</dt><dd data-total="round_off">{{ q.round_off|inr2 }}</dd></div>
+        </dl>
+        <div class="qt-grand"><span>Grand total</span><strong data-total="grand_total">{{ q.grand_total|inr }}</strong></div>
+      </div>
+    </aside>
+
+    {% if q.editable %}
+    <div class="panel mb-3">
+      <div class="panel-head"><h2>Quotation details</h2></div>
+      <div class="panel-body form-compact" id="quoteMeta">
+        <div class="mb-2"><label class="form-label" for="qmTitle">Title</label><input class="form-control" id="qmTitle" data-meta="title" maxlength="140"></div>
+        <div class="row g-2 mb-2">
+          <div class="col-6"><label class="form-label" for="qmValid">Valid until</label><input class="form-control" type="date" id="qmValid" data-meta="valid_until"></div>
+          <div class="col-6"><label class="form-label" for="qmGstin">Client GSTIN</label><input class="form-control" id="qmGstin" data-meta="client_gstin" maxlength="15" placeholder="Optional"></div>
+        </div>
+        <div class="mb-2"><label class="form-label" for="qmAddr">Client address</label><input class="form-control" id="qmAddr" data-meta="client_address" maxlength="240"></div>
+        <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" id="qmInter" data-meta="inter_state"><label class="form-check-label small" for="qmInter">Client is outside {{ studio.state_name }} (charge IGST)</label></div>
+        <div class="mb-2"><label class="form-label" for="qmNotes">Notes for the client</label><textarea class="form-control" rows="2" id="qmNotes" data-meta="notes"></textarea></div>
+        <div><label class="form-label" for="qmTerms">Terms</label><textarea class="form-control" rows="4" id="qmTerms" data-meta="terms"></textarea></div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="panel mb-3">
+      <div class="panel-head"><h2>Payment schedule</h2></div>
+      <div class="panel-body py-1">
+        {% if schedule %}
+          {% for s in schedule %}<div class="list-row"><div class="flex-grow-1 small"><span class="fw-semibold">{{ s.label }}</span> · {{ s.percent|pct }}%</div><span class="small fw-semibold">{{ s.amount|inr }}</span></div>{% endfor %}
+          {% if q.project %}<a class="btn btn-light btn-sm w-100 my-2" href="{{ q.project.get_absolute_url }}?tab=billing">Invoices &amp; payments</a>{% endif %}
+        {% else %}
+          <p class="small text-muted mt-2 mb-1">Created when the client accepts. Preview:</p>
+          {% for label, percent, amount in schedule_preview %}<div class="list-row py-1"><div class="flex-grow-1 small">{{ label }} · {{ percent|pct }}%</div><span class="small">{{ amount|inr }}</span></div>{% endfor %}
+        {% endif %}
+      </div>
+    </div>
+
+    {% if versions|length > 1 %}
+    <div class="panel">
+      <div class="panel-head"><h2>Versions</h2></div>
+      <div class="panel-body py-1">
+        {% for v in versions %}<div class="list-row"><a class="flex-grow-1 small {% if v.pk == q.pk %}fw-semibold{% endif %}" href="{{ v.get_absolute_url }}">v{{ v.version }} · {{ v.date|date:"d-m-Y" }}</a>
+          <span class="pill pill-grey">{{ v.get_status_display }}</span><span class="small ms-2">{{ v.grand_total|inr_short }}</span></div>{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if q.editable %}
+{{ payload|json_script:"quotePayload" }}
+{{ catalogue|json_script:"quoteCatalogue" }}
+{{ units|json_script:"quoteUnits" }}
+{% endif %}
+{% endblock %}
+{% block extra_js %}{% if q.editable %}<script src="{% static 'js/quotation.js' %}" defer></script>{% endif %}
+<script>document.addEventListener("DOMContentLoaded",function(){var inter={{ q.inter_state|yesno:'true,false' }};document.querySelectorAll(".igst-row").forEach(function(e){e.style.display=inter?"":"none"});document.querySelectorAll(".cgst-row").forEach(function(e){e.style.display=inter?"none":""});});</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% load static %}
+<div class="tab-pane fade {% if active %}show active{% endif %}" id="{{ id }}" role="tabpanel" tabindex="0">
+  <div class="lp-module {% if tall %}is-tall{% endif %}">
+    <div class="lp-module-text">
+      <h3>{{ title }}</h3>
+      <p>{{ text }}</p>
+      <ul>{% for item in items|split:"|" %}<li><i class="bi bi-check-circle-fill"></i>{{ item }}</li>{% endfor %}</ul>
+      <a class="btn btn-ink btn-sm mt-2" href="#demo">See it in the live demo <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    <figure class="lp-browser {% if tall %}lp-browser-tall{% endif %}">
+      <div class="lp-browser-bar"><span></span><span></span><span></span></div>
+      <img src="{% static 'img/landing/'|add:img|add:'.jpg' %}" alt="{{ alt }}" loading="lazy" decoding="async">
+    </figure>
+  </div>
+</div>

@@ -1,0 +1,31 @@
+{% extends "portal/base.html" %}
+{% block page_title %}Requests &amp; snags{% endblock %}
+{% block portal_content %}
+<div class="portal-head"><h1 class="h3 mb-1">Requests &amp; snags</h1><p class="text-muted mb-0">Spotted something? Send a photo — it goes straight to your designer’s task list.</p></div>
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="panel"><div class="panel-head"><h2>New request</h2></div><div class="panel-body">
+      <form method="post" enctype="multipart/form-data" class="form-compact" novalidate data-loading>
+        {% csrf_token %}
+        <div class="mb-2"><label class="form-label" for="{{ form.title.id_for_label }}">What’s the issue?</label>{{ form.title }}{% for e in form.title.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}</div>
+        <div class="mb-2"><label class="form-label" for="{{ form.description.id_for_label }}">Details</label>{{ form.description }}</div>
+        <div class="mb-2"><label class="form-label" for="{{ form.photo.id_for_label }}">Photo (optional)</label>{{ form.photo }}{% for e in form.photo.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}</div>
+        <div class="form-check mb-3">{{ form.urgent }}<label class="form-check-label small" for="{{ form.urgent.id_for_label }}">This is urgent</label></div>
+        <button class="btn btn-accent w-100" data-loading-text="Sending…"><i class="bi bi-send me-1"></i> Send to my designer</button>
+      </form>
+    </div></div>
+  </div>
+  <div class="col-lg-7">
+    <div class="panel"><div class="panel-head"><h2>Your requests</h2></div><div class="panel-body py-1">
+      {% for r in requests %}
+      <div class="list-row">
+        {% if r.photo %}<a href="{{ r.photo.url }}" data-lightbox="req"><img src="{{ r.photo.url }}" alt="" width="64" height="48" style="object-fit:cover;border-radius:8px"></a>{% else %}<i class="bi bi-chat-square-dots text-accent fs-4"></i>{% endif %}
+        <div class="flex-grow-1 small"><span class="fw-semibold">{{ r.title }}</span>{% if r.description %}<div class="text-muted">{{ r.description|truncatechars:120 }}</div>{% endif %}<div class="text-muted">{{ r.created_at|date:"d M Y" }}</div></div>
+        <span class="pill {% if r.status == 'resolved' %}pill-green{% elif r.status == 'in_progress' %}pill-blue{% else %}pill-accent{% endif %}">{{ r.get_status_display }}</span>
+      </div>
+      {% empty %}<div class="empty-mini py-4"><i class="bi bi-emoji-smile"></i>No requests yet.</div>{% endfor %}
+    </div></div>
+  </div>
+</div>
+{% include "partials/lightbox.html" %}
+{% endblock %}

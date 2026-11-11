@@ -1,0 +1,42 @@
+# Studio OS on the server: https://interiors.devnixplus.com
+#   Start / update:  docker compose --env-file .env_server up -d --build
+#   Logs:            docker compose --env-file .env_server logs -f web
+# The app listens on 127.0.0.1:${APP_PORT} only; the host's nginx proxies to it (deploy/nginx/).
+# Data lives in ./docker-data/ (database, uploads, static files) and survives rebuilds.
+name: interiors
+
+x-app: &app
+  image: interiors-studio:latest
+  restart: unless-stopped
+  env_file: .env_server
+  environment:
+    DATABASE_URL: sqlite:////app/data/db.sqlite3
+    CACHE_DIR: /app/data/cache
+
+services:
+  web:
+    <<: *app
+    build: .
+    command: web
+    ports:
+      - "127.0.0.1:${APP_PORT:-9005}:8000"
+    volumes:
+      - ./docker-data/data:/app/data
+      - ./docker-data/media:/app/media
+      - ./docker-data/staticfiles:/app/staticfiles
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen(u.Request('http://127.0.0.1:8000/privacy/', headers={'Host': 'localhost'}), timeout=5)\" > /dev/null 2>&1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 600s   # first start loads the demo data
+      retries: 3
+
+  scheduler:
+    <<: *app
+    command: scheduler
+    volumes:
+      - ./docker-data/data:/app/data
+      - ./docker-data/media:/app/media
+    depends_on:
+      web:
+        condition: service_started

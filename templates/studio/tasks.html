@@ -1,0 +1,18 @@
+{% extends "studio/base.html" %}
+{% load static %}
+{% block page_title %}Tasks{% endblock %}
+{% block heading %}Tasks{% endblock %}
+{% block erp_content %}
+<div class="erp-tabs">
+  <a class="{% if show == 'mine' %}active{% endif %}" href="?show=mine">Assigned to me</a>
+  <a class="{% if show == 'all' %}active{% endif %}" href="?show=all">All open tasks</a>
+</div>
+<div class="panel"><div class="panel-body py-1">
+  {% for t in tasks %}
+  {% include "studio/_task_row.html" with t=t show_project=True %}
+  {% empty %}
+  <div class="empty-mini py-4"><i class="bi bi-check2-all"></i>No open tasks{% if show == 'mine' %} assigned to you{% endif %}. Nice work!</div>
+  {% endfor %}
+</div></div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/erp.js' %}" defer></script>{% endblock %}

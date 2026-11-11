@@ -1,0 +1,22 @@
+<nav class="navbar navbar-expand-lg site-nav sticky-top">
+  <div class="container">
+    {% include "partials/brand.html" %}
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNav"
+            aria-controls="siteNav" aria-expanded="false" aria-label="Open menu">
+      <i class="bi bi-list fs-2"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="siteNav">
+      <ul class="navbar-nav ms-auto me-lg-3">
+        <li class="nav-item"><a class="nav-link {% active 'portfolio' 'project_detail' %}" href="{% url 'website:portfolio' %}">Portfolio</a></li>
+        <li class="nav-item"><a class="nav-link {% active 'services' %}" href="{% url 'website:services' %}">Services</a></li>
+        <li class="nav-item"><a class="nav-link {% active 'quiz' 'quiz_result' %}" href="{% url 'website:quiz' %}">Style quiz</a></li>
+        <li class="nav-item"><a class="nav-link {% active 'estimate' %}" href="{% url 'website:estimate' %}">Cost estimate</a></li>
+        <li class="nav-item"><a class="nav-link {% active 'about' %}" href="{% url 'website:about' %}">About</a></li>
+        <li class="nav-item"><a class="nav-link {% active 'contact' %}" href="{% url 'website:contact' %}">Contact</a></li>
+      </ul>
+      {% if erp_role == "client" %}<a class="btn btn-outline-ink btn-sm px-3 me-lg-2 mb-2 mb-lg-0" href="{% url 'portal:overview' %}"><i class="bi bi-house-heart me-1"></i>My project</a>
+      {% elif erp_role == "owner" or erp_role == "team" %}<a class="btn btn-outline-ink btn-sm px-3 me-lg-2 mb-2 mb-lg-0" href="{% url 'studio:dashboard' %}"><i class="bi bi-grid-1x2 me-1"></i>Studio</a>{% endif %}
+      <a class="btn btn-accent btn-sm px-3" href="{% url 'bookings:book' %}">Book a free consultation</a>
+    </div>
+  </div>
+</nav>

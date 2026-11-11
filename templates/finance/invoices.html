@@ -1,0 +1,59 @@
+{% extends "studio/base.html" %}
+{% block page_title %}Invoices &amp; payments{% endblock %}
+{% block heading %}Invoices &amp; payments{% endblock %}
+
+{% block erp_content %}
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-hourglass-split"></i> Outstanding</div><div class="kpi-value">{{ outstanding_total|inr_short }}</div><div class="kpi-sub">invoiced, not yet paid</div></div></div>
+  <div class="col-6 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-exclamation-circle"></i> Overdue</div><div class="kpi-value {% if overdue_total %}text-overdue{% endif %}">{{ overdue_total|inr_short }}</div><div class="kpi-sub">past due date</div></div></div>
+  <div class="col-12 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-wallet2"></i> Received</div><div class="kpi-value">{{ received_total|inr_short }}</div><div class="kpi-sub">all payments recorded</div></div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-xl-8">
+    <nav class="erp-tabs" aria-label="Filter invoices">
+      <a class="{% if show != 'outstanding' %}active{% endif %}" href="?">All invoices</a>
+      <a class="{% if show == 'outstanding' %}active{% endif %}" href="?show=outstanding">Outstanding</a>
+    </nav>
+    <div class="panel">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="small text-muted"><tr><th>Invoice</th><th>Client / project</th><th>Date</th><th class="text-end">Total</th><th class="text-end">Balance</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            {% for inv in invoices %}
+            <tr>
+              <td><a class="fw-semibold" href="{{ inv.get_absolute_url }}">{{ inv.number }}</a><div class="small text-muted">{{ inv.description|truncatechars:42 }}</div></td>
+              <td class="small">{{ inv.client_name }}<div class="text-muted">{{ inv.project.code }}</div></td>
+              <td class="small">{{ inv.date|date:"d-m-Y" }}<div class="{% if inv.is_overdue %}text-overdue{% else %}text-muted{% endif %}">due {{ inv.due_date|date:"d-m" }}</div></td>
+              <td class="text-end">{{ inv.total|inr }}</td>
+              <td class="text-end fw-semibold">{% if inv.balance %}{{ inv.balance|inr }}{% else %}—{% endif %}</td>
+              <td><span class="pill {% if inv.status == 'paid' %}pill-green{% elif inv.is_overdue %}pill-red{% elif inv.status == 'partial' %}pill-accent{% elif inv.status == 'cancelled' %}pill-grey{% else %}pill-blue{% endif %}">{% if inv.is_overdue %}Overdue{% else %}{{ inv.get_status_display }}{% endif %}</span></td>
+              <td class="text-end"><a class="btn btn-light btn-sm" href="{% url 'finance:invoice_pdf' inv.pk %}" target="_blank" rel="noopener" aria-label="PDF"><i class="bi bi-filetype-pdf"></i></a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7"><div class="empty-mini py-4"><i class="bi bi-receipt-cutoff"></i>No invoices{% if show == 'outstanding' %} outstanding — everything is paid{% else %} yet. Raise one from a project’s payment schedule{% endif %}.</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="panel">
+      <div class="panel-head"><h2>Next milestones to invoice</h2></div>
+      <div class="panel-body py-1">
+        {% for s in upcoming %}
+        <div class="list-row align-items-center">
+          <div class="flex-grow-1 small"><span class="fw-semibold">{{ s.label }}</span> · {{ s.amount|inr }}
+            <div class="text-muted"><a class="text-muted" href="{{ s.project.get_absolute_url }}?tab=billing">{{ s.project.name }}</a>{% if s.due_date %} · due {{ s.due_date|date:"d-m" }}{% endif %}</div></div>
+          {% if erp_role == "owner" %}
+          <form method="post" action="{% url 'finance:schedule_invoice' s.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button class="btn btn-sm btn-outline-ink">Invoice</button></form>
+          {% endif %}
+        </div>
+        {% empty %}<div class="empty-mini"><i class="bi bi-check2-circle"></i>No milestones waiting to be invoiced.</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

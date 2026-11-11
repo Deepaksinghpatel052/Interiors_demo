@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}{{ project.title }} — {{ studio.name }}{% endblock %}
+{% block meta_description %}{{ project.summary }}{% endblock %}
+{% block extra_head %}<link rel="preload" as="image" href="{{ project.cover.url }}" fetchpriority="high">{% endblock %}
+
+{% block content %}
+<header class="page-hero pb-4">
+  <div class="container">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb mb-3">
+      <li class="breadcrumb-item"><a href="{% url 'website:portfolio' %}">Portfolio</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ project.title }}</li>
+    </ol></nav>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <span class="badge-soft">{{ project.get_style_display }}</span>
+      <span class="badge-soft">{{ project.get_room_type_display }}</span>
+      {% if project.property_type %}<span class="badge-soft">{{ project.get_property_type_display }}</span>{% endif %}
+    </div>
+    <h1 class="mb-3">{{ project.title }}</h1>
+    <p class="lead-text">{{ project.summary }}</p>
+  </div>
+</header>
+
+<div class="container">
+  <a href="{{ project.cover.url }}" data-lightbox="gallery" data-caption="{{ project.title }}" class="d-block rounded-4 overflow-hidden" style="background:var(--sand)">
+    <img src="{{ project.cover.url }}" alt="{{ project.title }}" class="w-100 ratio-32" fetchpriority="high" width="1600" height="1067">
+  </a>
+</div>
+
+<section class="section-sm">
+  <div class="container">
+    <div class="facts pb-4 mb-2 border-bottom">
+      <div><div class="fact-label">Location</div><div class="fact-value">{{ project.location }}</div></div>
+      <div><div class="fact-label">Carpet area</div><div class="fact-value">{{ project.area_sqft|num }} sq ft</div></div>
+      <div><div class="fact-label">Budget band</div><div class="fact-value">{{ project.get_budget_band_display }}</div></div>
+      <div><div class="fact-label">Completed in</div><div class="fact-value">{{ project.duration_weeks }} weeks</div></div>
+    </div>
+
+    <div class="row g-4 g-lg-5 pt-4">
+      <div class="col-lg-7">
+        {% if project.brief %}
+        <span class="eyebrow">The brief</span>
+        <p class="fs-5 mb-4" style="line-height:1.55">{{ project.brief }}</p>
+        {% endif %}
+        <span class="eyebrow">Our approach</span>
+        <div class="prose">{{ project.description|linebreaks }}</div>
+      </div>
+      <div class="col-lg-5">
+        {% if project.timeline.all %}
+        <div class="card-soft p-4">
+          <h4 class="mb-3">Project timeline</h4>
+          <ul class="timeline">
+            {% for t in project.timeline.all %}
+            <li><div class="when">{{ t.duration }}</div><div class="fw-semibold">{{ t.title }}</div>{% if t.description %}<div class="small text-muted">{{ t.description }}</div>{% endif %}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if project.before_afters.all %}
+<section class="section-sm bg-sand">
+  <div class="container">
+    <div class="section-head mb-4">
+      <span class="eyebrow">Before &amp; after</span>
+      <h2>Drag to see the transformation</h2>
+    </div>
+    <div class="row g-4">
+      {% for ba in project.before_afters.all %}
+      <div class="{% if project.before_afters.all|length > 1 %}col-lg-6{% else %}col-12{% endif %}">
+        <div class="ba-slider" tabindex="0" role="slider" aria-label="Before and after comparison" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+          <img src="{{ ba.before.url }}" alt="Before" loading="lazy" width="1400" height="933">
+          <div class="ba-after-wrap"><img src="{{ ba.after.url }}" alt="After" loading="lazy" width="1400" height="933"></div>
+          <span class="ba-label before">Before</span><span class="ba-label after">After</span>
+          <div class="ba-handle"><span><i class="bi bi-arrows-expand-vertical"></i></span></div>
+        </div>
+        {% if ba.caption %}<p class="small text-muted mt-2 mb-0">{{ ba.caption }}</p>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if project.images.all %}
+<section class="section-sm">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+      <div><span class="eyebrow">Gallery</span><h2 class="mb-0">Inside the project</h2></div>
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-ink btn-sm" href="{% url 'website:moodboard' project.slug %}"><i class="bi bi-palette2 me-1"></i> Open mood board</a>
+        {% if studio.show_locked_teasers %}
+        <button type="button" class="btn btn-outline-ink btn-sm" data-locked="walkthrough_3d"><i class="bi bi-badge-3d me-1"></i> 3D walkthrough <i class="bi bi-lock-fill small ms-1"></i></button>
+        <button type="button" class="btn btn-outline-ink btn-sm" data-locked="ar_view"><i class="bi bi-phone me-1"></i> View in your room (AR) <i class="bi bi-lock-fill small ms-1"></i></button>
+        {% endif %}
+      </div>
+    </div>
+    <div class="gallery-grid">
+      {% for img in project.images.all %}
+      <a href="{{ img.image.url }}" data-lightbox="gallery" data-caption="{{ img.caption }}" class="{% if forloop.first %}wide{% endif %}">
+        <img src="{{ img.image.url }}" alt="{{ img.caption|default:project.title }}" loading="lazy" decoding="async" width="900" height="675">
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section-sm">
+  <div class="container">
+    <div class="row g-4 g-lg-5">
+      {% if project.rooms.all %}
+      <div class="col-lg-7">
+        <span class="eyebrow">Room by room</span>
+        <h2 class="mb-3">What we did</h2>
+        {% for r in project.rooms.all %}
+        <div class="room-block"><h4 class="mb-1">{{ r.name }}</h4><p class="text-muted mb-0">{{ r.description }}</p></div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div class="col-lg-5">
+        {% if project.colours %}
+        <span class="eyebrow">Colour palette</span>
+        <div class="d-flex flex-wrap gap-3 mb-4">
+          {% for s in project.colours %}
+          <div class="swatch"><span class="swatch-chip" style="background:{{ s.hex }}"></span><span><span class="swatch-name d-block">{{ s.name }}</span><span class="swatch-note">{{ s.hex|upper }}</span></span></div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% if project.materials %}
+        <span class="eyebrow">Materials</span>
+        <div class="d-flex flex-column gap-3">
+          {% for s in project.materials %}
+          <div class="swatch"><span class="swatch-chip material" style="background-color:{{ s.hex }}"></span><span><span class="swatch-name d-block">{{ s.name }}</span><span class="swatch-note">{{ s.note }}</span></span></div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if project.client_quote %}
+<section class="section-sm">
+  <div class="container">
+    <figure class="text-center mx-auto" style="max-width:48rem">
+      <i class="bi bi-quote fs-1 text-accent"></i>
+      <blockquote class="pull-quote mb-3">{{ project.client_quote }}</blockquote>
+      <figcaption class="text-muted">— {{ project.client_name|default:"Homeowner" }}, {{ project.location }} <span class="badge-sample ms-1">Sample</span></figcaption>
+    </figure>
+  </div>
+</section>
+{% endif %}
+
+<section class="section-sm">
+  <div class="container">
+    <div class="cta-band">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+          <span class="eyebrow" style="color:var(--accent-light)">Want something like this?</span>
+          <h2 class="mb-2">Let’s design your {{ project.get_style_display|lower }} space.</h2>
+          <p class="mb-0" style="color:rgba(255,255,255,.75)">Book a free consultation — we’ll note that you liked this project.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+          <a class="btn btn-accent btn-lg" href="{% url 'bookings:book' %}?style={{ project.style }}&project={{ project.title|urlencode }}">Book a consultation</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if related %}
+<section class="section-sm pb-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4"><h3 class="mb-0">More projects</h3><a class="link-arrow" href="{% url 'website:portfolio' %}">All work <i class="bi bi-arrow-right"></i></a></div>
+    <div class="row g-4">
+      {% for p in related %}<div class="col-md-4">{% include "partials/project_card.html" with p=p %}</div>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% include "partials/lightbox.html" %}
+{% endblock %}

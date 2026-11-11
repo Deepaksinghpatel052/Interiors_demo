@@ -1,0 +1,52 @@
+{% extends "studio/base.html" %}
+{% load static %}
+{% block page_title %}Leads{% endblock %}
+{% block heading %}Leads <span class="text-muted fw-normal small">· {{ total }}</span>{% endblock %}
+{% block actions %}<a class="btn btn-accent btn-sm" href="{% url 'studio:lead_create' %}"><i class="bi bi-plus-lg"></i><span class="d-none d-sm-inline ms-1">New lead</span></a>{% endblock %}
+
+{% block erp_content %}
+<form class="d-flex flex-wrap gap-2 mb-3" method="get" role="search">
+  <div class="input-group" style="max-width:20rem">
+    <span class="input-group-text"><i class="bi bi-search"></i></span>
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Search name, mobile, area" aria-label="Search leads">
+  </div>
+  <select class="form-select" name="source" style="max-width:13rem" onchange="this.form.submit()" aria-label="Filter by source">
+    <option value="">All sources</option>
+    {% for v, l in sources %}<option value="{{ v }}" {% if source == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+  </select>
+  {% if q or source %}<a class="btn btn-light" href="{% url 'studio:leads' %}">Clear</a>{% endif %}
+  <span class="small text-muted align-self-center ms-auto d-none d-md-inline"><i class="bi bi-arrows-move me-1"></i>Drag cards between stages</span>
+</form>
+
+<div class="kanban" id="leadBoard" data-move-url="{% url 'studio:lead_move' %}">
+  {% for col in columns %}
+  <section class="kanban-col stage-{{ col.value }}" aria-label="{{ col.label }}">
+    <div class="kanban-head"><span>{{ col.label }}</span><span class="kanban-count">{{ col.leads|length }}</span></div>
+    <div class="kanban-list" data-stage="{{ col.value }}">
+      {% for l in col.leads %}
+      <article class="kcard" data-id="{{ l.pk }}">
+        <div class="d-flex justify-content-between gap-2">
+          <a class="kname" href="{% url 'studio:lead_detail' l.pk %}">{{ l.name }}</a>
+          <span class="kactions d-flex gap-2">
+            <a href="{{ l.mobile|india|tel }}" aria-label="Call {{ l.name }}"><i class="bi bi-telephone"></i></a>
+            <a href="{% wa_link l.mobile|india 'Hi '|add:l.name|add:', this is '|add:studio.name|add:'. Thank you for your enquiry!' %}" target="_blank" rel="noopener" aria-label="WhatsApp {{ l.name }}"><i class="bi bi-whatsapp"></i></a>
+          </span>
+        </div>
+        <div class="kmeta">{% if l.property_type %}{{ l.get_property_type_display }}{% endif %}{% if l.budget_band %} · {{ l.get_budget_band_display }}{% endif %}</div>
+        <div class="d-flex flex-wrap gap-1 mt-2 align-items-center">
+          <span class="pill {% if l.source == 'ai_assistant' %}pill-blue{% elif l.source == 'cost_estimator' %}pill-accent{% else %}pill-grey{% endif %}">{{ l.get_source_display }}</span>
+          {% if l.follow_up_date %}<span class="pill {% if l.follow_up_date < today and l.stage != 'won' and l.stage != 'lost' %}pill-red{% else %}pill-grey{% endif %}"><i class="bi bi-alarm"></i> {{ l.follow_up_date|date:"d M" }}</span>{% endif %}
+          {% if l.assigned_to %}<span class="avatar ms-auto" style="width:22px;height:22px;font-size:.7rem" title="{{ l.assigned_to.get_full_name }}">{{ l.assigned_to.first_name|first }}</span>{% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" defer></script>
+<script src="{% static 'js/erp.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "studio/base.html" %}
+{% block page_title %}{% if obj %}{{ obj.title }}{% else %}New project{% endif %}{% endblock %}
+{% block heading %}<a href="{% url 'cms:projects' %}" class="text-muted text-decoration-none" aria-label="Back"><i class="bi bi-arrow-left"></i></a> {% if obj %}{{ obj.title|truncatechars:50 }}{% else %}New project{% endif %}{% endblock %}
+{% block erp_content %}
+{% include "cms/_project_tabs.html" %}
+<div class="panel" style="max-width:60rem"><div class="panel-body">
+  <form method="post" enctype="multipart/form-data" class="form-compact row g-2" novalidate data-loading>{% csrf_token %}
+    {% include "cms/_fields.html" %}
+    <div class="col-12 d-flex gap-2 justify-content-end mt-2">
+      <a class="btn btn-light" href="{% url 'cms:projects' %}">Cancel</a>
+      <button class="btn btn-accent" data-loading-text="Saving…">{% if obj %}Save &amp; publish{% else %}Create project{% endif %}</button>
+    </div>
+  </form>
+  {% if obj %}
+  <form method="post" action="{% url 'cms:project_delete' obj.pk %}" class="mt-3 pt-3 border-top" data-confirm="Delete this project and all its photos from the website?">
+    {% csrf_token %}<button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash3 me-1"></i> Delete project</button></form>
+  {% endif %}
+</div></div>
+{% endblock %}

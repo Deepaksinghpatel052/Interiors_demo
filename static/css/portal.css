@@ -1,0 +1,78 @@
+/* ============================ Client portal ============================ */
+body.portal { background: var(--bg-alt); }
+.portal-top { background: rgba(255,255,255,.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 1020; }
+.portal-top > .container { padding-top: .7rem; padding-bottom: .7rem; }
+.portal-tabs { border-top: 1px solid var(--line); }
+.portal-tabs .container { overflow-x: auto; scrollbar-width: none; }
+.portal-tabs a { display: inline-flex; align-items: center; gap: .4rem; padding: .7rem .9rem; color: var(--muted); text-decoration: none; font-weight: 500; font-size: .92rem; border-bottom: 2px solid transparent; white-space: nowrap; }
+.portal-tabs a:hover { color: var(--deep); }
+.portal-tabs a.active { color: var(--deep); border-bottom-color: var(--accent); }
+.portal-content { padding-top: 1.5rem; padding-bottom: 3rem; }
+.portal-head { margin-bottom: 1.25rem; }
+.portal-head h1 { font-family: var(--font-serif); }
+.portal-footer { padding: 1.25rem 0 6rem; border-top: 1px solid var(--line); background: #fff; }
+@media (min-width: 768px) { .portal-footer { padding-bottom: 1.25rem; } }
+
+/* Hero */
+.portal-hero { border-radius: 20px; padding: clamp(1.4rem, 4vw, 2.2rem); margin-bottom: 1.25rem; color: #fff;
+  background: radial-gradient(600px 300px at 95% -20%, color-mix(in srgb, var(--accent) 45%, transparent), transparent 70%),
+              radial-gradient(500px 260px at -10% 120%, color-mix(in srgb, var(--accent-2) 30%, transparent), transparent 70%), var(--deep); }
+.portal-progress { height: 10px; background: rgba(255,255,255,.15); }
+.designer-card { display: flex; align-items: center; gap: .75rem; padding: .9rem 1rem; border-radius: 14px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); }
+.hero-fact { padding: .7rem .9rem; border-radius: 12px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); }
+.hero-fact span { display: block; font-size: .72rem; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: .08em; }
+.hero-fact strong { color: #fff; font-size: .95rem; }
+
+/* Action cards */
+.action-card { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.1rem; background: #fff; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: var(--radius); text-decoration: none; color: var(--deep); box-shadow: var(--shadow-sm); transition: transform .2s, box-shadow .2s; }
+.action-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); color: var(--deep); }
+.action-card .bi-chevron-right { color: var(--accent); }
+
+/* Stepper */
+.stepper { list-style: none; padding: 0; margin: 0; display: grid; gap: .35rem; }
+.stepper li { display: flex; align-items: center; gap: .75rem; padding: .45rem 0; position: relative; }
+.stepper li:not(:last-child)::after { content: ""; position: absolute; left: 15px; top: 38px; height: calc(100% - 22px); width: 2px; background: var(--line); }
+.stepper li.done:not(:last-child)::after { background: var(--accent); }
+.stepper-dot { width: 32px; height: 32px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: .82rem; font-weight: 700; background: #fff; border: 2px solid var(--line-strong); color: var(--muted); z-index: 1; }
+.stepper li.done .stepper-dot { background: var(--gradient); border-color: transparent; color: #fff; }
+.stepper li.in_progress .stepper-dot { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.stepper-title { flex: 1; font-weight: 600; font-size: .95rem; }
+.stepper li.pending .stepper-title { color: var(--muted); font-weight: 500; }
+.stepper-date { font-size: .8rem; color: var(--muted); }
+
+/* Designs */
+.design-teaser { overflow: hidden; transition: transform .2s, box-shadow .2s; }
+.design-teaser:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.design-teaser img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; }
+.design-image { overflow: hidden; }
+.design-image img { width: 100%; height: auto; display: block; max-height: 70vh; object-fit: cover; }
+.decision-box { position: sticky; top: 130px; border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+@media (max-width: 991.98px) { .decision-box { position: static; } }
+
+/* Documents */
+.doc-row { display: flex; align-items: center; gap: .85rem; padding: .8rem 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--deep); }
+.doc-row:last-child { border-bottom: 0; }
+.doc-row > .bi:first-child { font-size: 1.5rem; color: var(--accent); }
+.doc-row:hover .fw-semibold { color: var(--accent); }
+
+/* Timeline status */
+.portal-timeline li.done::before { background: var(--accent); }
+.portal-timeline li.in_progress::before { box-shadow: 0 0 0 4px var(--accent-soft); }
+.portal-timeline li { padding-bottom: 1.6rem; }
+
+/* Mobile tab bar */
+.portal-tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030; display: flex; background: rgba(255,255,255,.97); backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line); padding: .35rem .25rem calc(.35rem + env(safe-area-inset-bottom)); box-shadow: 0 -6px 20px rgba(17,18,18,.06); }
+.portal-tabbar a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .1rem; padding: .3rem 0; font-size: .7rem; font-weight: 600; color: var(--muted); text-decoration: none; position: relative; }
+.portal-tabbar a .bi { font-size: 1.25rem; }
+.portal-tabbar a.active { color: var(--accent); }
+.tab-dot { position: absolute; top: 4px; right: calc(50% - 16px); width: 8px; height: 8px; border-radius: 50%; background: var(--danger); }
+.portal-more { height: auto !important; border-radius: 18px 18px 0 0; }
+.portal-more a { display: flex; gap: .8rem; align-items: center; padding: .9rem .4rem; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--deep); font-weight: 500; }
+.portal-more a .bi { color: var(--accent); font-size: 1.2rem; }
+
+.approve-bar { position: fixed; left: .75rem; right: .75rem; bottom: calc(70px + env(safe-area-inset-bottom)); z-index: 1029; display: flex; align-items: center;
+  justify-content: space-between; gap: 1rem; padding: .7rem 1rem; border-radius: 14px; background: var(--gradient); color: #fff; text-decoration: none; box-shadow: var(--shadow-blue); }
+.approve-bar:hover { color: #fff; }
+body.portal .wa-float { display: none; }

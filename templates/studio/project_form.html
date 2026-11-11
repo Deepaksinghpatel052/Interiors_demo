@@ -1,0 +1,25 @@
+{% extends "studio/base.html" %}
+{% block page_title %}New project{% endblock %}
+{% block heading %}<a href="{% url 'studio:projects' %}" class="text-muted text-decoration-none"><i class="bi bi-arrow-left"></i></a> New project{% endblock %}
+{% block erp_content %}
+<div class="panel" style="max-width:60rem">
+  <div class="panel-body">
+    <p class="text-muted small">Tip: converting a lead creates the project, the client login and default milestones in one click.</p>
+    <form method="post" class="form-compact" novalidate data-loading>
+      {% csrf_token %}
+      <div class="row g-3">
+        {% for field in form %}
+        <div class="{% if field.name == 'notes' or field.name == 'site_address' %}col-12{% else %}col-sm-6 col-lg-4{% endif %}">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-accent">*</span>{% endif %}</label>{{ field }}
+          {% for e in field.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="mt-3 d-flex gap-2 justify-content-end">
+        <a class="btn btn-light" href="{% url 'studio:projects' %}">Cancel</a>
+        <button class="btn btn-accent" data-loading-text="Creating…">Create project</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

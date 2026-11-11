@@ -1,0 +1,94 @@
+{% extends "studio/base.html" %}
+{% block page_title %}Studio settings{% endblock %}
+{% block heading %}Studio settings{% endblock %}
+{% block actions %}<a class="btn btn-light btn-sm" href="{{ site_home }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i><span class="d-none d-sm-inline ms-1">Preview website</span></a>{% endblock %}
+
+{% block erp_content %}
+<form method="post" enctype="multipart/form-data" class="form-compact" novalidate data-loading id="settingsForm">
+  {% csrf_token %}
+  <div class="row g-3">
+    <div class="col-lg-3">
+      <nav class="panel p-2 settings-nav" aria-label="Settings sections">
+        {% for key, label, icon, fields in sections %}
+        <a href="#s-{{ key }}" class="{% if key in error_sections %}has-error{% endif %}"><i class="bi bi-{{ icon }}"></i> {{ label }}{% if key in error_sections %} <i class="bi bi-exclamation-circle-fill ms-auto"></i>{% endif %}</a>
+        {% endfor %}
+      </nav>
+      <div class="panel p-3 mt-3 d-none d-lg-block">
+        <div class="small text-muted mb-2">Live colour preview</div>
+        <div class="brand-preview" id="brandPreview">
+          <div class="bp-top"><span class="bp-mark">{{ studio.initials }}</span><span class="bp-name">{{ studio.name }}</span></div>
+          <div class="bp-body"><div class="bp-line"></div><div class="bp-line short"></div><span class="bp-btn">Book consultation</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-9">
+      {% for key, label, icon, fields in sections %}
+      <section class="panel mb-3" id="s-{{ key }}" style="scroll-margin-top:90px">
+        <div class="panel-head"><h2><i class="bi bi-{{ icon }} text-accent me-2"></i>{{ label }}</h2>
+          {% if key == "modules" %}<span class="small text-muted">Switch packages on or off for this client</span>{% endif %}
+          {% if key == "rates" %}<span class="small text-muted">₹ per sq ft of carpet area</span>{% endif %}
+        </div>
+        <div class="panel-body">
+          <div class="row g-3">
+            {% for field in fields %}
+            {% if field.field.widget.input_type == "checkbox" %}
+            <div class="col-sm-6">
+              <div class="form-check form-switch">
+                {{ field }}<label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+              </div>
+            </div>
+            {% else %}
+            <div class="{% if field.name in 'address about_text hero_subtitle hero_title quotation_terms bank_details easy_payment_text schedule_text tagline' %}col-12{% elif field.name in 'accent_color secondary_color dark_color' %}col-sm-4{% else %}col-sm-6{% endif %}">
+              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {% if field.name == "logo" and studio.logo %}<div class="mb-2"><img src="{{ studio.logo.url }}" alt="Current logo" height="44" class="rounded border p-1 bg-white"></div>{% endif %}
+              {% if field.name in "accent_color secondary_color dark_color" %}
+              <div class="d-flex align-items-center gap-2">{{ field }}<code class="small" data-hex-for="{{ field.id_for_label }}">{{ field.value }}</code></div>
+              {% else %}{{ field }}{% endif %}
+              {% for e in field.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+              {% if field.help_text and field.name not in "accent_color secondary_color dark_color" %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+      {% endfor %}
+      <div class="settings-save">
+        <span class="small text-muted d-none d-sm-inline"><i class="bi bi-info-circle me-1"></i>Changes apply to the website, client portal and documents immediately.</span>
+        <button class="btn btn-accent" data-loading-text="Saving…"><i class="bi bi-check2 me-1"></i> Save settings</button>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var root = document.getElementById("brandPreview");
+  function sync() {
+    var a = document.getElementById("id_accent_color"), b = document.getElementById("id_secondary_color"), d = document.getElementById("id_dark_color");
+    if (!a || !b || !d) return;
+    if (root) {
+      root.style.setProperty("--pa", a.value); root.style.setProperty("--pb", b.value); root.style.setProperty("--pd", d.value);
+    }
+    document.querySelectorAll("[data-hex-for]").forEach(function (el) {
+      var input = document.getElementById(el.getAttribute("data-hex-for"));
+      if (input) el.textContent = input.value.toUpperCase();
+    });
+  }
+  ["id_accent_color", "id_secondary_color", "id_dark_color"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener("input", sync);
+  });
+  var nameInput = document.getElementById("id_name");
+  if (nameInput) nameInput.addEventListener("input", function () {
+    var n = root && root.querySelector(".bp-name");
+    if (n) n.textContent = nameInput.value || "Studio";
+  });
+  sync();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "studio/base.html" %}
+{% block page_title %}Mood board — {{ obj.title }}{% endblock %}
+{% block heading %}<a href="{% url 'cms:projects' %}" class="text-muted text-decoration-none" aria-label="Back"><i class="bi bi-arrow-left"></i></a> {{ obj.title|truncatechars:50 }}{% endblock %}
+{% block erp_content %}
+{% include "cms/_project_tabs.html" %}
+<form method="post" novalidate data-loading>{% csrf_token %}
+  {{ rooms.management_form }}{{ swatches.management_form }}
+  <div class="row g-3">
+    <div class="col-xl-6">
+      <div class="panel"><div class="panel-head"><h2>Room notes</h2></div><div class="panel-body">
+        {% for f in rooms %}
+        <div class="cms-row">{{ f.id }}
+          <div class="row g-2">
+            <div class="col-8"><label class="visually-hidden" for="{{ f.name.id_for_label }}">Room</label>{{ f.name }}</div>
+            <div class="col-4"><label class="visually-hidden" for="{{ f.order.id_for_label }}">Order</label>{{ f.order }}</div>
+            <div class="col-12"><label class="visually-hidden" for="{{ f.description.id_for_label }}">Description</label>{{ f.description }}</div>
+          </div>
+          {% if f.instance.pk %}<label class="small text-danger mt-1"><input type="checkbox" name="{{ f.DELETE.html_name }}" class="form-check-input me-1">Remove</label>{% endif %}
+          {% for e in f.errors.values %}<div class="invalid-feedback d-block">{{ e.0 }}</div>{% endfor %}
+        </div>
+        {% endfor %}
+        <div class="form-text">Room name, order and a short description. Leave the empty row blank if you don’t need it.</div>
+      </div></div>
+    </div>
+    <div class="col-xl-6">
+      <div class="panel"><div class="panel-head"><h2>Colours &amp; materials</h2></div><div class="panel-body">
+        {% for f in swatches %}
+        <div class="cms-row">{{ f.id }}
+          <div class="row g-2 align-items-center">
+            <div class="col-3 col-sm-2">{{ f.hex }}</div>
+            <div class="col-9 col-sm-4"><label class="visually-hidden" for="{{ f.name.id_for_label }}">Name</label>{{ f.name }}</div>
+            <div class="col-6 col-sm-3">{{ f.kind }}</div>
+            <div class="col-6 col-sm-3"><label class="visually-hidden" for="{{ f.order.id_for_label }}">Order</label>{{ f.order }}</div>
+            <div class="col-12"><label class="visually-hidden" for="{{ f.note.id_for_label }}">Note</label>{{ f.note }}</div>
+          </div>
+          {% if f.instance.pk %}<label class="small text-danger mt-1"><input type="checkbox" name="{{ f.DELETE.html_name }}" class="form-check-input me-1">Remove</label>{% endif %}
+          {% for e in f.errors.values %}<div class="invalid-feedback d-block">{{ e.0 }}</div>{% endfor %}
+        </div>
+        {% endfor %}
+      </div></div>
+    </div>
+  </div>
+  <div class="text-end mt-3"><button class="btn btn-accent" data-loading-text="Saving…">Save mood board</button></div>
+</form>
+{% endblock %}

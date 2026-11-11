@@ -1,0 +1,71 @@
+{% extends "studio/base.html" %}
+{% block page_title %}Team &amp; roles{% endblock %}
+{% block heading %}Team &amp; roles{% endblock %}
+{% block actions %}
+<button class="btn btn-accent btn-sm" data-bs-toggle="collapse" data-bs-target="#addMember" aria-expanded="{% if show_form %}true{% else %}false{% endif %}"><i class="bi bi-person-plus"></i><span class="d-none d-sm-inline ms-1">Add team member</span></button>
+{% endblock %}
+
+{% block erp_content %}
+<div class="collapse {% if show_form and form.errors %}show{% endif %} mb-3" id="addMember">
+  <div class="panel"><div class="panel-head"><h2>New team member</h2></div><div class="panel-body">
+    <form method="post" class="form-compact row g-2" novalidate data-loading autocomplete="off">{% csrf_token %}
+      <input type="hidden" name="action" value="add">
+      {% for field in form %}
+      <div class="col-sm-6 col-lg-4">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+        {% for e in field.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+      </div>
+      {% endfor %}
+      <div class="col-12 text-end"><button class="btn btn-ink" data-loading-text="Saving…">Create login</button></div>
+    </form>
+  </div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-xl-7">
+    <div class="panel"><div class="panel-head"><h2>People ({{ members|length }})</h2></div><div class="panel-body py-1">
+      {% for m in members %}
+      <div class="list-row align-items-center {% if not m.is_active %}opacity-50{% endif %}">
+        <span class="avatar">{{ m.first_name|first|default:m.username|first|upper }}</span>
+        <div class="flex-grow-1 min-w-0 small">
+          <div class="fw-semibold">{{ m.get_full_name|default:m.username }}{% if m == user %} <span class="text-muted fw-normal">(you)</span>{% endif %}</div>
+          <div class="text-muted">@{{ m.username }} · {{ m.open_tasks }} open task{{ m.open_tasks|pluralize }}{% if m.last_login %} · last sign-in {{ m.last_login|date:"d M" }}{% endif %}</div>
+        </div>
+        <span class="pill {% if m.role_label == 'Owner' %}pill-accent{% else %}pill-blue{% endif %}">{{ m.role_label }}</span>
+        {% if m != user %}
+        <form method="post" class="ms-1" {% if m.is_active %}data-confirm="Deactivate {{ m.get_full_name|default:m.username }}? They will not be able to sign in."{% endif %}>{% csrf_token %}<input type="hidden" name="action" value="toggle"><input type="hidden" name="user" value="{{ m.pk }}">
+          <button class="btn btn-light btn-sm">{% if m.is_active %}Deactivate{% else %}Reactivate{% endif %}</button>
+        </form>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div></div>
+  </div>
+
+  <div class="col-xl-5">
+    <div class="panel mb-3"><div class="panel-head"><h2>What each role can do</h2></div><div class="panel-body p-0">
+      <table class="table table-sm mb-0 role-table">
+        <thead><tr><th>Area</th><th class="text-center">Owner</th><th class="text-center">Team</th></tr></thead>
+        <tbody>
+          {% for area, owner, teamok in matrix %}
+          <tr><td class="small">{{ area }}</td>
+            <td class="text-center">{% if owner %}<i class="bi bi-check-circle-fill text-accent" aria-label="Yes"></i>{% else %}<i class="bi bi-dash text-muted" aria-label="No"></i>{% endif %}</td>
+            <td class="text-center">{% if teamok %}<i class="bi bi-check-circle-fill text-accent" aria-label="Yes"></i>{% else %}<i class="bi bi-dash text-muted" aria-label="No"></i>{% endif %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+    {% if studio.show_locked_teasers %}
+    <div class="d-flex flex-column gap-2">
+      <button type="button" class="locked-row" data-locked="{{ locked_roles.key }}"><i class="bi bi-lock-fill"></i>
+        <span class="flex-grow-1 text-start min-w-0"><span class="fw-semibold d-block">{{ locked_roles.title }}</span><span class="small text-muted">Custom roles such as Site supervisor or Accountant, per-project access and multiple branches.</span></span>
+        <span class="badge-locked">Full version</span></button>
+      <button type="button" class="locked-row" data-locked="{{ locked_payroll.key }}"><i class="bi bi-lock-fill"></i>
+        <span class="flex-grow-1 text-start min-w-0"><span class="fw-semibold d-block">{{ locked_payroll.title }}</span><span class="small text-muted">{{ locked_payroll.benefit }}</span></span>
+        <span class="badge-locked">Full version</span></button>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

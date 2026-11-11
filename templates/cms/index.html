@@ -1,0 +1,34 @@
+{% extends "studio/base.html" %}
+{% block page_title %}Website content{% endblock %}
+{% block heading %}Website content{% endblock %}
+{% block actions %}{% if studio.module_website %}<a class="btn btn-light btn-sm" href="{{ site_home }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i><span class="d-none d-sm-inline ms-1">View website</span></a>{% endif %}{% endblock %}
+{% block erp_content %}
+<div class="row g-3 mb-3">
+  {% for key, label, icon, count, hint in sections %}
+  <div class="col-6 col-xl-3">
+    <a class="kpi" href="{% if key == 'projects' %}{% url 'cms:projects' %}{% else %}{% url 'cms:list' key %}{% endif %}">
+      <div class="kpi-label"><i class="bi bi-{{ icon }}"></i> {{ label }}</div>
+      <div class="kpi-value">{{ count }}</div><div class="kpi-sub">{{ hint }}</div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+<div class="row g-3">
+  <div class="col-xl-8">
+    <div class="panel"><div class="panel-head"><h2>Homepage &amp; about text</h2></div><div class="panel-body">
+      <form method="post" class="form-compact row g-2" novalidate data-loading>{% csrf_token %}
+        {% include "cms/_fields.html" %}
+        <div class="col-12 text-end mt-2"><button class="btn btn-accent" data-loading-text="Saving…">Save &amp; publish</button></div>
+      </form>
+    </div></div>
+  </div>
+  <div class="col-xl-4">
+    <div class="panel"><div class="panel-head"><h2>Also editable</h2></div><div class="panel-body py-1">
+      <a class="doc-row" href="{% url 'studio:settings' %}"><i class="bi bi-palette"></i><span class="flex-grow-1">Logo, name, colours &amp; contact</span><i class="bi bi-chevron-right small text-muted"></i></a>
+      <a class="doc-row" href="{% url 'studio:availability' %}"><i class="bi bi-clock"></i><span class="flex-grow-1">Booking hours &amp; holidays</span><i class="bi bi-chevron-right small text-muted"></i></a>
+      {% if studio.module_ai %}<a class="doc-row" href="{% url 'assistant:kb' %}"><i class="bi bi-journal-text"></i><span class="flex-grow-1">AI knowledge base</span><i class="bi bi-chevron-right small text-muted"></i></a>{% endif %}
+    </div></div>
+    <p class="small text-muted mt-3"><i class="bi bi-info-circle me-1"></i>Changes are live on the website immediately. Services, FAQs and projects are re-indexed for the AI assistant automatically.</p>
+  </div>
+</div>
+{% endblock %}

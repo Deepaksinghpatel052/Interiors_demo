@@ -1,0 +1,57 @@
+{% extends "studio/base.html" %}
+{% block page_title %}Availability{% endblock %}
+{% block heading %}<a href="{% url 'studio:bookings' %}" class="text-muted text-decoration-none"><i class="bi bi-arrow-left"></i></a> Availability{% endblock %}
+{% block erp_content %}
+<div class="row g-3">
+  <div class="col-xl-8">
+    <div class="panel">
+      <div class="panel-head"><h2>Weekly hours</h2><a class="small" href="{% url 'bookings:book' %}" target="_blank" rel="noopener">See booking page <i class="bi bi-box-arrow-up-right"></i></a></div>
+      <div class="panel-body">
+        <p class="small text-muted">These windows become the time slots visitors can book on your website. Add two rows for a lunch break.</p>
+        <form method="post" class="form-compact" novalidate data-loading>
+          {% csrf_token %}{{ formset.management_form }}
+          {% if formset.non_form_errors %}<div class="alert alert-danger small">{{ formset.non_form_errors }}</div>{% endif %}
+          <div class="table-responsive">
+            <table class="table align-middle mb-2">
+              <thead class="small text-muted"><tr><th>Day</th><th>From</th><th>To</th><th>Slot (min)</th><th>Active</th><th>Remove</th></tr></thead>
+              <tbody>
+                {% for f in formset %}
+                <tr>
+                  <td style="min-width:9rem">{{ f.id }}{{ f.weekday }}{% if f.non_field_errors %}<div class="invalid-feedback">{{ f.non_field_errors.0 }}</div>{% endif %}</td>
+                  <td style="min-width:7rem">{{ f.start_time }}</td>
+                  <td style="min-width:7rem">{{ f.end_time }}</td>
+                  <td style="min-width:5.5rem">{{ f.slot_minutes }}{% for e in f.slot_minutes.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}</td>
+                  <td>{{ f.is_active }}</td>
+                  <td>{% if f.instance.pk %}{{ f.DELETE }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="text-end"><button class="btn btn-ink" data-loading-text="Saving…">Save hours</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="panel">
+      <div class="panel-head"><h2>Blocked dates</h2></div>
+      <div class="panel-body">
+        <p class="small text-muted">Holidays, site-heavy days or travel. No one can book on these dates.</p>
+        <form method="post" class="form-compact row g-2 mb-3" novalidate>
+          {% csrf_token %}
+          <div class="col-6">{{ block_form.date }}{% for e in block_form.date.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}</div>
+          <div class="col-6">{{ block_form.reason }}</div>
+          <div class="col-12"><button class="btn btn-accent btn-sm w-100" name="add_block" value="1">Block date</button></div>
+        </form>
+        {% for b in blocked %}
+        <div class="list-row align-items-center">
+          <div class="flex-grow-1 small"><span class="fw-semibold">{{ b.date|date:"D, d-m-Y" }}</span>{% if b.reason %} · {{ b.reason }}{% endif %}</div>
+          <form method="post" action="{% url 'studio:unblock_date' b.pk %}">{% csrf_token %}<button class="btn btn-sm btn-light" aria-label="Unblock"><i class="bi bi-x-lg"></i></button></form>
+        </div>
+        {% empty %}<div class="empty-mini"><i class="bi bi-calendar-check"></i>No blocked dates.</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "portal/base.html" %}
+{% block page_title %}Documents{% endblock %}
+{% block portal_content %}
+<div class="portal-head"><h1 class="h3 mb-1">Documents</h1><p class="text-muted mb-0">Quotations, invoices, agreements and drawings for your project.</p></div>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="panel h-100"><div class="panel-head"><h2>Quotations</h2></div><div class="panel-body py-1">
+      {% for q in quotations %}
+      <a class="doc-row" href="{% url 'portal:quotation_pdf' q.pk %}" target="_blank" rel="noopener">
+        <i class="bi bi-filetype-pdf"></i><span class="flex-grow-1"><span class="fw-semibold">{{ q.display_number }}</span> · {{ q.grand_total|inr }}<br><span class="small text-muted">{{ q.title }} · {{ q.date|date:"d M Y" }}</span></span>
+        <span class="pill {% if q.status == 'accepted' %}pill-green{% else %}pill-blue{% endif %}">{{ q.get_status_display }}</span></a>
+      {% empty %}<div class="empty-mini"><i class="bi bi-receipt"></i>No quotations shared yet.</div>{% endfor %}
+    </div></div>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel h-100"><div class="panel-head"><h2>Invoices</h2></div><div class="panel-body py-1">
+      {% for inv in invoices %}
+      <a class="doc-row" href="{% url 'portal:invoice_pdf' inv.pk %}" target="_blank" rel="noopener">
+        <i class="bi bi-filetype-pdf"></i><span class="flex-grow-1"><span class="fw-semibold">{{ inv.number }}</span> · {{ inv.total|inr }}<br><span class="small text-muted">{{ inv.description|truncatechars:48 }}</span></span>
+        <span class="pill {% if inv.status == 'paid' %}pill-green{% elif inv.is_overdue %}pill-red{% else %}pill-blue{% endif %}">{% if inv.is_overdue %}Overdue{% else %}{{ inv.get_status_display }}{% endif %}</span></a>
+      {% empty %}<div class="empty-mini"><i class="bi bi-receipt-cutoff"></i>No invoices yet.</div>{% endfor %}
+    </div></div>
+  </div>
+  <div class="col-12">
+    <div class="panel"><div class="panel-head"><h2>Agreements &amp; drawings</h2></div><div class="panel-body py-1">
+      {% for d in documents %}
+      <a class="doc-row" href="{% url 'portal:document_download' d.pk %}" target="_blank" rel="noopener">
+        <i class="bi bi-file-earmark-{% if d.file.name|slice:'-4:' == '.pdf' %}pdf{% else %}image{% endif %}"></i>
+        <span class="flex-grow-1"><span class="fw-semibold">{{ d.title }}</span><br><span class="small text-muted">{{ d.get_kind_display }} · {{ d.created_at|date:"d M Y" }}</span></span>
+        <i class="bi bi-download"></i></a>
+      {% empty %}<div class="empty-mini"><i class="bi bi-folder2-open"></i>Agreements and drawings will appear here.</div>{% endfor %}
+    </div></div>
+  </div>
+</div>
+{% endblock %}

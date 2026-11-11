@@ -1,0 +1,7 @@
+<a class="{% active 'overview' %}" href="{% url 'portal:overview' %}"><i class="bi bi-house"></i> Overview</a>
+<a class="{% active 'designs' 'design_detail' %}" href="{% url 'portal:designs' %}"><i class="bi bi-images"></i> Designs{% if waiting_designs %} <span class="pill pill-accent">{{ waiting_designs }}</span>{% endif %}</a>
+<a class="{% active 'timeline' %}" href="{% url 'portal:timeline' %}"><i class="bi bi-flag"></i> Timeline</a>
+<a class="{% active 'updates' %}" href="{% url 'portal:updates' %}"><i class="bi bi-camera"></i> Site updates</a>
+<a class="{% active 'documents' %}" href="{% url 'portal:documents' %}"><i class="bi bi-folder2-open"></i> Documents</a>
+<a class="{% active 'payments' %}" href="{% url 'portal:payments' %}"><i class="bi bi-wallet2"></i> Payments{% if due_invoices %} <span class="pill pill-red">due</span>{% endif %}</a>
+<a class="{% active 'requests' %}" href="{% url 'portal:requests' %}"><i class="bi bi-chat-square-dots"></i> Requests</a>

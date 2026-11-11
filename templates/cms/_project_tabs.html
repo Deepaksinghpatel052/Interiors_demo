@@ -1,0 +1,8 @@
+{% if obj %}
+<nav class="erp-tabs mb-3">
+  <a class="{% if tab == 'details' %}active{% endif %}" href="{% url 'cms:project_edit' obj.pk %}">Details</a>
+  <a class="{% if tab == 'media' %}active{% endif %}" href="{% url 'cms:project_media' obj.pk %}">Photos &amp; before/after</a>
+  <a class="{% if tab == 'mood' %}active{% endif %}" href="{% url 'cms:project_moodboard' obj.pk %}">Mood board</a>
+  {% if studio.module_website %}<a href="{{ obj.get_absolute_url }}" target="_blank" rel="noopener">View on site <i class="bi bi-box-arrow-up-right small"></i></a>{% endif %}
+</nav>
+{% endif %}

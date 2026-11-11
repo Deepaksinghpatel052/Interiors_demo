@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Why this system — {{ DEVNIX_NAME }} demo{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<header class="page-hero why-hero">
+  <div class="container">
+    <span class="eyebrow">For interior designers · by {{ DEVNIX_NAME }}</span>
+    <h1>Spend your time designing, not chasing messages</h1>
+    <p class="lead-text">This demo shows one connected system for an interior studio: a website that brings enquiries, an ERP that runs projects and money, automations that follow up, and an AI assistant that knows your work. Start with one module and add the rest when you are ready.</p>
+    <div class="d-flex flex-wrap gap-2 mt-4">
+      <button type="button" class="btn btn-accent btn-lg" data-tour-start><i class="bi bi-signpost-2 me-2"></i>Take the 2-minute tour</button>
+      <a class="btn btn-outline-ink btn-lg" href="#offer"><i class="bi bi-ui-checks me-2"></i>Build an offer</a>
+    </div>
+  </div>
+</header>
+
+<section class="section pt-2">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow">The problems</span><h2>Five things that slow every studio down</h2></div>
+    <div class="d-flex flex-column gap-3">
+      {% for p in problems %}
+      <article class="problem-row reveal">
+        <div class="problem-pain">
+          <span class="problem-icon"><i class="bi bi-{{ p.icon }}"></i></span>
+          <div><h3 class="h5 mb-1">{{ p.title }}</h3><p class="text-muted mb-0">{{ p.pain }}</p></div>
+        </div>
+        <i class="bi bi-arrow-right problem-arrow" aria-hidden="true"></i>
+        <div class="problem-fix">
+          <span class="pill pill-accent mb-1 d-inline-block">{{ p.module }}</span>
+          <p class="mb-2">{{ p.fix }}</p>
+          <form method="post" action="{% url 'core:switch_role' p.role %}">{% csrf_token %}<input type="hidden" name="next" value="{{ p.url }}"><input type="hidden" name="quiet" value="1">
+            <button class="btn btn-link btn-sm p-0 fw-semibold">See the {{ p.label|lower }} <i class="bi bi-box-arrow-up-right ms-1"></i></button></form>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section bg-sand" id="packages">
+  <div class="container">
+    <div class="section-head center"><span class="eyebrow">Modular packages</span><h2>Pick what you need today</h2>
+      <p class="lead-text">Each module works on its own and connects to the others later — no rebuilding.</p></div>
+    <div class="row g-3 g-lg-4">
+      {% for pk in packages %}
+      <div class="col-md-6 col-xl-4">
+        <article class="package-card h-100 {% if pk.is_bundle %}is-bundle{% endif %}">
+          {% if pk.is_bundle %}<span class="package-flag">Everything connected</span>{% endif %}
+          <span class="why-icon mb-3"><i class="bi bi-{{ pk.icon }}"></i></span>
+          <h3 class="h4 mb-1">{{ pk.name }}</h3>
+          <p class="text-muted">{{ pk.tagline }}</p>
+          <ul class="check-list mb-4">{% for item in pk.include_list %}<li>{{ item }}</li>{% endfor %}</ul>
+          <div class="mt-auto d-flex align-items-center justify-content-between gap-2 flex-wrap">
+            {% if pk.price_text %}<span class="fw-semibold">{{ pk.price_text }}</span>{% endif %}
+            {% if DEVNIX_WHATSAPP %}{% with "Hi "|add:DEVNIX_NAME|add:", I'm interested in the "|add:pk.name|add:" package for my interior studio." as msg %}
+            <a class="btn {% if pk.is_bundle %}btn-accent{% else %}btn-outline-ink{% endif %} btn-sm ms-auto" target="_blank" rel="noopener" href="{% wa_link DEVNIX_WHATSAPP msg %}"><i class="bi bi-whatsapp me-1"></i>Talk to us</a>
+            {% endwith %}{% endif %}
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section" id="offer">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow">Offer builder</span><h2>Tick the modules this studio needs</h2>
+      <p class="lead-text">A clean summary to discuss or share on WhatsApp.</p></div>
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="offer-picks" id="offerPicks">
+          {% for o in offer %}
+          <label class="offer-pick">
+            <input type="checkbox" class="form-check-input" value="{{ o.key }}" {% if o.bundle %}data-bundle{% endif %}>
+            <span><span class="fw-semibold d-block">{{ o.name }}</span><span class="small text-muted">{{ o.tagline }}</span></span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="offer-summary" id="offerSummary" aria-live="polite">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+            <div><div class="small text-muted">Proposal summary</div><h3 class="h4 mb-0" id="offerTitle">Choose at least one module</h3></div>
+            <span class="brand-mark" style="width:42px;height:42px">{{ studio.initials }}</span>
+          </div>
+          <div id="offerList" class="offer-list"><p class="text-muted small mb-0">Your selection will appear here.</p></div>
+          {% if easy_payment %}
+          <div class="offer-pay mt-3">
+            <div class="fw-semibold small mb-1"><i class="bi bi-calendar2-check text-accent me-1"></i>Easy payment options</div>
+            <ul class="small mb-0 ps-3">{% for line in easy_payment %}<li>{{ line }}</li>{% endfor %}</ul>
+          </div>
+          {% endif %}
+          <div class="d-flex flex-wrap gap-2 mt-3 offer-actions">
+            {% if DEVNIX_WHATSAPP %}<a class="btn btn-wa disabled" id="offerWa" target="_blank" rel="noopener" aria-disabled="true" data-number="{{ DEVNIX_WHATSAPP }}" data-name="{{ DEVNIX_NAME }}"><i class="bi bi-whatsapp me-1"></i>Send on WhatsApp</a>{% endif %}
+            <button type="button" class="btn btn-outline-ink" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print / PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-sand" id="calculator">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow">Value calculator</span><h2>What could a few extra projects mean for you?</h2>
+      <p class="lead-text">Enter your own numbers. The result is an <strong>illustration based only on your inputs and assumptions</strong> — not a promise or a forecast.</p></div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <form class="calc-form card-soft p-3 p-md-4" id="valueCalc" novalidate>
+          <div class="row g-3">
+            <div class="col-sm-6"><label class="form-label" for="vcEnq">Enquiries per month</label><input class="form-control" id="vcEnq" type="number" min="0" max="10000" step="1" value="20" inputmode="numeric"></div>
+            <div class="col-sm-6"><label class="form-label" for="vcConv">Current conversion %</label><input class="form-control" id="vcConv" type="number" min="0" max="100" step="0.5" value="10" inputmode="decimal"></div>
+            <div class="col-sm-6"><label class="form-label" for="vcValue">Average project value (₹)</label><input class="form-control" id="vcValue" type="number" min="0" step="10000" value="600000" inputmode="numeric"></div>
+            <div class="col-sm-6"><label class="form-label" for="vcHours">Admin hours per week</label><input class="form-control" id="vcHours" type="number" min="0" max="100" step="1" value="12" inputmode="numeric"></div>
+          </div>
+          <hr class="my-4">
+          <div class="small fw-semibold mb-2">Your assumptions for the example</div>
+          <div class="row g-3">
+            <div class="col-sm-6"><label class="form-label" for="vcExtra">Extra projects won per month</label><input class="form-control" id="vcExtra" type="number" min="0" max="50" step="0.5" value="1" inputmode="decimal"><div class="form-text">e.g. from faster replies and follow-ups</div></div>
+            <div class="col-sm-6"><label class="form-label" for="vcSave">Admin time saved %</label><input class="form-control" id="vcSave" type="number" min="0" max="100" step="5" value="25" inputmode="numeric"><div class="form-text">quotes, reminders, updates</div></div>
+          </div>
+        </form>
+      </div>
+      <div class="col-lg-6">
+        <div class="calc-out" aria-live="polite">
+          <span class="pill pill-grey mb-3 d-inline-block">Example only · based on your inputs</span>
+          <div class="calc-grid">
+            <div><span>Projects won today</span><b id="vcNow">–</b><small>per month</small></div>
+            <div><span>With your assumption</span><b id="vcNew">–</b><small>per month</small></div>
+            <div class="wide"><span>Extra project value in a year</span><b id="vcYear">–</b><small id="vcYearNote">extra projects × average value × 12</small></div>
+            <div class="wide"><span>Admin time freed</span><b id="vcTime">–</b><small id="vcTimeNote">hours per month</small></div>
+          </div>
+          <p class="small text-white-50 mt-3 mb-0">Real results depend on your market, pricing and follow-up. Change any number to see how it affects the example.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container text-center">
+    <h2 class="mb-3">Want this for your studio?</h2>
+    <p class="lead-text mx-auto mb-4" style="max-width:36rem">We set it up with your name, logo, colours, projects and team — and train you to use it.</p>
+    {% if DEVNIX_WHATSAPP %}<a class="btn btn-wa btn-lg" target="_blank" rel="noopener" href="{% wa_link DEVNIX_WHATSAPP 'Hi '|add:DEVNIX_NAME|add:', I saw the interior studio demo and want this for my studio.' %}"><i class="bi bi-whatsapp me-2"></i>Talk to {{ DEVNIX_NAME }}</a>{% endif %}
+  </div>
+</section>
+
+{{ offer|json_script:"offerData" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // ---------- offer builder ----------
+  var data = JSON.parse(document.getElementById("offerData").textContent);
+  var byKey = {}; data.forEach(function (o) { byKey[o.key] = o; });
+  var picks = document.getElementById("offerPicks"), list = document.getElementById("offerList"),
+      title = document.getElementById("offerTitle"), wa = document.getElementById("offerWa");
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function render() {
+    var boxes = picks.querySelectorAll("input"), chosen = [];
+    boxes.forEach(function (b) { if (b.checked) chosen.push(byKey[b.value]); });
+    var bundle = chosen.filter(function (o) { return o.bundle; })[0];
+    boxes.forEach(function (b) { if (!b.hasAttribute("data-bundle")) { b.disabled = !!bundle; b.closest(".offer-pick").classList.toggle("muted", !!bundle); } });
+    if (bundle) chosen = [bundle].concat(data.filter(function (o) { return !o.bundle; }));
+    list.innerHTML = "";
+    if (!chosen.length) {
+      title.textContent = "Choose at least one module";
+      list.appendChild(el("p", "text-muted small mb-0", "Your selection will appear here."));
+      if (wa) { wa.classList.add("disabled"); wa.setAttribute("aria-disabled", "true"); wa.removeAttribute("href"); }
+      return;
+    }
+    title.textContent = bundle ? bundle.name : chosen.map(function (o) { return o.name; }).join(" + ");
+    chosen.forEach(function (o) {
+      if (bundle && o === bundle) return;
+      var box = el("div", "offer-item");
+      var head = el("div", "d-flex justify-content-between gap-2");
+      head.appendChild(el("span", "fw-semibold", o.name));
+      head.appendChild(el("span", "small " + (o.price ? "fw-semibold" : "text-muted"), o.price || "Talk to us"));
+      box.appendChild(head);
+      var ul = el("ul", "small text-muted mb-0 ps-3");
+      o.includes.forEach(function (i) { ul.appendChild(el("li", null, i)); });
+      box.appendChild(ul);
+      list.appendChild(box);
+    });
+    if (bundle) {
+      var extra = el("div", "offer-item"); extra.appendChild(el("div", "fw-semibold", "Also included"));
+      var ul2 = el("ul", "small text-muted mb-0 ps-3"); bundle.includes.forEach(function (i) { ul2.appendChild(el("li", null, i)); });
+      extra.appendChild(ul2); list.appendChild(extra);
+    }
+    if (wa) {
+      var text = "Hi " + wa.dataset.name + ", I saw the interior studio demo. I'm interested in: " +
+        (bundle ? bundle.name : chosen.map(function (o) { return o.name; }).join(", ")) + ".";
+      wa.href = "https://wa.me/" + wa.dataset.number + "?text=" + encodeURIComponent(text);
+      wa.classList.remove("disabled"); wa.removeAttribute("aria-disabled");
+    }
+  }
+  picks.addEventListener("change", render);
+  render();
+
+  // ---------- value calculator (illustrative only) ----------
+  var $ = function (id) { return document.getElementById(id); };
+  function n(id, max) { var v = parseFloat($(id).value); if (!isFinite(v) || v < 0) v = 0; return max != null ? Math.min(v, max) : v; }
+  function inr(x) {
+    x = Math.round(x);
+    if (x >= 1e7) return "₹" + (x / 1e7).toFixed(x >= 1e8 ? 0 : 2).replace(/\.?0+$/, "") + " crore";
+    if (x >= 1e5) return "₹" + (x / 1e5).toFixed(x >= 1e6 ? 1 : 2).replace(/\.?0+$/, "") + " lakh";
+    return "₹" + x.toLocaleString("en-IN");
+  }
+  function fmt(x) { return (Math.round(x * 10) / 10).toLocaleString("en-IN"); }
+  function calc() {
+    var enq = n("vcEnq", 10000), conv = n("vcConv", 100), val = n("vcValue"), hrs = n("vcHours", 100),
+        extra = n("vcExtra", 50), save = n("vcSave", 100);
+    var now = enq * conv / 100;
+    $("vcNow").textContent = fmt(now);
+    $("vcNew").textContent = fmt(now + extra);
+    $("vcYear").textContent = inr(extra * val * 12);
+    $("vcYearNote").textContent = fmt(extra) + " × " + inr(val) + " × 12 months";
+    var freed = hrs * save / 100 * 52 / 12;
+    $("vcTime").textContent = fmt(freed) + " hrs";
+    $("vcTimeNote").textContent = "per month (" + fmt(hrs) + " hrs/week × " + fmt(save) + "%)";
+  }
+  document.getElementById("valueCalc").addEventListener("input", calc);
+  calc();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Your style: {{ style_label }} — {{ studio.name }}{% endblock %}
+{% block content %}
+<section class="section pb-4">
+  <div class="container">
+    <div class="row g-4 g-lg-5 align-items-center">
+      <div class="col-lg-6">
+        <span class="eyebrow">Your style</span>
+        <h1 class="mb-3">{{ style_label }}</h1>
+        <p class="lead-text">{{ description }}</p>
+        <p class="small text-muted">You picked {{ style_label|lower }} in {{ share }} of 5 questions.</p>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <a class="btn btn-accent btn-lg" href="{% url 'bookings:book' %}?style={{ style }}">Book a consultation for this style</a>
+          <a class="btn btn-outline-ink btn-lg" href="{% url 'website:quiz' %}">Retake quiz</a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card-soft p-4">
+          <div class="fact-label mb-2">Your palette</div>
+          <div class="palette-strip rounded-3 overflow-hidden mb-4" style="height:84px">{% for c in palette %}<span style="background:{{ c }}"></span>{% endfor %}</div>
+          <div class="fact-label mb-2">Materials you’ll love</div>
+          <div class="d-flex flex-column gap-3">
+            {% for name, hex in materials %}
+            <div class="swatch"><span class="swatch-chip material" style="background-color:{{ hex }}"></span><span class="swatch-name">{{ name }}</span></div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-sm pb-5">
+  <div class="container">
+    <h2 class="h3 mb-4">Projects in your style</h2>
+    <div class="row g-4">
+      {% for p in projects %}
+      <div class="col-md-4">{% include "partials/project_card.html" with p=p %}</div>
+      {% empty %}
+      <div class="col-12"><div class="empty-state"><i class="bi bi-images"></i>
+        <p class="mb-3">We don’t have a {{ style_label|lower }} project online yet — but we design in every style.</p>
+        <a class="btn btn-outline-ink" href="{% url 'website:portfolio' %}">See all projects</a></div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

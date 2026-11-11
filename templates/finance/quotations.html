@@ -1,0 +1,38 @@
+{% extends "studio/base.html" %}
+{% block page_title %}Quotations{% endblock %}
+{% block heading %}Quotations{% endblock %}
+{% block actions %}<a class="btn btn-accent btn-sm" href="{% url 'finance:quotation_new' %}"><i class="bi bi-plus-lg"></i><span class="d-none d-sm-inline ms-1">New quotation</span></a>{% endblock %}
+
+{% block erp_content %}
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-send"></i> Awaiting client</div><div class="kpi-value">{{ pipeline|inr_short }}</div><div class="kpi-sub">quotations sent</div></div></div>
+  <div class="col-6 col-lg-3"><div class="kpi"><div class="kpi-label"><i class="bi bi-hand-thumbs-up"></i> Accepted</div><div class="kpi-value">{{ won|inr_short }}</div><div class="kpi-sub">order value</div></div></div>
+</div>
+<nav class="erp-tabs" aria-label="Filter quotations">
+  <a class="{% if not status %}active{% endif %}" href="?">All</a>
+  {% for v, l, n in statuses %}<a class="{% if status == v %}active{% endif %}" href="?status={{ v }}">{{ l }}{% if n %} <span class="pill pill-grey ms-1">{{ n }}</span>{% endif %}</a>{% endfor %}
+</nav>
+<div class="panel">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="small text-muted"><tr><th>Number</th><th>Client</th><th>Title</th><th>Date</th><th>Status</th><th class="text-end">Total (incl. GST)</th><th></th></tr></thead>
+      <tbody>
+        {% for q in quotations %}
+        <tr>
+          <td><a class="fw-semibold" href="{{ q.get_absolute_url }}">{{ q.display_number }}</a></td>
+          <td class="small">{{ q.client_name }}<div class="text-muted">{% if q.project %}{{ q.project.code }}{% else %}Lead{% endif %}</div></td>
+          <td class="small">{{ q.title }}</td>
+          <td class="small">{{ q.date|date:"d-m-Y" }}</td>
+          <td><span class="pill {% if q.status == 'accepted' %}pill-green{% elif q.status == 'sent' %}pill-blue{% elif q.status == 'rejected' %}pill-red{% else %}pill-grey{% endif %}">{{ q.get_status_display }}</span></td>
+          <td class="text-end fw-semibold">{{ q.grand_total|inr }}</td>
+          <td class="text-end"><a class="btn btn-light btn-sm" href="{% url 'finance:quotation_pdf' q.pk %}" target="_blank" rel="noopener" aria-label="PDF"><i class="bi bi-filetype-pdf"></i></a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-mini py-4"><i class="bi bi-receipt"></i>No quotations{% if status %} with this status{% endif %} yet.
+          <div class="mt-2"><a class="btn btn-accent btn-sm" href="{% url 'finance:quotation_new' %}">Create the first one</a></div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

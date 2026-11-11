@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Mood board: {{ project.title }} — {{ studio.name }}{% endblock %}
+{% block content %}
+<header class="page-hero pb-4">
+  <div class="container">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb mb-3">
+      <li class="breadcrumb-item"><a href="{% url 'website:portfolio' %}">Portfolio</a></li>
+      <li class="breadcrumb-item"><a href="{{ project.get_absolute_url }}">{{ project.title }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Mood board</li>
+    </ol></nav>
+    <span class="eyebrow">Mood board</span>
+    <h1 class="mb-2">{{ project.title }}</h1>
+    <p class="lead-text mb-0">The board we shared with the client before a single panel was cut: images, colours and the materials they could touch.</p>
+  </div>
+</header>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="moodboard">
+      <a class="mb-tile mb-hero" href="{{ project.cover.url }}" data-lightbox="mood" data-caption="{{ project.title }}">
+        <img src="{{ project.cover.url }}" alt="{{ project.title }}" width="1400" height="933" decoding="async">
+      </a>
+      {% for img in images %}
+      <a class="mb-tile" href="{{ img.image.url }}" data-lightbox="mood" data-caption="{{ img.caption }}">
+        <img src="{{ img.image.url }}" alt="{{ img.caption }}" loading="lazy" decoding="async" width="900" height="600">
+      </a>
+      {% endfor %}
+      {% for s in project.colours %}
+      <div class="mb-tile mb-colour" style="background:{{ s.hex }}"><span>{{ s.name }}<br><small>{{ s.hex|upper }}</small></span></div>
+      {% endfor %}
+      {% for s in project.materials %}
+      <div class="mb-tile mb-material" style="background-color:{{ s.hex }}"><span>{{ s.name }}<br><small>{{ s.note }}</small></span></div>
+      {% endfor %}
+      <div class="mb-tile mb-note">
+        <span class="eyebrow mb-1">Designer’s note</span>
+        <p class="mb-0">{{ project.summary }}</p>
+      </div>
+      <button type="button" class="mb-tile mb-locked" data-locked="walkthrough_3d">
+        <img src="{{ project.cover.url }}" alt="" loading="lazy" width="900" height="600">
+        <span class="mb-locked-inner"><i class="bi bi-badge-3d fs-2"></i><span class="fw-semibold">3D / 360° walkthrough</span><span class="badge-locked"><i class="bi bi-lock-fill me-1"></i>Full version</span></span>
+      </button>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mt-4">
+      <a class="btn btn-accent" href="{% url 'bookings:book' %}?style={{ project.style }}&project={{ project.title|urlencode }}">I want a board like this</a>
+      <a class="btn btn-outline-ink" href="{{ project.get_absolute_url }}">See the finished project</a>
+    </div>
+
+    {% if others %}
+    <h2 class="h4 mt-5 mb-3" style="font-family:var(--font-sans)">More mood boards</h2>
+    <div class="filter-group">
+      {% for p in others %}<a class="chip" href="{% url 'website:moodboard' p.slug %}">{{ p.title }}</a>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% include "partials/lightbox.html" %}
+{% endblock %}

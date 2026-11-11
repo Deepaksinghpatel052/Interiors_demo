@@ -1,0 +1,28 @@
+{% extends "studio/base.html" %}
+{% block page_title %}Chat{% endblock %}
+{% block heading %}<a href="{% url 'assistant:chats' %}" class="text-muted text-decoration-none"><i class="bi bi-arrow-left"></i></a> {{ session.get_channel_display }}{% endblock %}
+{% block erp_content %}
+<div class="row g-3">
+  <div class="col-xl-8">
+    <div class="panel studio-chat"><div class="chat-log" style="max-height:none">
+      {% for m in chat %}
+      <div class="chat-msg {{ m.role }}">
+        <div class="chat-bubble-body">{{ m.text|linebreaksbr }}</div>
+        <div class="small text-muted mt-1 {% if m.role == 'user' %}text-end{% endif %}">{{ m.created_at|date:"h:i A" }}{% if m.mode %} · {{ m.mode }}{% endif %}
+          {% for s in m.sources %} · [{{ s.n }}] {{ s.title }}{% endfor %}</div>
+      </div>
+      {% endfor %}
+    </div></div>
+  </div>
+  <div class="col-xl-4">
+    <div class="panel"><div class="panel-body small">
+      <dl class="detail-grid mb-0">
+        <dt>Started</dt><dd>{{ session.created_at|date:"d M Y, h:i A" }}</dd>
+        <dt>Messages</dt><dd>{{ chat|length }}</dd>
+        {% if session.user %}<dt>Team member</dt><dd>{{ session.user.get_full_name|default:session.user.username }}</dd>{% endif %}
+        <dt>Lead</dt><dd>{% if session.lead %}<a href="{% url 'studio:lead_detail' session.lead_id %}">{{ session.lead.name }} · {{ session.lead.mobile }}</a>{% else %}—{% endif %}</dd>
+      </dl>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

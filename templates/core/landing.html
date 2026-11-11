@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Studio OS by {{ DEVNIX_NAME }} — website, ERP, client portal &amp; AI for interior designers{% endblock %}
+{% block meta_description %}One connected system for Indian interior design studios: a premium website, leads and projects, GST quotations, client approvals, WhatsApp automations and an AI assistant.{% endblock %}
+{% block extra_head %}<link href="{% static 'css/landing.css' %}" rel="stylesheet">
+<link rel="preload" as="image" href="{% static 'img/landing/dashboard.jpg' %}">{% endblock %}
+{% block body_class %}landing{% endblock %}
+{% block ribbon %}{% endblock %}
+{% block chat_widget %}{% endblock %}
+
+{% block nav %}
+<header class="lp-nav" id="top">
+  <nav class="container d-flex align-items-center gap-3" aria-label="Main">
+    <a href="#top" class="lp-brand"><span class="lp-logo">D+</span><span><b>{{ DEVNIX_NAME }}</b><small>Studio OS</small></span></a>
+    <div class="lp-links d-none d-lg-flex">
+      <a href="#features">Features</a><a href="#how">How it works</a><a href="#packages">Packages</a><a href="#demo">Live demo</a><a href="#faq">FAQ</a>
+    </div>
+    <div class="ms-auto d-flex gap-2">
+      <a class="btn btn-outline-light btn-sm d-none d-sm-inline-flex" href="#demo"><i class="bi bi-play-circle me-1"></i>Try the demo</a>
+      <a class="btn btn-accent btn-sm" href="#enquire">Get a free demo</a>
+    </div>
+  </nav>
+</header>
+{% endblock %}
+
+{% block content %}
+<!-- ============================== HERO -->
+<section class="lp-hero">
+  <div class="container">
+    <div class="row g-5 align-items-center">
+      <div class="col-lg-6">
+        <span class="lp-kicker"><i class="bi bi-stars"></i> Made for Indian interior designers</span>
+        <h1>Run your interior studio like a <span class="lp-grad">premium brand</span></h1>
+        <p class="lp-lead">Website, leads, GST quotations, client approvals, WhatsApp follow-ups and an AI assistant — in <b>one connected system</b> with your name, logo and colours.</p>
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <a class="btn btn-accent btn-lg" href="#enquire"><i class="bi bi-calendar2-check me-2"></i>Book a free personalised demo</a>
+          <a class="btn btn-outline-light btn-lg" href="#demo"><i class="bi bi-cursor me-2"></i>Explore the live demo</a>
+        </div>
+        <ul class="lp-hero-points">
+          <li><i class="bi bi-currency-rupee"></i>GST-ready quotes</li>
+          <li><i class="bi bi-whatsapp"></i>WhatsApp-first</li>
+          <li><i class="bi bi-phone"></i>Works on your phone</li>
+          <li><i class="bi bi-palette"></i>Your brand</li>
+        </ul>
+      </div>
+      <div class="col-lg-6">
+        <div class="lp-hero-visual">
+          <figure class="lp-browser lp-browser-dark">
+            <div class="lp-browser-bar"><span></span><span></span><span></span><em>studio dashboard</em></div>
+            <img src="{% static 'img/landing/dashboard.jpg' %}" alt="Studio dashboard with leads, bookings, projects and payments" width="1364" height="637" fetchpriority="high">
+          </figure>
+          <figure class="lp-phone"><img src="{% static 'img/landing/phone.jpg' %}" alt="Client portal on a phone" width="500" height="637" loading="lazy"></figure>
+          <div class="lp-chip lp-chip-1"><i class="bi bi-instagram"></i><span><b>New lead</b><small>3 BHK · from Instagram</small></span></div>
+          <div class="lp-chip lp-chip-2"><i class="bi bi-patch-check-fill"></i><span><b>Design approved</b><small>by the client, in the portal</small></span></div>
+          <div class="lp-chip lp-chip-3"><i class="bi bi-currency-rupee"></i><span><b>Payment recorded</b><small>UPI · milestone 2</small></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== QUICK FACTS -->
+<section class="lp-facts">
+  <div class="container">
+    <div class="row g-3 text-center">
+      <div class="col-6 col-md-3"><div class="lp-fact"><b>6</b><span>modules that work together</span></div></div>
+      <div class="col-6 col-md-3"><div class="lp-fact"><b>40+</b><span>features working today</span></div></div>
+      <div class="col-6 col-md-3"><div class="lp-fact"><b>3</b><span>logins: you, your team, your clients</span></div></div>
+      <div class="col-6 col-md-3"><div class="lp-fact"><b>1–2 days</b><span>our target to set you up</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== PROBLEMS -> SOLUTIONS -->
+<section class="lp-section" id="problems">
+  <div class="container">
+    <div class="lp-head text-center"><span class="lp-eyebrow">Sound familiar?</span><h2>From daily chaos to a calm, organised studio</h2></div>
+    <div class="row g-3 g-lg-4">
+      <div class="col-md-6 col-xl-4">
+        <div class="lp-swap"><div class="lp-swap-before"><i class="bi bi-chat-dots"></i><div><small>Today</small>Enquiries lost between WhatsApp, Instagram and calls</div></div>
+          <div class="lp-swap-after"><i class="bi bi-kanban"></i><div><small>With Studio OS</small>Every lead on one board with source and follow-up date</div></div></div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="lp-swap"><div class="lp-swap-before"><i class="bi bi-images"></i><div><small>Today</small>Designs sent as scattered images; “seen” ticks as approval</div></div>
+          <div class="lp-swap-after"><i class="bi bi-patch-check"></i><div><small>With Studio OS</small>Design versions with one-click approval and comments</div></div></div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="lp-swap"><div class="lp-swap-before"><i class="bi bi-file-earmark-spreadsheet"></i><div><small>Today</small>Hours in Excel for each quotation, GST mistakes</div></div>
+          <div class="lp-swap-after"><i class="bi bi-receipt"></i><div><small>With Studio OS</small>Room-wise GST quotation and branded PDF in minutes</div></div></div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="lp-swap"><div class="lp-swap-before"><i class="bi bi-hourglass-split"></i><div><small>Today</small>Awkward payment follow-ups, nobody knows what is due</div></div>
+          <div class="lp-swap-after"><i class="bi bi-wallet2"></i><div><small>With Studio OS</small>Milestone invoices, balances and ready-to-send reminders</div></div></div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="lp-swap"><div class="lp-swap-before"><i class="bi bi-question-circle"></i><div><small>Today</small>Same questions answered again and again, even at night</div></div>
+          <div class="lp-swap-after"><i class="bi bi-stars"></i><div><small>With Studio OS</small>An AI assistant that answers from your own information</div></div></div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="lp-swap"><div class="lp-swap-before"><i class="bi bi-eye-slash"></i><div><small>Today</small>No clear view of leads, projects or money</div></div>
+          <div class="lp-swap-after"><i class="bi bi-graph-up-arrow"></i><div><small>With Studio OS</small>A live dashboard and reports — on your phone</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== MODULES (interactive tabs) -->
+<section class="lp-section lp-soft" id="features">
+  <div class="container">
+    <div class="lp-head text-center"><span class="lp-eyebrow">What you get</span><h2>Six modules. One system. Your brand.</h2>
+      <p>Tap a module to see it. Start with one and add the others whenever you are ready.</p></div>
+    <ul class="nav lp-tabs" role="tablist">
+      <li role="presentation"><button class="active" data-bs-toggle="pill" data-bs-target="#m-website" type="button" role="tab" aria-controls="m-website" aria-selected="true"><i class="bi bi-globe2"></i>Website</button></li>
+      <li role="presentation"><button data-bs-toggle="pill" data-bs-target="#m-erp" type="button" role="tab" aria-controls="m-erp" aria-selected="false"><i class="bi bi-kanban"></i>Studio ERP</button></li>
+      <li role="presentation"><button data-bs-toggle="pill" data-bs-target="#m-money" type="button" role="tab" aria-controls="m-money" aria-selected="false"><i class="bi bi-receipt"></i>Quotes &amp; money</button></li>
+      <li role="presentation"><button data-bs-toggle="pill" data-bs-target="#m-portal" type="button" role="tab" aria-controls="m-portal" aria-selected="false"><i class="bi bi-person-heart"></i>Client portal</button></li>
+      <li role="presentation"><button data-bs-toggle="pill" data-bs-target="#m-auto" type="button" role="tab" aria-controls="m-auto" aria-selected="false"><i class="bi bi-lightning-charge"></i>Automation</button></li>
+      <li role="presentation"><button data-bs-toggle="pill" data-bs-target="#m-ai" type="button" role="tab" aria-controls="m-ai" aria-selected="false"><i class="bi bi-stars"></i>AI assistant</button></li>
+      <li role="presentation"><button data-bs-toggle="pill" data-bs-target="#m-cms" type="button" role="tab" aria-controls="m-cms" aria-selected="false"><i class="bi bi-pencil-square"></i>CMS &amp; reports</button></li>
+    </ul>
+    <div class="tab-content">
+      {% include "core/_landing_module.html" with id="m-website" active=True title="A premium website that brings enquiries" text="Your projects, services and story — fast on any phone, with WhatsApp one tap away." img="website" alt="Studio website home page" items="Portfolio filtered by room, style and budget|Case studies with before/after slider and mood boards|Style quiz and ₹ cost estimator that capture leads|Online consultation booking with live slots|SEO basics and social sharing previews" %}
+      {% include "core/_landing_module.html" with id="m-erp" title="Every lead and project on one screen" text="Leads board, bookings calendar, projects, tasks and a live owner dashboard." img="leads" alt="Leads board" items="Drag leads across stages — source, budget, follow-up date|Bookings calendar: studio, online or site visit|Projects with milestones, tasks, design versions, site updates|Lead to project in one click, with client login|Owner and team member logins" %}
+      {% include "core/_landing_module.html" with id="m-money" title="GST quotations in minutes, payments under control" text="Room-wise quotations from your catalogue, a branded PDF, and invoices that follow your payment schedule." img="quotation" alt="Quotation with GST totals" items="CGST + SGST or IGST, HSN/SAC, amount in words|Versions, WhatsApp share, client acceptance|Payment schedule e.g. 10 / 40 / 40 / 10|Invoices with Indian financial-year numbering|UPI, bank transfer, cash and cheque payments" %}
+      {% include "core/_landing_module.html" with id="m-portal" title="Clients approve designs online — with a record" text="A private, branded login for every client. Fewer calls asking “what is the status?”." img="portal" alt="Client portal design approval" items="Approve or request changes, with comments|Progress, milestones and handover date|Site update photos as work happens|Quotation and invoice PDFs, payments due|Requests and snags become tasks for your team" %}
+      {% include "core/_landing_module.html" with id="m-auto" title="Every client message, written for you" text="Bookings, quotations, payments and leads trigger ready-to-send WhatsApp messages from your own templates." img="automations" alt="Automation message previews" items="Booking confirmation and reminder 1 day before|“Quotation sent” and payment due reminders|New-lead alert to you, follow-up after 3 quiet days|Edit the wording, switch any message on or off|One tap to send from your own WhatsApp" %}
+      {% include "core/_landing_module.html" with id="m-ai" title="An assistant that knows your studio" text="It answers visitors 24×7 using only your own FAQs, services and policies — and shows its sources." img="ai" alt="AI assistant answering with sources" tall=True items="Finds the answer in your documents, then writes it simply|Every answer shows sources — no made-up promises|Captures the visitor’s number when they are interested|Studio assistant for your team’s internal questions|You add or edit knowledge any time (text or PDF)" %}
+      {% include "core/_landing_module.html" with id="m-cms" title="You stay in control — no developer needed" text="Update your website yourself and see your business in clear reports." img="reports" alt="Reports with revenue and leads by source" items="Add projects and photos (resized automatically)|Before/after pairs, mood boards, services, FAQs|Leads by source and conversion rate|Revenue by month and outstanding payments|Export to Excel / CSV in one click" %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================== JOURNEY -->
+<section class="lp-section" id="how">
+  <div class="container">
+    <div class="lp-head text-center"><span class="lp-eyebrow">How it works</span><h2>One client, from first click to final payment</h2>
+      <p>Everything is connected, so nothing is typed twice and nothing is forgotten.</p></div>
+    <ol class="lp-journey">
+      <li><span class="lp-j-icon"><i class="bi bi-search-heart"></i></span><b>Finds you</b><small>Instagram or Google brings a visitor to your website</small></li>
+      <li><span class="lp-j-icon"><i class="bi bi-calendar2-check"></i></span><b>Books</b><small>Picks a free slot; you get the lead instantly</small></li>
+      <li><span class="lp-j-icon"><i class="bi bi-whatsapp"></i></span><b>Confirmed</b><small>WhatsApp confirmation and reminder ready to send</small></li>
+      <li><span class="lp-j-icon"><i class="bi bi-receipt"></i></span><b>Quoted</b><small>GST quotation and branded PDF in minutes</small></li>
+      <li><span class="lp-j-icon"><i class="bi bi-patch-check"></i></span><b>Approved</b><small>Client approves the design in their portal</small></li>
+      <li><span class="lp-j-icon"><i class="bi bi-wallet2"></i></span><b>Paid</b><small>Milestone invoice, payment recorded</small></li>
+      <li><span class="lp-j-icon"><i class="bi bi-graph-up-arrow"></i></span><b>Visible</b><small>Your dashboard updates — on your phone</small></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================== SHOWCASE STRIP -->
+<section class="lp-section lp-dark" id="showcase">
+  <div class="container">
+    <div class="row g-5 align-items-center">
+      <div class="col-lg-5">
+        <span class="lp-eyebrow">Look as premium as your work</span>
+        <h2>Your best projects, presented beautifully</h2>
+        <p class="lp-muted">Clients judge your design sense by your website. Show transformations they can drag, mood boards they can feel, and a style quiz that turns curiosity into an enquiry.</p>
+        <ul class="lp-icon-list">
+          <li><i class="bi bi-layout-split"></i>Before / after slider</li>
+          <li><i class="bi bi-palette2"></i>Mood boards with colours &amp; materials</li>
+          <li><i class="bi bi-ui-checks-grid"></i>Style quiz with matching projects</li>
+          <li><i class="bi bi-calculator"></i>₹ cost estimator for every BHK</li>
+        </ul>
+      </div>
+      <div class="col-lg-7">
+        <div class="lp-mosaic">
+          <img src="{% static 'img/landing/photo1.jpg' %}" alt="Living room interior" loading="lazy" width="960" height="640">
+          <img src="{% static 'img/landing/photo3.jpg' %}" alt="Modular kitchen interior" loading="lazy" width="1000" height="667">
+          <img src="{% static 'img/landing/photo2.jpg' %}" alt="Teal and teak 2 BHK interior" loading="lazy" width="960" height="641">
+          <img src="{% static 'img/landing/photo4.jpg' %}" alt="Office interior" loading="lazy" width="1000" height="667">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== INDIA / WHITE-LABEL -->
+<section class="lp-section">
+  <div class="container">
+    <div class="lp-head text-center"><span class="lp-eyebrow">Why studios choose it</span><h2>Built for how Indian studios actually work</h2></div>
+    <div class="row g-3 g-lg-4">
+      <div class="col-6 col-lg-3"><div class="lp-feature"><i class="bi bi-currency-rupee"></i><b>₹ &amp; GST everywhere</b><span>Lakh/crore formats, CGST/SGST/IGST, GSTIN, HSN/SAC</span></div></div>
+      <div class="col-6 col-lg-3"><div class="lp-feature"><i class="bi bi-whatsapp"></i><b>WhatsApp-first</b><span>On the website, in the ERP, in the portal and messages</span></div></div>
+      <div class="col-6 col-lg-3"><div class="lp-feature"><i class="bi bi-phone"></i><b>Mobile-first</b><span>You and your clients use it comfortably on a phone</span></div></div>
+      <div class="col-6 col-lg-3"><div class="lp-feature"><i class="bi bi-house-door"></i><b>Indian homes</b><span>1–4 BHK, villas, offices, retail; Indian budgets</span></div></div>
+      <div class="col-6 col-lg-3"><div class="lp-feature"><i class="bi bi-palette"></i><b>Your brand</b><span>Your name, logo and colours on every page and PDF</span></div></div>
+      <div class="col-6 col-lg-3"><div class="lp-feature"><i class="bi bi-toggles"></i><b>Pay for what you use</b><span>Switch modules on as you grow — same system</span></div></div>
+      <div class="col-6 col-lg-3"><div class="lp-feature"><i class="bi bi-shield-lock"></i><b>Private &amp; secure</b><span>Separate logins; clients see only their own project</span></div></div>
+      <div class="col-6 col-lg-3"><div class="lp-feature"><i class="bi bi-lightning"></i><b>Fast</b><span>Light pages and compressed photos for 4G</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== PACKAGES -->
+<section class="lp-section lp-soft" id="packages">
+  <div class="container">
+    <div class="lp-head text-center"><span class="lp-eyebrow">Packages</span><h2>Start with what hurts most today</h2>
+      <p>Every package can grow into the complete system later — nothing to rebuild.</p></div>
+    <div class="row g-3 g-lg-4">
+      {% for pk in packages %}
+      <div class="col-md-6 col-xl-4">
+        <article class="lp-package {% if pk.is_bundle %}is-bundle{% endif %}">
+          {% if pk.is_bundle %}<span class="lp-flag">Most complete</span>{% endif %}
+          <span class="lp-pk-icon"><i class="bi bi-{{ pk.icon }}"></i></span>
+          <h3>{{ pk.name }}</h3>
+          <p>{{ pk.tagline }}</p>
+          <ul>{% for item in pk.include_list|slice:":5" %}<li><i class="bi bi-check2"></i>{{ item }}</li>{% endfor %}</ul>
+          <div class="lp-pk-foot">
+            {% if pk.price_text %}<span class="lp-price">{{ pk.price_text }}</span>{% endif %}
+            <a class="btn {% if pk.is_bundle %}btn-accent{% else %}btn-outline-ink{% endif %} btn-sm ms-auto" href="?module={% if pk.key == 'website-cms' %}cms{% else %}{{ pk.key }}{% endif %}#enquire" data-pick="{% if pk.key == 'website-cms' %}cms{% else %}{{ pk.key }}{% endif %}">Enquire</a>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="text-center small text-muted mt-4 mb-0"><i class="bi bi-calendar2-check me-1"></i>Easy payment options: pay in parts (booking, design approval, go-live) or a one-time setup with a small monthly plan.</p>
+  </div>
+</section>
+
+<!-- ============================== LIVE DEMO -->
+<section class="lp-section" id="demo">
+  <div class="container">
+    <div class="lp-head text-center"><span class="lp-eyebrow">Try it yourself</span><h2>Explore the live demo — no sign-up</h2>
+      <p>A sample studio, “{{ studio.name }}”, with real screens and sample data. Pick who you want to be.</p></div>
+    <div class="row g-3 g-lg-4">
+      <div class="col-md-4">
+        <form method="post" action="{% url 'core:switch_role' 'visitor' %}" class="lp-role">{% csrf_token %}<input type="hidden" name="next" value="{% url 'website:home' %}"><input type="hidden" name="quiet" value="1">
+          <img src="{% static 'img/landing/portfolio.jpg' %}" alt="" loading="lazy" width="1364" height="637">
+          <div class="p-4"><span class="lp-role-icon"><i class="bi bi-globe2"></i></span><h3>As a home owner</h3><p>Browse projects, take the style quiz, ask the AI assistant and book a consultation.</p>
+          <button class="btn btn-ink w-100">Open the studio website <i class="bi bi-arrow-right ms-1"></i></button></div>
+        </form>
+      </div>
+      <div class="col-md-4">
+        <form method="post" action="{% url 'core:switch_role' 'owner' %}" class="lp-role is-main">{% csrf_token %}<input type="hidden" name="next" value="{% url 'studio:dashboard' %}"><input type="hidden" name="quiet" value="1">
+          <img src="{% static 'img/landing/dashboard.jpg' %}" alt="" loading="lazy" width="1364" height="637">
+          <div class="p-4"><span class="lp-role-icon"><i class="bi bi-briefcase"></i></span><h3>As the studio owner</h3><p>See leads, bookings, projects, quotations, invoices, automations and reports.</p>
+          <button class="btn btn-accent w-100">Open the studio dashboard <i class="bi bi-arrow-right ms-1"></i></button></div>
+        </form>
+      </div>
+      <div class="col-md-4">
+        <form method="post" action="{% url 'core:switch_role' 'client' %}" class="lp-role">{% csrf_token %}<input type="hidden" name="next" value="{% url 'portal:overview' %}"><input type="hidden" name="quiet" value="1">
+          <img src="{% static 'img/landing/portal.jpg' %}" alt="" loading="lazy" width="1364" height="637">
+          <div class="p-4"><span class="lp-role-icon"><i class="bi bi-person-heart"></i></span><h3>As a client</h3><p>Approve a design, follow progress, see site photos and download documents.</p>
+          <button class="btn btn-ink w-100">Open the client portal <i class="bi bi-arrow-right ms-1"></i></button></div>
+        </form>
+      </div>
+    </div>
+    <p class="text-center mt-4 mb-0"><button type="button" class="btn btn-link" data-tour-start><i class="bi bi-signpost-2 me-1"></i>Or take the 2-minute guided tour</button></p>
+  </div>
+</section>
+
+<!-- ============================== PROCESS -->
+<section class="lp-section lp-soft">
+  <div class="container">
+    <div class="lp-head text-center"><span class="lp-eyebrow">Getting started</span><h2>Live in days, not months</h2></div>
+    <div class="row g-3 lp-steps">
+      <div class="col-6 col-lg-2"><div class="lp-step"><span>1</span><i class="bi bi-person-video3"></i><b>Personalised demo</b><small>We load your name, logo and photos</small></div></div>
+      <div class="col-6 col-lg-2"><div class="lp-step"><span>2</span><i class="bi bi-ui-checks"></i><b>Choose modules</b><small>Only what you need today</small></div></div>
+      <div class="col-6 col-lg-2"><div class="lp-step"><span>3</span><i class="bi bi-folder2-open"></i><b>Share content</b><small>Photos, services, rates, GST details</small></div></div>
+      <div class="col-6 col-lg-2"><div class="lp-step"><span>4</span><i class="bi bi-gear"></i><b>We set it up</b><small>Branded and checked on phone &amp; laptop</small></div></div>
+      <div class="col-6 col-lg-2"><div class="lp-step"><span>5</span><i class="bi bi-mortarboard"></i><b>Training</b><small>A short session for you and your team</small></div></div>
+      <div class="col-6 col-lg-2"><div class="lp-step"><span>6</span><i class="bi bi-rocket-takeoff"></i><b>Go live &amp; grow</b><small>Add modules any time</small></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FAQ -->
+<section class="lp-section" id="faq">
+  <div class="container" style="max-width:860px">
+    <div class="lp-head text-center"><span class="lp-eyebrow">Questions</span><h2>Frequently asked</h2></div>
+    <div class="accordion lp-faq" id="lpFaq">
+      {% for q, a in faqs %}
+      <div class="accordion-item">
+        <h3 class="accordion-header"><button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="faq{{ forloop.counter }}">{{ q }}</button></h3>
+        <div id="faq{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#lpFaq"><div class="accordion-body">{{ a }}</div></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================== ENQUIRY -->
+<section class="lp-section lp-dark" id="enquire">
+  <div class="container">
+    <div class="row g-4 g-lg-5">
+      <div class="col-lg-5">
+        <span class="lp-eyebrow">Free personalised demo</span>
+        <h2>See your own studio inside the system</h2>
+        <p class="lp-muted">Tell us a little about your studio. We will show you the demo with <b>your name, logo and project photos</b> — and suggest the right package.</p>
+        <ol class="lp-next">
+          <li><i class="bi bi-send"></i><div><b>You send this form</b><span>Takes under a minute</span></div></li>
+          <li><i class="bi bi-whatsapp"></i><div><b>We reach out</b><span>On WhatsApp or a call, as you prefer</span></div></li>
+          <li><i class="bi bi-display"></i><div><b>15-minute demo</b><span>With your branding — no obligation</span></div></li>
+        </ol>
+        {% if DEVNIX_WHATSAPP %}<a class="btn btn-wa mt-2" target="_blank" rel="noopener" href="{% wa_link DEVNIX_WHATSAPP devnix_wa_text %}"><i class="bi bi-whatsapp me-2"></i>Prefer WhatsApp? Message us</a>{% endif %}
+      </div>
+      <div class="col-lg-7">
+        <div class="lp-form-card" id="enquire-form">
+          {% if sent %}
+          <div class="lp-sent text-center py-4">
+            <span class="lp-sent-icon"><i class="bi bi-check2"></i></span>
+            <h3>Thank you{% if first_name %}, {{ first_name }}{% endif %}!</h3>
+            <p class="text-muted">We have your enquiry and will contact you soon. Meanwhile, explore the live demo.</p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <a class="btn btn-accent" href="#demo">Explore the demo</a>
+              {% if DEVNIX_WHATSAPP %}<a class="btn btn-wa" target="_blank" rel="noopener" href="{% wa_link DEVNIX_WHATSAPP devnix_wa_text %}"><i class="bi bi-whatsapp me-1"></i>WhatsApp us</a>{% endif %}
+            </div>
+          </div>
+          {% else %}
+          <form method="post" action="{% url 'landing' %}#enquire-form" novalidate data-loading id="enquiryForm">
+            {% csrf_token %}
+            <div class="lp-hp" aria-hidden="true"><label for="{{ form.website.id_for_label }}">Leave this empty</label>{{ form.website }}</div>
+            <div class="row g-3">
+              {% include "partials/field.html" with field=form.name col="col-sm-6" %}
+              {% include "partials/field.html" with field=form.mobile col="col-sm-6" %}
+              {% include "partials/field.html" with field=form.studio_name col="col-sm-6" %}
+              {% include "partials/field.html" with field=form.city col="col-sm-6" %}
+              {% include "partials/field.html" with field=form.email col="col-sm-6" %}
+              {% include "partials/field.html" with field=form.team_size col="col-sm-6" %}
+              <div class="col-12">
+                <span class="form-label d-block">{{ form.modules.label }}</span>
+                <div class="lp-checks">
+                  {% for cb in form.modules %}<label class="lp-check">{{ cb.tag }}<span>{{ cb.choice_label }}</span></label>{% endfor %}
+                </div>
+              </div>
+              <div class="col-12">
+                <span class="form-label d-block">{{ form.contact_pref.label }}</span>
+                <div class="lp-checks">
+                  {% for rb in form.contact_pref %}<label class="lp-check">{{ rb.tag }}<span>{{ rb.choice_label }}</span></label>{% endfor %}
+                </div>
+              </div>
+              {% include "partials/field.html" with field=form.message col="col-12" %}
+              <div class="col-12 d-flex flex-wrap align-items-center gap-3">
+                <button class="btn btn-accent btn-lg px-4" data-loading-text="Sending…"><i class="bi bi-send me-2"></i>Request my free demo</button>
+                <small class="text-muted">We only use your details to contact you about this enquiry.</small>
+              </div>
+            </div>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+<footer class="lp-footer">
+  <div class="container d-flex flex-wrap gap-3 align-items-center justify-content-between">
+    <a href="#top" class="lp-brand"><span class="lp-logo">D+</span><span><b>{{ DEVNIX_NAME }}</b><small>Studio OS for interior designers</small></span></a>
+    <nav class="d-flex flex-wrap gap-3 small" aria-label="Footer">
+      <a href="#features">Features</a><a href="#packages">Packages</a><a href="#demo">Live demo</a><a href="{% url 'website:why' %}">Why this system</a><a href="#enquire">Contact</a>
+    </nav>
+    <small class="lp-muted">Screens show a sample studio with sample data. Photos: CC0 (see <a href="{% url 'website:credits' %}">credits</a>).</small>
+  </div>
+</footer>
+{% endblock %}
+
+{% block floating %}
+{% if DEVNIX_WHATSAPP %}<a class="wa-float" href="{% wa_link DEVNIX_WHATSAPP devnix_wa_text %}" target="_blank" rel="noopener" aria-label="WhatsApp {{ DEVNIX_NAME }}"><i class="bi bi-whatsapp"></i></a>{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // "Enquire" on a package ticks that module in the form (no page reload)
+  document.querySelectorAll("[data-pick]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      var box = document.querySelector('#enquiryForm input[name="modules"][value="' + a.getAttribute("data-pick") + '"]');
+      if (box) { box.checked = true; }
+    });
+  });
+  // sticky nav gets a solid background after scrolling
+  var nav = document.querySelector(".lp-nav");
+  var onScroll = function () { nav.classList.toggle("is-solid", window.scrollY > 40); };
+  window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
+});
+</script>
+{% endblock %}

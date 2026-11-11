@@ -1,0 +1,28 @@
+{% load static %}
+<button type="button" class="chat-launcher" data-open-chat aria-controls="chatPanel" aria-label="Ask our design assistant">
+  <i class="bi bi-stars"></i><span>Ask AI</span>
+</button>
+<section class="chat-panel" id="chatPanel" role="dialog" aria-modal="false" aria-labelledby="chatTitle"
+         data-chat data-channel="public" data-endpoint="{% url 'assistant:public_chat' %}" data-lead-endpoint="{% url 'assistant:public_lead' %}">
+  <header class="chat-head">
+    <span class="chat-avatar"><i class="bi bi-stars"></i></span>
+    <div class="flex-grow-1 lh-sm"><div class="fw-semibold" id="chatTitle">Design Assistant</div>
+      <small>Answers from {{ studio.name }}’s own guides · <span data-mode>{% if AI_MOCK %}Offline demo answers{% else %}Powered by Claude{% endif %}</span></small></div>
+    <button type="button" class="btn-close btn-close-white" data-close-chat aria-label="Close assistant"></button>
+  </header>
+  <div class="chat-log" aria-live="polite">
+    <div class="chat-msg assistant"><div class="chat-bubble-body"><p>Hi! I’m the {{ studio.name }} design assistant. Ask me about our services, process, timelines, materials, warranty or payment terms — or ask for design ideas.</p></div></div>
+    <div class="chat-suggestions">
+      <button type="button" data-ask="How long does a 2BHK interior take?">How long does a 2BHK take?</button>
+      <button type="button" data-ask="What warranty do you give?">What warranty do you give?</button>
+      <button type="button" data-ask="I want a warm modern living room for a 2BHK. Any ideas?">Ideas for a warm modern living room</button>
+      <button type="button" data-ask="How do payments work?">How do payments work?</button>
+    </div>
+  </div>
+  <form class="chat-form" autocomplete="off">
+    <textarea rows="1" maxlength="500" placeholder="Ask about services, timelines, materials…" aria-label="Your question"></textarea>
+    <button class="btn btn-accent" type="submit" aria-label="Send"><i class="bi bi-send-fill"></i></button>
+  </form>
+  <div class="chat-foot">AI answers come from our guides and may be incomplete. For exact prices, book a free consultation.</div>
+</section>
+<script src="{% static 'js/chat.js' %}" defer></script>

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Book a free consultation — {{ studio.name }}{% endblock %}
+{% block body_class %}{% endblock %}
+{% block floating %}<a class="wa-float" href="{% wa_link studio.whatsapp 'Hi, I need help booking a consultation.' %}" target="_blank" rel="noopener" aria-label="Chat on WhatsApp" style="bottom:1.1rem"><i class="bi bi-whatsapp"></i></a>{% endblock %}
+{% block content %}
+<header class="page-hero pb-4">
+  <div class="container">
+    <span class="eyebrow">Free consultation</span>
+    <h1>Book a free design consultation</h1>
+    <p class="lead-text mb-0">Pick how you’d like to meet and a time that suits you. You’ll get an instant confirmation.</p>
+  </div>
+</header>
+
+<section class="pb-5">
+  <div class="container">
+    <form method="post" id="bookingForm" novalidate data-loading
+          data-slots-url="{% url 'bookings:api_slots' %}"
+          data-selected-date="{{ form.date.value|default:'' }}" data-selected-time="{{ form.time.value|default:'' }}">
+      {% csrf_token %}
+      {{ form.date }}{{ form.time }}{{ form.style }}{{ form.website }}
+      <div class="row g-4 g-lg-5">
+        <div class="col-lg-8">
+          {% if form.non_field_errors %}<div class="alert alert-danger">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>{% endif %}
+
+          {# Step 1 — mode #}
+          <div class="book-step">
+            <div class="step-head"><span class="step-badge">1</span><h2 class="h4 mb-0">How would you like to meet?</h2></div>
+            <div class="row g-2 g-sm-3">
+              {% for value, icon, label, hint in modes %}
+              <div class="col-sm-4">
+                <label class="choice-card h-100">
+                  <input type="radio" name="mode" value="{{ value }}" {% if form.mode.value == value %}checked{% endif %} required>
+                  <span class="choice-inner">
+                    <i class="bi bi-{{ icon }}"></i>
+                    <span class="d-block"><span class="fw-semibold d-block">{{ label }}</span>
+                    <span class="small text-muted">{{ hint }}</span></span>
+                  </span>
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          {# Step 2 — date + time #}
+          <div class="book-step">
+            <div class="step-head"><span class="step-badge">2</span><h2 class="h4 mb-0">Pick a day and time</h2></div>
+            {% if days %}
+            <div class="date-strip" role="listbox" aria-label="Available days">
+              {% for d in days %}
+              <button type="button" class="date-pill" data-date="{{ d.date|date:'Y-m-d' }}" role="option">
+                <span class="dow">{{ d.date|date:"D" }}</span>
+                <span class="dom">{{ d.date|date:"j" }}</span>
+                <span class="mon">{{ d.date|date:"M" }}</span>
+                <span class="free">{{ d.free }} free</span>
+              </button>
+              {% endfor %}
+            </div>
+            <div id="slotArea" class="mt-3">
+              <p class="text-muted small mb-0" id="slotHint"><i class="bi bi-hand-index me-1"></i>Choose a day to see available times.</p>
+              <div class="slot-grid" id="slotGrid" aria-live="polite"></div>
+            </div>
+            {% if form.date.errors or form.time.errors %}<div class="invalid-feedback">Please pick a day and a time slot.</div>{% endif %}
+            {% else %}
+            <div class="empty-state py-4"><i class="bi bi-calendar-x"></i>
+              <p class="mb-3">Our calendar is full for the next few weeks. Message us and we’ll find a time.</p>
+              <a class="btn btn-wa" target="_blank" rel="noopener" href="{% wa_link studio.whatsapp 'Hi, I would like to book a consultation.' %}"><i class="bi bi-whatsapp me-1"></i> WhatsApp us</a>
+            </div>
+            {% endif %}
+          </div>
+
+          {# Step 3 — details #}
+          <div class="book-step">
+            <div class="step-head"><span class="step-badge">3</span><h2 class="h4 mb-0">Your details</h2></div>
+            <div class="row g-3">
+              {% include "partials/field.html" with field=form.name col="col-md-6" %}
+              {% include "partials/field.html" with field=form.mobile col="col-md-6" %}
+              {% include "partials/field.html" with field=form.email col="col-md-6" %}
+              {% include "partials/field.html" with field=form.property_type col="col-md-6" %}
+              {% include "partials/field.html" with field=form.budget_band col="col-md-6" %}
+              <div class="col-md-6" id="siteAddressWrap">{% include "partials/field.html" with field=form.site_address col="" %}</div>
+              {% include "partials/field.html" with field=form.notes %}
+            </div>
+          </div>
+        </div>
+
+        {# Summary #}
+        <div class="col-lg-4">
+          <aside class="card-soft p-4 booking-summary">
+            <h3 class="h5 mb-3" style="font-family:var(--font-sans)">Your booking</h3>
+            <dl class="summary-list mb-3">
+              <div><dt>Meeting</dt><dd id="sumMode">—</dd></div>
+              <div><dt>Date</dt><dd id="sumDate">—</dd></div>
+              <div><dt>Time</dt><dd id="sumTime">—</dd></div>
+              <div><dt>Duration</dt><dd>About 60 minutes</dd></div>
+              {% if style_label %}<div><dt>Style</dt><dd><span class="badge-soft">{{ style_label }}</span></dd></div>{% endif %}
+            </dl>
+            <button type="submit" class="btn btn-accent btn-lg w-100" id="bookBtn" data-loading-text="Booking…">Confirm booking</button>
+            <p class="small text-muted mt-3 mb-0"><i class="bi bi-shield-check me-1"></i>Free and no obligation. You can reschedule anytime on WhatsApp.</p>
+          </aside>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/showcase.js' %}" defer></script>{% endblock %}

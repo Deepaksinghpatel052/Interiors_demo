@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% block page_title %}Studio{% endblock %} — {{ studio.name }}{% endblock %}
+{% block extra_head %}
+<link href="{% static 'css/erp.css' %}" rel="stylesheet">
+<meta name="robots" content="noindex">
+{% block erp_head %}{% endblock %}
+{% endblock %}
+{% block body_class %}erp{% endblock %}
+{% block nav %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block floating %}{% endblock %}
+{% block chat_widget %}{% endblock %}
+
+{% block content %}
+<div class="erp-shell">
+  <aside class="erp-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="erpNav" aria-label="Studio menu">
+    <div class="erp-brand">
+      <a href="{% url studio_home %}" class="d-flex align-items-center gap-2 text-decoration-none">
+        {% if studio.logo %}<img src="{{ studio.logo.url }}" alt="" width="34" height="34" class="rounded-circle">
+        {% else %}<span class="brand-mark" style="width:34px;height:34px;font-size:1rem">{{ studio.initials }}</span>{% endif %}
+        <span class="lh-1"><span class="d-block fw-semibold text-white">{{ studio.name }}</span><small class="text-white-50">Studio</small></span>
+      </a>
+      <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#erpNav" aria-label="Close menu"></button>
+    </div>
+    <nav class="erp-nav">
+      {% if studio.module_erp %}
+      <a class="{% active 'dashboard' %}" href="{% url 'studio:dashboard' %}"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+      <div class="erp-nav-label">Sales</div>
+      <a class="{% active 'leads' 'lead_detail' 'lead_create' %}" href="{% url 'studio:leads' %}"><i class="bi bi-kanban"></i> Leads</a>
+      <a class="{% active 'bookings' %}" href="{% url 'studio:bookings' %}"><i class="bi bi-calendar3"></i> Bookings</a>
+      <div class="erp-nav-label">Delivery</div>
+      <a class="{% active 'projects' 'project_detail' 'project_create' %}" href="{% url 'studio:projects' %}"><i class="bi bi-house-gear"></i> Projects</a>
+      <a class="{% active 'tasks' %}" href="{% url 'studio:tasks' %}"><i class="bi bi-check2-square"></i> Tasks</a>
+      <div class="erp-nav-label">Money</div>
+      <a class="{% active 'quotations' 'quotation_detail' 'quotation_new' %}" href="{% url 'finance:quotations' %}"><i class="bi bi-receipt"></i> Quotations</a>
+      <a class="{% active 'invoices' 'invoice_detail' %}" href="{% url 'finance:invoices' %}"><i class="bi bi-wallet2"></i> Invoices &amp; payments</a>
+      <div class="erp-nav-label">Purchasing</div>
+      <a class="{% active 'vendors' 'vendor_edit' %}" href="{% url 'finance:vendors' %}"><i class="bi bi-shop"></i> Vendors</a>
+      <a class="{% active 'catalogue' 'catalogue_edit' %}" href="{% url 'finance:catalogue' %}"><i class="bi bi-box-seam"></i> Materials catalogue</a>
+      <a class="{% active 'reports' %}" href="{% url 'studio:reports' %}"><i class="bi bi-bar-chart-line"></i> Reports</a>
+      {% endif %}
+      {% if studio.module_cms and erp_role == "owner" %}
+      <div class="erp-nav-label">Website</div>
+      <a class="{% if request.resolver_match.namespace == 'cms' %}active{% endif %}" href="{% url 'cms:index' %}"><i class="bi bi-window-stack"></i> Website content</a>
+      {% endif %}
+      {% if studio.module_automation or studio.module_ai %}<div class="erp-nav-label">Automation &amp; AI</div>{% endif %}
+      {% if studio.module_automation %}<a class="{% active 'automations:index' %}" href="{% url 'automations:index' %}"><i class="bi bi-lightning-charge"></i> Automations</a>{% endif %}
+      {% if studio.module_ai %}
+      <a class="{% active 'studio' %}" href="{% url 'assistant:studio' %}"><i class="bi bi-stars"></i> Studio assistant</a>
+      <a class="{% active 'kb' 'kb_edit' %}" href="{% url 'assistant:kb' %}"><i class="bi bi-journal-text"></i> Knowledge base</a>
+      {% if erp_role == "owner" %}<a class="{% active 'chats' 'chat_detail' %}" href="{% url 'assistant:chats' %}"><i class="bi bi-chat-square-text"></i> Chat logs</a>{% endif %}
+      {% endif %}
+      {% if erp_role == "owner" %}
+      <div class="erp-nav-label">Settings</div>
+      <a class="{% active 'availability' %}" href="{% url 'studio:availability' %}"><i class="bi bi-clock"></i> Availability</a>
+      <a class="{% active 'team' %}" href="{% url 'studio:team' %}"><i class="bi bi-people"></i> Team &amp; roles</a>
+      <a class="{% active 'settings' %}" href="{% url 'studio:settings' %}"><i class="bi bi-sliders"></i> Studio settings</a>
+      {% endif %}
+      {% if studio.show_locked_teasers %}
+      <div class="erp-nav-label">Full version <i class="bi bi-lock-fill ms-1"></i></div>
+      {% for key, label, icon in off_modules %}<button type="button" class="erp-nav-locked" data-locked="module_{{ key }}"><i class="bi bi-{{ icon }}"></i> {{ label }}</button>{% endfor %}
+      <button type="button" class="erp-nav-locked" data-locked="inventory"><i class="bi bi-boxes"></i> Inventory &amp; POs</button>
+      <button type="button" class="erp-nav-locked" data-locked="accounting"><i class="bi bi-calculator"></i> Accounting &amp; Tally</button>
+      <button type="button" class="erp-nav-locked" data-locked="team_payroll"><i class="bi bi-person-badge"></i> Attendance &amp; payroll</button>
+      <button type="button" class="erp-nav-locked" data-locked="ai_business"><i class="bi bi-graph-up"></i> Ask your business data</button>
+      <button type="button" class="erp-nav-locked" data-locked="mobile_app"><i class="bi bi-phone"></i> Site app</button>
+      {% endif %}
+    </nav>
+    <div class="erp-sidebar-foot">
+      <a href="{{ site_home }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> View website</a>
+    </div>
+  </aside>
+
+  <div class="erp-main">
+    <header class="erp-top">
+      <button class="btn btn-light d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#erpNav" aria-controls="erpNav" aria-label="Open menu"><i class="bi bi-list fs-5"></i></button>
+      <div class="flex-grow-1 min-w-0">
+        <h1 class="erp-title text-truncate">{% block heading %}{% endblock %}</h1>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        {% block actions %}{% endblock %}
+        <div class="dropdown">
+          <button class="btn btn-light erp-user" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account">
+            <span class="avatar">{{ user.first_name|first|default:user.username|first|upper }}</span>
+            <span class="d-none d-md-inline">{{ user.get_full_name|default:user.username }}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li><span class="dropdown-item-text small text-muted">{% if erp_role == "owner" %}Owner{% else %}Team member{% endif %}</span></li>
+            <li><a class="dropdown-item" href="{{ site_home }}">View website</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><form method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button class="dropdown-item">Sign out</button></form></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+    <div class="erp-content">{% block erp_content %}{% endblock %}</div>
+  </div>
+</div>
+{% if studio.module_erp %}<span id="liveActivity" hidden data-url="{% url 'studio:client_activity' %}" data-since="{% now 'c' %}"></span>
+<script src="{% static 'js/erp-live.js' %}" defer></script>{% endif %}
+{% endblock %}

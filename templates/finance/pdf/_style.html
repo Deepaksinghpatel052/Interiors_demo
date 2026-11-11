@@ -1,0 +1,36 @@
+<style>
+  {% if has_font %}
+  @font-face { font-family: Noto; src: url("{{ fonts.Regular }}"); }
+  @font-face { font-family: Noto; src: url("{{ fonts.Bold }}"); font-weight: bold; }
+  {% endif %}
+  @page {
+    size: a4 portrait;
+    margin: 1.4cm 1.4cm 2.0cm 1.4cm;
+    @frame footer { -pdf-frame-content: pdfFooter; bottom: 0.6cm; margin-left: 1.4cm; margin-right: 1.4cm; height: 1cm; }
+  }
+  body { font-family: {% if has_font %}Noto{% else %}Helvetica{% endif %}; font-size: 9pt; color: {{ studio.dark_color }}; line-height: 1.35; }
+  .accent { color: {{ studio.accent_color }}; }
+  .muted { color: #5B6470; }
+  .small { font-size: 8pt; }
+  .brandbar { background-color: {{ studio.dark_color }}; color: #ffffff; padding: 10pt 12pt; }
+  .brandbar td { color: #ffffff; vertical-align: middle; }
+  .studio-name { font-size: 16pt; font-weight: bold; }
+  .doc-title { font-size: 15pt; font-weight: bold; color: #ffffff; text-align: right; }
+  .mark { background-color: {{ studio.accent_color }}; color: #ffffff; font-weight: bold; font-size: 12pt; text-align: center; padding: 6pt 0; width: 34pt; }
+  .stripe { background-color: {{ studio.accent_color }}; height: 3pt; }
+  table { width: 100%; border-collapse: collapse; }
+  .meta td { vertical-align: top; padding: 2pt 0; }
+  .box { border: 0.6pt solid #D7DEE8; padding: 8pt 10pt; }
+  .label { font-size: 7pt; color: #5B6470; text-transform: uppercase; letter-spacing: 1pt; font-weight: bold; }
+  .items th { background-color: #EEF3FA; color: {{ studio.dark_color }}; font-size: 7.5pt; text-transform: uppercase; padding: 5pt 4pt; border-bottom: 0.8pt solid {{ studio.accent_color }}; text-align: left; }
+  .items td { padding: 5pt 4pt; border-bottom: 0.5pt solid #E4E9F0; vertical-align: top; }
+  .items .num { text-align: right; }
+  .room-row td { background-color: #F7F9FC; font-weight: bold; color: {{ studio.accent_color }}; padding-top: 7pt; }
+  .room-total td { font-weight: bold; text-align: right; border-bottom: 0.8pt solid #D7DEE8; }
+  .totals td { padding: 3pt 6pt; }
+  .totals .grand td { background-color: {{ studio.dark_color }}; color: #ffffff; font-weight: bold; font-size: 11pt; padding: 6pt; }
+  .tag { background-color: {{ studio.accent_color }}; color: #fff; padding: 2pt 6pt; font-size: 7.5pt; font-weight: bold; }
+  .terms li { margin-bottom: 2pt; }
+  .sign td { padding-top: 26pt; }
+  #pdfFooter { font-size: 7pt; color: #8A93A0; text-align: center; }
+</style>

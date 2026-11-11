@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Services — {{ studio.name }}{% endblock %}
+{% block content %}
+<header class="page-hero">
+  <div class="container">
+    <span class="eyebrow">Services</span>
+    <h1>Everything your space needs, handled by one team</h1>
+    <p class="lead-text mb-0">Choose design-only, or let us take care of everything from layout to the last light fitting. Every project comes with an itemised GST quotation and an online client portal.</p>
+  </div>
+</header>
+
+<section class="pb-5">
+  <div class="container">
+    {% for s in services %}
+    <article id="{{ s.slug }}" class="row g-4 g-lg-5 align-items-center py-4 py-lg-5 {% if not forloop.last %}border-bottom{% endif %} reveal" style="scroll-margin-top:100px">
+      <div class="col-lg-5 {% cycle '' 'order-lg-2' %}">
+        {% if s.image %}<img src="{{ s.image.url }}" alt="{{ s.title }}" class="w-100 rounded-4 ratio-43" loading="lazy" decoding="async" width="900" height="675">
+        {% else %}<div class="rounded-4 ratio-43 d-grid" style="place-items:center;background:var(--sand)"><i class="bi bi-{{ s.icon }} display-4 text-accent"></i></div>{% endif %}
+      </div>
+      <div class="col-lg-7">
+        <div class="icon-circle"><i class="bi bi-{{ s.icon }}"></i></div>
+        <h2 class="h3">{{ s.title }}</h2>
+        <p class="text-muted">{{ s.description }}</p>
+        {% if s.includes %}
+        <ul class="check-list row row-cols-1 row-cols-sm-2 g-0 mb-3">
+          {% for item in s.includes|split_lines %}<li class="col">{{ item }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+          <a class="btn btn-ink btn-sm" href="{% url 'bookings:book' %}">Discuss this service</a>
+          {% if s.typical_timeline %}<span class="small text-muted"><i class="bi bi-clock me-1"></i> Typically {{ s.typical_timeline }}</span>{% endif %}
+        </div>
+      </div>
+    </article>
+    {% empty %}
+    <div class="empty-state"><i class="bi bi-grid"></i>Services will appear here once added in the CMS.</div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section bg-ink">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow" style="color:var(--accent-light)">How we work</span><h2>The same clear process for every project</h2></div>
+    <div class="row g-4">
+      {% for icon, title, text in steps %}
+      <div class="col-sm-6 col-lg"><div class="step"><div class="step-num">0{{ forloop.counter }}</div><h4><i class="bi bi-{{ icon }} me-1"></i> {{ title }}</h4><p>{{ text }}</p></div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% include "partials/cta_band.html" %}
+<div class="pb-5"></div>
+{% endblock %}

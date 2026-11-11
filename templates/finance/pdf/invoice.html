@@ -1,0 +1,72 @@
+<html><head><meta charset="utf-8">{% include "finance/pdf/_style.html" %}</head>
+<body>
+{% include "finance/pdf/_header.html" with doc_title="TAX INVOICE" %}
+
+<table class="meta" style="margin-top:10pt">
+  <tr>
+    <td width="55%" class="box">
+      <div class="label">Billed to</div>
+      <b style="font-size:10.5pt">{{ inv.client_name }}</b><br>
+      {% if inv.client_address %}{{ inv.client_address }}<br>{% endif %}
+      {% if inv.client_gstin %}GSTIN: {{ inv.client_gstin }}<br>{% endif %}
+      Project: {{ inv.project.name }} ({{ inv.project.code }})
+    </td>
+    <td width="3%"></td>
+    <td width="42%" class="box">
+      <table>
+        <tr><td class="label">Invoice no.</td><td style="text-align:right"><b>{{ inv.number }}</b></td></tr>
+        <tr><td class="label">Invoice date</td><td style="text-align:right">{{ inv.date|date:"d-m-Y" }}</td></tr>
+        <tr><td class="label">Due date</td><td style="text-align:right">{{ inv.due_date|date:"d-m-Y"|default:"On receipt" }}</td></tr>
+        <tr><td class="label">Place of supply</td><td style="text-align:right">{% if inv.inter_state %}Outside {{ studio.state_name }}{% else %}{{ studio.state_name }}{% endif %}</td></tr>
+        <tr><td class="label">Status</td><td style="text-align:right"><span class="tag">{{ inv.get_status_display|upper }}</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<table class="items" style="margin-top:12pt">
+  <thead><tr><th width="6%">#</th><th width="54%">Description</th><th width="12%">SAC</th><th width="28%" class="num">Taxable value</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><b>{{ inv.description }}</b><br><span class="small muted">Interior design and execution services</span></td><td>998391</td>
+        <td class="num">{{ inv.taxable_amount|pdf_money:rupee }}</td></tr>
+  </tbody>
+</table>
+
+<table style="margin-top:10pt">
+  <tr>
+    <td width="52%" style="vertical-align:top">
+      <p class="small"><span class="label">Amount in words</span><br><b>{{ words }}</b></p>
+      {% if payments %}
+      <div class="label" style="margin-top:8pt">Payments received</div>
+      <table class="items" style="margin-top:3pt">
+        <tr><th>Date</th><th>Mode</th><th>Reference</th><th class="num">Amount</th></tr>
+        {% for p in payments %}<tr><td>{{ p.date|date:"d-m-Y" }}</td><td>{{ p.get_mode_display }}</td><td>{{ p.reference|default:"—" }}</td><td class="num">{{ p.amount|pdf_money:rupee }}</td></tr>{% endfor %}
+      </table>
+      {% endif %}
+    </td>
+    <td width="4%"></td>
+    <td width="44%" style="vertical-align:top">
+      <table class="totals">
+        <tr><td>Taxable value</td><td style="text-align:right">{{ inv.taxable_amount|pdf_money:rupee }}</td></tr>
+        {% if inv.inter_state %}<tr><td>IGST</td><td style="text-align:right">{{ inv.igst|pdf_money:rupee }}</td></tr>
+        {% else %}<tr><td>CGST</td><td style="text-align:right">{{ inv.cgst|pdf_money:rupee }}</td></tr>
+        <tr><td>SGST</td><td style="text-align:right">{{ inv.sgst|pdf_money:rupee }}</td></tr>{% endif %}
+        <tr class="grand"><td>Invoice total</td><td style="text-align:right">{{ inv.total|pdf_money:rupee }}</td></tr>
+        {% if inv.paid %}<tr><td>Paid</td><td style="text-align:right">{{ inv.paid|pdf_money:rupee }}</td></tr>
+        <tr><td><b>Balance due</b></td><td style="text-align:right"><b>{{ inv.balance|pdf_money:rupee }}</b></td></tr>{% endif %}
+      </table>
+    </td>
+  </tr>
+</table>
+
+{% if studio.bank_details %}
+<div class="box" style="margin-top:14pt"><span class="label">Pay by UPI or bank transfer</span><br>{{ studio.bank_details }}</div>
+{% endif %}
+
+<table class="sign">
+  <tr><td width="50%" class="small muted">This is a computer-generated invoice.</td>
+      <td width="50%" class="small" style="text-align:right">For <b>{{ studio.legal_name }}</b><br><br><br>Authorised signatory</td></tr>
+</table>
+
+<div id="pdfFooter">{{ studio.name }} · {{ studio.phone }} · {{ studio.email }} · Page <pdf:pagenumber> of <pdf:pagecount></div>
+</body></html>

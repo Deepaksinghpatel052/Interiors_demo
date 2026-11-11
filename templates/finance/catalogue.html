@@ -1,0 +1,54 @@
+{% extends "studio/base.html" %}
+{% block page_title %}Materials catalogue{% endblock %}
+{% block heading %}Materials catalogue <span class="text-muted fw-normal small">· {{ items|length }}</span>{% endblock %}
+{% block actions %}<button class="btn btn-accent btn-sm" data-bs-toggle="collapse" data-bs-target="#addItem" aria-expanded="{% if form.errors %}true{% else %}false{% endif %}"><i class="bi bi-plus-lg"></i><span class="d-none d-sm-inline ms-1">Add item</span></button>{% endblock %}
+
+{% block erp_content %}
+<div class="collapse {% if form.errors %}show{% endif %} mb-3" id="addItem">
+  <div class="panel"><div class="panel-head"><h2>New catalogue item</h2></div><div class="panel-body">
+    <form method="post" class="form-compact row g-2" novalidate data-loading>
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="{% if field.name == 'description' %}col-12{% elif field.name == 'is_active' %}col-12{% else %}col-sm-6 col-lg-3{% endif %}">
+        {% if field.name == 'is_active' %}<div class="form-check">{{ field }}<label class="form-check-label small" for="{{ field.id_for_label }}">Active</label></div>
+        {% else %}<label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% endif %}
+        {% for e in field.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+      </div>
+      {% endfor %}
+      <div class="col-12 text-end"><button class="btn btn-ink" data-loading-text="Saving…">Save item</button></div>
+    </form>
+  </div></div>
+</div>
+
+<form class="d-flex flex-wrap gap-2 mb-3" method="get" role="search">
+  <div class="input-group" style="max-width:20rem"><span class="input-group-text"><i class="bi bi-search"></i></span>
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Search items or vendors" aria-label="Search catalogue"></div>
+  <select class="form-select" name="category" style="max-width:15rem" onchange="this.form.submit()" aria-label="Category">
+    <option value="">All categories</option>{% for v, l in categories %}<option value="{{ v }}" {% if category == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+  </select>
+  {% if q or category %}<a class="btn btn-light" href="{% url 'finance:catalogue' %}">Clear</a>{% endif %}
+</form>
+
+<div class="panel">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="small text-muted"><tr><th>Item</th><th>Category</th><th>Vendor</th><th class="text-end">Rate</th><th>Unit</th><th class="text-end">GST</th><th></th></tr></thead>
+      <tbody>
+        {% for it in items %}
+        <tr class="{% if not it.is_active %}text-muted{% endif %}">
+          <td><a class="fw-semibold" href="{% url 'finance:catalogue_edit' it.pk %}">{{ it.name }}</a>{% if it.description %}<div class="small text-muted">{{ it.description }}</div>{% endif %}</td>
+          <td class="small">{{ it.get_category_display }}</td>
+          <td class="small">{{ it.vendor.name|default:"—" }}</td>
+          <td class="text-end fw-semibold">{{ it.rate|inr2 }}</td>
+          <td class="small">per {{ it.get_unit_display }}</td>
+          <td class="text-end small">{{ it.gst_percent|pct }}%</td>
+          <td class="text-end"><a class="btn btn-sm btn-light" href="{% url 'finance:catalogue_edit' it.pk %}" aria-label="Edit"><i class="bi bi-pencil"></i></a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-mini py-4"><i class="bi bi-box-seam"></i>No items{% if q or category %} match this search{% else %} yet{% endif %}.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

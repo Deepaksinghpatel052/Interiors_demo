@@ -1,0 +1,106 @@
+<html><head><meta charset="utf-8">{% include "finance/pdf/_style.html" %}</head>
+<body>
+{% include "finance/pdf/_header.html" with doc_title="QUOTATION" %}
+
+<table class="meta" style="margin-top:10pt">
+  <tr>
+    <td width="55%" class="box">
+      <div class="label">Prepared for</div>
+      <b style="font-size:10.5pt">{{ q.client_name }}</b><br>
+      {% if q.client_address %}{{ q.client_address }}<br>{% endif %}
+      {% if q.client_mobile %}+91 {{ q.client_mobile }}<br>{% endif %}
+      {% if q.client_gstin %}GSTIN: {{ q.client_gstin }}{% endif %}
+    </td>
+    <td width="3%"></td>
+    <td width="42%" class="box">
+      <table>
+        <tr><td class="label">Quotation no.</td><td style="text-align:right"><b>{{ q.display_number }}</b></td></tr>
+        <tr><td class="label">Date</td><td style="text-align:right">{{ q.date|date:"d-m-Y" }}</td></tr>
+        <tr><td class="label">Valid until</td><td style="text-align:right">{{ q.valid_until|date:"d-m-Y"|default:"—" }}</td></tr>
+        {% if q.project %}<tr><td class="label">Project</td><td style="text-align:right">{{ q.project.code }}</td></tr>{% endif %}
+        <tr><td class="label">Tax</td><td style="text-align:right">{% if q.inter_state %}IGST{% else %}CGST + SGST{% endif %}</td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<p style="margin:10pt 0 4pt 0"><b style="font-size:11pt">{{ q.title }}</b></p>
+{% if q.notes %}<p class="small muted" style="margin:0 0 6pt 0">{{ q.notes|linebreaksbr }}</p>{% endif %}
+
+<table class="items">
+  <thead>
+    <tr><th width="4%">#</th><th width="35%">Description</th><th width="8%">HSN/SAC</th><th width="12%" class="num">Qty</th>
+        <th width="12%" class="num">Rate</th><th width="6%" class="num">Disc.</th><th width="6%" class="num">GST</th><th width="17%" class="num">Amount</th></tr>
+  </thead>
+  <tbody>
+  {% for room in rooms %}
+    <tr class="room-row"><td colspan="8">{{ room.name }}</td></tr>
+    {% for it in room.items.all %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ it.description }}</td>
+      <td class="small">{{ it.hsn_code|default:"—" }}</td>
+      <td class="num">{{ it.quantity|pct }} {{ it.get_unit_display }}</td>
+      <td class="num">{{ it.rate|pdf_money:rupee }}</td>
+      <td class="num">{% if it.discount_percent %}{{ it.discount_percent|pct }}%{% else %}—{% endif %}</td>
+      <td class="num">{{ it.gst_percent|pct }}%</td>
+      <td class="num">{{ it.taxable|pdf_money:rupee }}</td>
+    </tr>
+    {% endfor %}
+    <tr class="room-total"><td colspan="7">{{ room.name }} total (before GST)</td><td>{{ room.total|pdf_money:rupee }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<div style="page-break-inside: avoid">
+<table style="margin-top:10pt">
+  <tr>
+    <td width="52%" style="vertical-align:top">
+      <div class="label">GST summary</div>
+      <table class="items" style="margin-top:3pt">
+        <tr><th>Rate</th><th class="num">Taxable</th>{% if q.inter_state %}<th class="num">IGST</th>{% else %}<th class="num">CGST</th><th class="num">SGST</th>{% endif %}</tr>
+        {% for rate, taxable, gst, cgst, sgst in breakdown %}
+        <tr><td>{{ rate|pct }}%</td><td class="num">{{ taxable|pdf_money:rupee }}</td>
+          {% if q.inter_state %}<td class="num">{{ gst|pdf_money:rupee }}</td>{% else %}<td class="num">{{ cgst|pdf_money:rupee }}</td><td class="num">{{ sgst|pdf_money:rupee }}</td>{% endif %}</tr>
+        {% endfor %}
+      </table>
+      <p class="small" style="margin-top:8pt"><span class="label">Amount in words</span><br><b>{{ words }}</b></p>
+    </td>
+    <td width="4%"></td>
+    <td width="44%" style="vertical-align:top">
+      <table class="totals">
+        <tr><td>Subtotal</td><td style="text-align:right">{{ q.subtotal|pdf_money:rupee }}</td></tr>
+        {% if q.discount_total %}<tr><td>Discount</td><td style="text-align:right">− {{ q.discount_total|pdf_money:rupee }}</td></tr>{% endif %}
+        <tr><td>Taxable value</td><td style="text-align:right">{{ q.taxable_total|pdf_money:rupee }}</td></tr>
+        {% if q.inter_state %}<tr><td>IGST</td><td style="text-align:right">{{ q.igst|pdf_money:rupee }}</td></tr>
+        {% else %}<tr><td>CGST</td><td style="text-align:right">{{ q.cgst|pdf_money:rupee }}</td></tr>
+        <tr><td>SGST</td><td style="text-align:right">{{ q.sgst|pdf_money:rupee }}</td></tr>{% endif %}
+        {% if q.round_off %}<tr><td>Round off</td><td style="text-align:right">{{ q.round_off|pdf_money:rupee }}</td></tr>{% endif %}
+        <tr class="grand"><td>Grand total</td><td style="text-align:right">{{ q.grand_total|pdf_money:rupee }}</td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</div>
+
+{% if schedule %}
+<div class="label" style="margin-top:12pt">Payment schedule</div>
+<table class="items" style="margin-top:3pt">
+  <tr>{% for label, percent, amount in schedule %}<th>{{ label }} · {{ percent|pct }}%</th>{% endfor %}</tr>
+  <tr>{% for label, percent, amount in schedule %}<td>{{ amount|pdf_money:rupee }}</td>{% endfor %}</tr>
+</table>
+{% endif %}
+
+{% if terms_lines %}
+<div class="label" style="margin-top:12pt">Terms &amp; conditions</div>
+<ol class="terms small muted" style="margin-top:3pt">{% for t in terms_lines %}<li>{{ t }}</li>{% endfor %}</ol>
+{% endif %}
+{% if studio.bank_details %}<p class="small"><span class="label">Bank details</span><br>{{ studio.bank_details }}</p>{% endif %}
+
+<table class="sign">
+  <tr><td width="50%" class="small muted">Accepted by client: ______________________</td>
+      <td width="50%" class="small" style="text-align:right">For <b>{{ studio.legal_name }}</b><br><br><br>Authorised signatory</td></tr>
+</table>
+
+<div id="pdfFooter">{{ studio.name }} · {{ studio.phone }} · {{ studio.email }} · Page <pdf:pagenumber> of <pdf:pagecount></div>
+</body></html>

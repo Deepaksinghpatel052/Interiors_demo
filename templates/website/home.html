@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+{% block extra_head %}{% if hero %}<link rel="preload" as="image" href="{{ hero.cover.url }}" fetchpriority="high">{% endif %}{% endblock %}
+
+{% block content %}
+{# ---------- Hero ---------- #}
+<section class="hero">
+  {% if hero %}<img class="hero-img" src="{{ hero.cover.url }}" alt="{{ hero.title }}" fetchpriority="high" decoding="async" width="1600" height="1067">{% endif %}
+  <div class="container">
+    <div class="row align-items-end g-4">
+      <div class="col-lg-8">
+        <span class="eyebrow">{{ studio.name }} · {{ studio.city }}</span>
+        <h1 class="mb-3">{{ studio.hero_title }}</h1>
+        <p class="mb-4">{{ studio.hero_subtitle }}</p>
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <a class="btn btn-accent btn-lg" href="{% url 'bookings:book' %}">Book a free consultation</a>
+          <a class="btn btn-light-outline btn-lg" href="{% url 'website:portfolio' %}">See our work</a>
+        </div>
+        {% if hero %}<div class="hero-caption">Featured: <a href="{{ hero.get_absolute_url }}">{{ hero.title }}</a> · {{ hero.location }}</div>{% endif %}
+      </div>
+      <div class="col-lg-4 d-none d-lg-block">
+        <div class="glass-card">
+          {% if next_slot %}
+          <div class="small text-uppercase fw-semibold" style="letter-spacing:.12em;color:var(--accent-light)">Next free consultation</div>
+          <div class="glass-big">{{ next_slot.date|date:"D, d M" }} · {{ next_slot.label }}</div>
+          <p class="small mb-3" style="color:rgba(255,255,255,.75)">Online, at our studio or at your site. 30 minutes, no obligation.</p>
+          {% else %}
+          <div class="glass-big">Free design consultation</div>
+          <p class="small mb-3" style="color:rgba(255,255,255,.75)">Online, at our studio or at your site.</p>
+          {% endif %}
+          <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-accent flex-fill" href="{% url 'bookings:book' %}">Pick a time</a>
+            <a class="btn btn-sm btn-light-outline" href="{% url 'website:estimate' %}"><i class="bi bi-calculator me-1"></i>Estimate</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ---------- Trust stats ---------- #}
+<section class="stats-band">
+  <div class="container">
+    <div class="row g-4 text-center text-md-start">
+      <div class="col-6 col-md-3"><div class="stat-num">{{ studio.years_of_practice }}+</div><div class="stat-label">years designing homes</div></div>
+      <div class="col-6 col-md-3"><div class="stat-num">{{ project_count }}</div><div class="stat-label">projects in our portfolio</div></div>
+      <div class="col-6 col-md-3"><div class="stat-num">{{ style_count }}</div><div class="stat-label">design styles we work in</div></div>
+      <div class="col-6 col-md-3"><div class="stat-num">{{ city_count }}</div><div class="stat-label">cities we've delivered in</div></div>
+    </div>
+  </div>
+</section>
+
+{# ---------- Featured projects ---------- #}
+<section class="section">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 section-head mw-100">
+      <div>
+        <span class="eyebrow">Selected work</span>
+        <h2 class="mb-0">Spaces we’ve shaped</h2>
+      </div>
+      <a class="link-arrow" href="{% url 'website:portfolio' %}">View full portfolio <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for p in featured %}
+      <div class="col-md-6 col-lg-4 reveal">
+        {% include "partials/project_card.html" with p=p %}
+      </div>
+      {% empty %}
+      <div class="col-12"><div class="empty-state"><i class="bi bi-images"></i>Portfolio projects will appear here once added in the CMS.</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ---------- Explore by room ---------- #}
+{% if rooms %}
+<section class="section bg-sand">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Explore by space</span>
+      <h2>Find ideas for your room</h2>
+      <p class="lead-text">Browse finished projects by the space you’re planning — from a single kitchen to a whole home or office.</p>
+    </div>
+    <div class="room-grid">
+      {% for r in rooms %}
+      <a class="room-tile reveal {% if forloop.first %}room-tile-lg{% endif %}" href="{% url 'website:portfolio' %}?room={{ r.value }}">
+        <img src="{{ r.cover.url }}" alt="{{ r.label }}" loading="lazy" decoding="async" width="800" height="600">
+        <span class="room-tile-body">
+          <span class="room-tile-title">{{ r.label }}</span>
+          <span class="room-tile-meta">{{ r.count }} project{{ r.count|pluralize }} <i class="bi bi-arrow-up-right"></i></span>
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ---------- Design tools ---------- #}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Explore before you meet us</span>
+      <h2>See it, feel it, price it</h2>
+      <p class="lead-text">Tools that help you find your style and plan your budget — and show you how we present designs to our clients.</p>
+    </div>
+    <div class="row g-3 g-lg-4">
+      <div class="col-sm-6 col-lg-3 reveal"><a class="card-soft tool-card" href="{% url 'website:quiz' %}">
+        <div class="icon-circle"><i class="bi bi-ui-checks-grid"></i></div><h4>Style quiz</h4>
+        <p class="text-muted small mb-3">Five pictures, one minute — discover your interior style.</p><span class="link-arrow small mt-auto">Take the quiz <i class="bi bi-arrow-right"></i></span></a></div>
+      <div class="col-sm-6 col-lg-3 reveal"><a class="card-soft tool-card" href="{% if hero %}{% url 'website:moodboard' hero.slug %}{% else %}{% url 'website:portfolio' %}{% endif %}">
+        <div class="icon-circle"><i class="bi bi-palette2"></i></div><h4>Mood boards</h4>
+        <p class="text-muted small mb-3">Images, colours and materials exactly as we share them with clients.</p><span class="link-arrow small mt-auto">Open a board <i class="bi bi-arrow-right"></i></span></a></div>
+      <div class="col-sm-6 col-lg-3 reveal"><a class="card-soft tool-card" href="{% url 'website:estimate' %}">
+        <div class="icon-circle"><i class="bi bi-calculator"></i></div><h4>Cost estimator</h4>
+        <p class="text-muted small mb-3">An indicative budget range for your home in 30 seconds.</p><span class="link-arrow small mt-auto">Estimate my cost <i class="bi bi-arrow-right"></i></span></a></div>
+      <div class="col-sm-6 col-lg-3 reveal"><button type="button" class="card-soft tool-card" data-locked="walkthrough_3d">
+        <span class="badge-locked"><i class="bi bi-lock-fill me-1"></i>Full version</span>
+        <div class="icon-circle"><i class="bi bi-badge-3d"></i></div><h4>3D / 360° walkthrough</h4>
+        <p class="text-muted small mb-3">Walk through your future home before work begins.</p><span class="link-arrow small mt-auto">Preview <i class="bi bi-arrow-right"></i></span></button></div>
+    </div>
+  </div>
+</section>
+
+{# ---------- Project spotlight ---------- #}
+{% if spotlight %}{% with ba=spotlight.before_afters.all.0 %}
+<section class="section bg-sand">
+  <div class="container">
+    <div class="row g-4 g-lg-5 align-items-center">
+      <div class="col-lg-7 reveal">
+        <div class="ba-slider" tabindex="0" role="slider" aria-label="Before and after comparison" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+          <img src="{{ ba.before.url }}" alt="Before" loading="lazy" width="1400" height="933">
+          <div class="ba-after-wrap"><img src="{{ ba.after.url }}" alt="After" loading="lazy" width="1400" height="933"></div>
+          <span class="ba-label before">Before</span><span class="ba-label after">After</span>
+          <div class="ba-handle"><span><i class="bi bi-arrows-expand-vertical"></i></span></div>
+        </div>
+      </div>
+      <div class="col-lg-5 reveal">
+        <span class="eyebrow">Project spotlight</span>
+        <h2 class="mb-3">{{ spotlight.title }}</h2>
+        <p class="text-muted">{{ spotlight.summary }}</p>
+        <div class="spot-facts">
+          <div><span>Location</span><strong>{{ spotlight.location }}</strong></div>
+          <div><span>Style</span><strong>{{ spotlight.get_style_display }}</strong></div>
+          <div><span>Area</span><strong>{{ spotlight.area_sqft|num }} sq ft</strong></div>
+          <div><span>Completed in</span><strong>{{ spotlight.duration_weeks }} weeks</strong></div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <a class="btn btn-ink" href="{{ spotlight.get_absolute_url }}">Read the case study</a>
+          <a class="btn btn-outline-ink" href="{% url 'website:moodboard' spotlight.slug %}">See the mood board</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endwith %}{% endif %}
+
+{# ---------- Services ---------- #}
+<section class="section">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 section-head mw-100">
+      <div style="max-width:40rem">
+        <span class="eyebrow">What we do</span>
+        <h2>Design and execution, under one roof</h2>
+        <p class="lead-text mb-0">From a single modular kitchen to a complete turnkey home — one team, one point of contact, one transparent quotation.</p>
+      </div>
+      <a class="link-arrow" href="{% url 'website:services' %}">All services <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="row g-3 g-lg-4">
+      {% for s in services %}
+      <div class="col-sm-6 col-lg-4 reveal">
+        <a class="service-photo-card" href="{% url 'website:services' %}#{{ s.slug }}">
+          {% if s.image %}<img src="{{ s.image.url }}" alt="{{ s.title }}" loading="lazy" decoding="async" width="800" height="533">{% endif %}
+          <span class="spc-body">
+            <span class="icon-circle"><i class="bi bi-{{ s.icon }}"></i></span>
+            <span class="spc-title">{{ s.title }}</span>
+            <span class="spc-text">{{ s.short }}</span>
+            <span class="link-arrow small">Learn more <i class="bi bi-arrow-right"></i></span>
+          </span>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ---------- Why us ---------- #}
+<section class="section bg-sand">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Why homeowners choose us</span>
+      <h2>No surprises. Just a beautiful home.</h2>
+      <p class="lead-text">The things that make working with {{ studio.name }} calm, transparent and on time.</p>
+    </div>
+    <div class="row g-3 g-lg-4">
+      {% for icon, title, text in why_us %}
+      <div class="col-sm-6 col-lg-4 reveal">
+        <div class="why-card h-100">
+          <div class="why-icon"><i class="bi bi-{{ icon }}"></i></div>
+          <div><h4 class="mb-1">{{ title }}</h4><p class="text-muted mb-0">{{ text }}</p></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ---------- Process ---------- #}
+<section class="section bg-ink">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">How we work</span>
+      <h2>Five steps. No surprises.</h2>
+      <p class="lead-text">You always know what happens next, what it costs and when it will be done.</p>
+    </div>
+    <div class="row g-4 steps">
+      {% for icon, title, text in steps %}
+      <div class="col-sm-6 col-lg reveal">
+        <div class="step">
+          <div class="step-num">0{{ forloop.counter }}</div>
+          <h4><i class="bi bi-{{ icon }} me-1"></i> {{ title }}</h4>
+          <p>{{ text }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ---------- From our sites (mosaic) ---------- #}
+{% if moments %}
+<section class="section">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 section-head mw-100">
+      <div><span class="eyebrow">From our sites</span><h2 class="mb-0">Details we’re proud of</h2></div>
+      <a class="link-arrow" href="{% url 'website:portfolio' %}">Explore all projects <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="mosaic">
+      {% for p, img in moments %}
+      <a class="mosaic-item reveal" href="{{ p.get_absolute_url }}">
+        <img src="{{ img.image.url }}" alt="{{ img.caption|default:p.title }}" loading="lazy" decoding="async" width="600" height="450">
+        <span class="mosaic-caption">{{ p.title }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ---------- AI assistant entry point ---------- #}
+<section class="section pt-0">
+  <div class="container">
+    <div class="ai-teaser reveal">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-5">
+          <span class="eyebrow"><i class="bi bi-stars"></i> Design assistant</span>
+          <h2>Ask us anything, any time.</h2>
+          <p class="text-muted">Our assistant answers from our own guides — services, process, materials, warranty and payment terms — and shows you where each answer comes from.</p>
+          {% if studio.module_ai %}<button type="button" class="btn btn-ink" data-open-chat><i class="bi bi-stars me-1"></i> Ask the assistant</button>
+          {% else %}<a class="btn btn-ink" href="{% url 'website:contact' %}"><i class="bi bi-chat-dots me-1"></i> Ask a question</a>{% endif %}
+        </div>
+        <div class="col-lg-7">
+          <div class="d-flex flex-column gap-2">
+            <div class="chat-bubble me">How long does a 2BHK interior usually take?</div>
+            <div class="chat-bubble">For a typical 2BHK, design takes 2–3 weeks and execution 6–8 weeks after you approve the design and materials<sup>[1]</sup>. Would you like to book a free consultation to plan your timeline?</div>
+            <div class="small text-muted ps-1"><i class="bi bi-journal-text me-1"></i>[1] Our process &amp; timelines</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ---------- Testimonials ---------- #}
+{% if testimonials %}
+<section class="section bg-sand">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Client words</span>
+      <h2>What living in it feels like</h2>
+    </div>
+    <div class="row g-4">
+      {% for t in testimonials %}
+      <div class="col-md-4 reveal">
+        <figure class="card-soft quote-card mb-0">
+          <div class="quote-stars" aria-hidden="true"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <blockquote>“{{ t.text }}”</blockquote>
+          <figcaption class="who d-flex justify-content-between align-items-center gap-2">
+            <span class="d-flex align-items-center gap-2"><span class="avatar">{{ t.name|first }}</span>
+              <span><strong>{{ t.name }}</strong>{% if t.city %}, {{ t.city }}{% endif %}{% if t.project_type %}<br>{{ t.project_type }}{% endif %}</span></span>
+            {% if t.is_sample %}<span class="badge-sample" title="Sample testimonial for this demo">Sample</span>{% endif %}
+          </figcaption>
+        </figure>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ---------- FAQ preview ---------- #}
+{% if faqs %}
+<section class="section">
+  <div class="container">
+    <div class="row g-4 g-lg-5">
+      <div class="col-lg-4">
+        <span class="eyebrow">Good to know</span>
+        <h2>Questions, answered</h2>
+        <p class="lead-text">Timelines, payments, materials and warranty — the things everyone asks before starting.</p>
+        <a class="link-arrow" href="{% url 'website:faq' %}">All FAQs <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="col-lg-8">
+        <div class="accordion" id="homeFaq">
+          {% for f in faqs %}
+          <div class="accordion-item">
+            <h3 class="accordion-header">
+              <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#hf{{ f.pk }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="hf{{ f.pk }}">{{ f.question }}</button>
+            </h3>
+            <div id="hf{{ f.pk }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#homeFaq">
+              <div class="accordion-body">{{ f.answer }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% include "partials/cta_band.html" %}
+<div class="pb-5"></div>
+{% endblock %}

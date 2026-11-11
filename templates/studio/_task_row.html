@@ -1,0 +1,16 @@
+<div class="task-row {% if t.status == 'done' %}done{% endif %}" data-task="{{ t.pk }}">
+  <form method="post" action="{% url 'studio:task_status' t.pk %}" class="task-toggle">
+    {% csrf_token %}<input type="hidden" name="status" value="{% if t.status == 'done' %}todo{% else %}done{% endif %}">
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <button class="task-check {% if t.status == 'done' %}on{% endif %}" aria-label="{% if t.status == 'done' %}Mark as not done{% else %}Mark as done{% endif %}"><i class="bi bi-check-lg"></i></button>
+  </form>
+  <div class="flex-grow-1 min-w-0">
+    <div class="task-title">{{ t.title }}{% if t.from_client %} <span class="pill pill-blue">From client</span>{% endif %}{% if t.priority == 'high' %} <span class="pill pill-red">High</span>{% endif %}</div>
+    <div class="small text-muted">
+      {% if show_project %}<a class="text-muted" href="{{ t.project.get_absolute_url }}?tab=tasks">{{ t.project.name }}</a> · {% endif %}
+      {% if t.assigned_to %}{{ t.assigned_to.get_full_name|default:t.assigned_to.username }}{% else %}Unassigned{% endif %}
+      {% if t.due_date %} · <span class="{% if t.is_overdue %}text-overdue{% endif %}">due {{ t.due_date|date:"d-m-Y" }}</span>{% endif %}
+    </div>
+  </div>
+  {% if t.status == 'doing' %}<span class="pill pill-accent">In progress</span>{% endif %}
+</div>

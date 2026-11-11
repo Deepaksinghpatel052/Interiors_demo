@@ -1,0 +1,7 @@
+<a class="project-card" href="{{ p.get_absolute_url }}">
+  <div class="ph"><img src="{{ p.cover.url }}" alt="{{ p.title }}" loading="lazy" decoding="async" width="900" height="{% if tall %}1125{% else %}675{% endif %}" class="{% if tall %}ratio-45{% else %}ratio-43{% endif %}"></div>
+  <div class="meta">
+    <h3>{{ p.title }}</h3>
+    <div class="tags">{{ p.get_style_display }} · {{ p.get_room_type_display }} · {{ p.location }}</div>
+  </div>
+</a>

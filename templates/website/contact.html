@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Contact — {{ studio.name }}{% endblock %}
+{% block content %}
+<header class="page-hero">
+  <div class="container">
+    <span class="eyebrow">Contact</span>
+    <h1>Tell us about your space</h1>
+    <p class="lead-text mb-0">Call, WhatsApp or send the form — whichever is easiest. We usually reply the same day.</p>
+  </div>
+</header>
+<section class="pb-5">
+  <div class="container">
+    <div class="row g-4 g-lg-5">
+      <div class="col-lg-7">{% include "partials/enquiry_form.html" %}</div>
+      <div class="col-lg-5">
+        <div class="d-flex gap-2 mb-3">
+          <a class="btn btn-wa flex-fill" target="_blank" rel="noopener" href="{% wa_link studio.whatsapp 'Hi, I would like to discuss interiors for my home.' %}"><i class="bi bi-whatsapp me-1"></i> WhatsApp</a>
+          <a class="btn btn-outline-ink flex-fill" href="{{ studio.phone|tel }}"><i class="bi bi-telephone me-1"></i> Call</a>
+        </div>
+        <div class="contact-line"><i class="bi bi-geo-alt"></i><span>{{ studio.address }}</span></div>
+        <div class="contact-line"><i class="bi bi-telephone"></i><a href="{{ studio.phone|tel }}">{{ studio.phone }}</a></div>
+        <div class="contact-line"><i class="bi bi-envelope"></i><a href="mailto:{{ studio.email }}">{{ studio.email }}</a></div>
+        <div class="contact-line border-0"><i class="bi bi-clock"></i><span>{{ studio.working_hours }}</span></div>
+        <div class="ratio ratio-4x3 mt-2">
+          <iframe class="map-embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map to {{ studio.name }}"
+                  src="https://maps.google.com/maps?q={{ studio.map_embed_query|urlencode }}&amp;z=14&amp;output=embed"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

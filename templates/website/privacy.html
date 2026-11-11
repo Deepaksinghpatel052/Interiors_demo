@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Privacy policy — {{ studio.name }}{% endblock %}
+{% block content %}
+<header class="page-hero"><div class="container"><span class="eyebrow">Legal</span><h1>Privacy policy</h1></div></header>
+<section class="pb-5">
+  <div class="container prose">
+    <p>{{ studio.legal_name }} (“we”, “us”) respects your privacy. This policy explains what we collect when you use this website and how we use it.</p>
+    <h2>What we collect</h2>
+    <p>When you send an enquiry, book a consultation, use the cost estimator or chat with our assistant, we collect the details you share: your name, mobile number, email, property details, budget and messages.</p>
+    <h2>How we use it</h2>
+    <ul>
+      <li>To contact you about your enquiry and schedule consultations.</li>
+      <li>To prepare proposals, quotations and invoices if you become a client.</li>
+      <li>To improve our services. We never sell your data.</li>
+    </ul>
+    <h2>Client portal</h2>
+    <p>If you become a client, your designs, documents and payment records are visible only to you and to our team members working on your project.</p>
+    <h2>Retention and your rights</h2>
+    <p>We keep enquiry data for up to 24 months. You can ask us to see, correct or delete your data at any time by writing to <a href="mailto:{{ studio.email }}">{{ studio.email }}</a>.</p>
+    <h2>Contact</h2>
+    <p>{{ studio.legal_name }}, {{ studio.address }}. Phone: {{ studio.phone }}.</p>
+  </div>
+</section>
+{% endblock %}

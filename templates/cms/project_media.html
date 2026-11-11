@@ -1,0 +1,64 @@
+{% extends "studio/base.html" %}
+{% block page_title %}Photos — {{ obj.title }}{% endblock %}
+{% block heading %}<a href="{% url 'cms:projects' %}" class="text-muted text-decoration-none" aria-label="Back"><i class="bi bi-arrow-left"></i></a> {{ obj.title|truncatechars:50 }}{% endblock %}
+{% block erp_content %}
+{% include "cms/_project_tabs.html" %}
+<div class="row g-3">
+  <div class="col-xl-8">
+    <div class="panel mb-3"><div class="panel-head"><h2>Gallery ({{ obj.images.count }})</h2></div><div class="panel-body">
+      <form method="post" enctype="multipart/form-data" class="cms-drop mb-3" data-loading>{% csrf_token %}<input type="hidden" name="action" value="upload">
+        <i class="bi bi-cloud-arrow-up fs-3 text-accent"></i>
+        <div class="small text-muted mb-2">JPG, PNG or WebP · up to 12 photos at a time · resized automatically for fast loading</div>
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+          <input type="file" name="images" multiple accept="image/jpeg,image/png,image/webp" class="form-control form-control-sm" style="max-width:20rem" aria-label="Photos" required>
+          <button class="btn btn-accent btn-sm" data-loading-text="Uploading…">Upload</button>
+        </div>
+      </form>
+      {% if obj.images.all %}
+      <form method="post" data-loading>{% csrf_token %}<input type="hidden" name="action" value="save">
+        <div class="row g-2">
+          {% for img in obj.images.all %}
+          <div class="col-6 col-md-4">
+            <div class="cms-photo">
+              <img src="{{ img.image.url }}" alt="{{ img.caption }}" loading="lazy" decoding="async">
+              <div class="p-2">
+                <input class="form-control form-control-sm mb-1" name="caption-{{ img.pk }}" value="{{ img.caption }}" maxlength="160" placeholder="Caption" aria-label="Caption">
+                <div class="d-flex gap-2 align-items-center small">
+                  <input class="form-control form-control-sm" style="width:4.2rem" type="number" min="0" name="order-{{ img.pk }}" value="{{ img.order }}" aria-label="Order">
+                  <label class="form-check-label"><input class="form-check-input me-1" type="checkbox" name="mood-{{ img.pk }}" {% if img.in_mood_board %}checked{% endif %}>Mood board</label>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-1 small">
+                  <button class="btn btn-link btn-sm p-0" form="cover-{{ img.pk }}">Make cover</button>
+                  <label class="text-danger"><input class="form-check-input me-1" type="checkbox" name="delete-{{ img.pk }}">Delete</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="text-end mt-3"><button class="btn btn-ink btn-sm" data-loading-text="Saving…">Save gallery</button></div>
+      </form>
+      {% for img in obj.images.all %}<form method="post" id="cover-{{ img.pk }}" hidden>{% csrf_token %}<input type="hidden" name="action" value="cover"><input type="hidden" name="image" value="{{ img.pk }}"></form>{% endfor %}
+      {% else %}<div class="empty-mini py-3"><i class="bi bi-images"></i>No gallery photos yet.</div>{% endif %}
+    </div></div>
+  </div>
+  <div class="col-xl-4">
+    <div class="panel mb-3"><div class="panel-head"><h2>Cover</h2></div><div class="panel-body">{% if obj.cover %}<img src="{{ obj.cover.url }}" alt="Cover photo" class="w-100 rounded-3">{% endif %}</div></div>
+    <div class="panel"><div class="panel-head"><h2>Before / after</h2></div><div class="panel-body">
+      {% for ba in obj.before_afters.all %}
+      <div class="d-flex gap-2 align-items-center mb-2">
+        <img src="{{ ba.before.url }}" alt="Before" class="cms-thumb"><i class="bi bi-arrow-right text-muted"></i><img src="{{ ba.after.url }}" alt="After" class="cms-thumb">
+        <span class="small flex-grow-1 text-truncate">{{ ba.caption }}</span>
+        <form method="post" data-confirm="Remove this before/after pair?">{% csrf_token %}<input type="hidden" name="action" value="delete_ba"><input type="hidden" name="pair" value="{{ ba.pk }}"><button class="btn btn-light btn-sm" aria-label="Remove"><i class="bi bi-x-lg"></i></button></form>
+      </div>
+      {% endfor %}
+      <form method="post" enctype="multipart/form-data" class="form-compact row g-2 mt-1" novalidate data-loading>{% csrf_token %}<input type="hidden" name="action" value="before_after">
+        {% for field in ba_form %}<div class="col-12"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {% if field.widget_type == "clearablefile" %}<input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" accept="image/jpeg,image/png,image/webp" class="form-control form-control-sm {% if field.errors %}is-invalid{% endif %}">{% else %}{{ field }}{% endif %}
+          {% for e in field.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}</div>{% endfor %}
+        <div class="col-12 text-end"><button class="btn btn-accent btn-sm" data-loading-text="Uploading…">Add pair</button></div>
+      </form>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

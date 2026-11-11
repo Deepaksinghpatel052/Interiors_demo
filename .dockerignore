@@ -1,0 +1,28 @@
+# Keep the image small and free of secrets / local data.
+venv/
+.venv/
+**/__pycache__/
+*.pyc
+.git/
+.vscode/
+.idea/
+
+# secrets and settings come from .env_server at run time, never baked into the image
+.env
+.env_server
+.env.*
+!.env.example
+
+# local data (the server keeps its own in docker-data/)
+db.sqlite3
+db.sqlite3-journal
+docker-data/
+staticfiles/
+
+# docs and sales material are not needed to run the app
+docs/
+interior_designer_demo_prompt.md
+deploy/
+Dockerfile
+docker-compose.yml
+.dockerignore

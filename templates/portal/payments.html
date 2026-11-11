@@ -1,0 +1,50 @@
+{% extends "portal/base.html" %}
+{% block page_title %}Payments{% endblock %}
+{% block portal_content %}
+<div class="portal-head"><h1 class="h3 mb-1">Payments</h1><p class="text-muted mb-0">Your payment schedule, invoices and receipts in one place.</p></div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="kpi"><div class="kpi-label"><i class="bi bi-file-earmark-check"></i> Project value</div><div class="kpi-value">{{ contract|inr }}</div><div class="kpi-sub">incl. GST</div></div></div>
+  <div class="col-md-4"><div class="kpi"><div class="kpi-label"><i class="bi bi-check-circle"></i> Paid so far</div><div class="kpi-value">{{ paid|inr }}</div>
+    <div class="progress-thin mt-2"><span style="width:{{ pct }}%"></span></div><div class="kpi-sub mt-1">{{ pct }}% of the project</div></div></div>
+  <div class="col-md-4"><div class="kpi kpi-highlight"><div class="kpi-label"><i class="bi bi-hourglass-split"></i> Due now</div><div class="kpi-value">{{ due_total|inr }}</div>
+    <div class="kpi-sub">{% if due_invoices %}{{ due_invoices|length }} open invoice{{ due_invoices|length|pluralize }}{% else %}Nothing due — thank you!{% endif %}</div></div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="panel mb-3"><div class="panel-head"><h2>Payment schedule</h2></div><div class="panel-body py-1">
+      {% for s in schedule %}{% with inv=s.invoice %}
+      <div class="list-row align-items-center">
+        <span class="ms-dot {% if inv.status == 'paid' %}done{% elif inv %}in_progress{% endif %}"></span>
+        <div class="flex-grow-1"><div class="fw-semibold small">{{ s.label }} · {{ s.percent|pct }}%</div>
+          <div class="small text-muted">{% if inv.status == 'paid' %}Paid · {{ inv.number }}{% elif inv %}Invoiced {{ inv.date|date:"d M" }} · due {{ inv.due_date|date:"d M Y" }}{% else %}Invoiced when this stage is reached{% endif %}</div></div>
+        <div class="text-end"><div class="fw-semibold small">{{ s.amount|inr }}</div>
+          {% if inv and inv.status != 'paid' %}<span class="pill {% if inv.is_overdue %}pill-red{% else %}pill-blue{% endif %}">{% if inv.is_overdue %}Overdue{% else %}Due{% endif %}</span>{% elif inv %}<span class="pill pill-green">Paid</span>{% endif %}</div>
+      </div>
+      {% endwith %}{% empty %}<div class="empty-mini py-4"><i class="bi bi-calendar2-week"></i>Your payment schedule appears once you accept the quotation.</div>{% endfor %}
+    </div></div>
+
+    <div class="panel"><div class="panel-head"><h2>Invoices</h2></div><div class="panel-body py-1">
+      {% for inv in invoices %}
+      <a class="doc-row" href="{% url 'portal:invoice_pdf' inv.pk %}" target="_blank" rel="noopener">
+        <i class="bi bi-filetype-pdf"></i><span class="flex-grow-1"><span class="fw-semibold">{{ inv.number }}</span> · {{ inv.total|inr }}<br>
+          <span class="small text-muted">{% if inv.paid %}Paid {{ inv.paid|inr }}{% if inv.balance %} · balance {{ inv.balance|inr }}{% endif %}{% else %}Due {{ inv.due_date|date:"d M Y" }}{% endif %}</span></span>
+        <span class="pill {% if inv.status == 'paid' %}pill-green{% elif inv.is_overdue %}pill-red{% elif inv.status == 'partial' %}pill-accent{% else %}pill-blue{% endif %}">{% if inv.is_overdue %}Overdue{% else %}{{ inv.get_status_display }}{% endif %}</span></a>
+      {% empty %}<div class="empty-mini"><i class="bi bi-receipt-cutoff"></i>No invoices yet.</div>{% endfor %}
+    </div></div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="panel mb-3"><div class="panel-body">
+      <h2 class="h5">How to pay</h2>
+      <button type="button" class="btn btn-accent w-100 mb-2 d-flex align-items-center justify-content-center gap-2" data-locked="online_payments">
+        <i class="bi bi-credit-card"></i> Pay online (UPI / card) <span class="badge-locked ms-1"><i class="bi bi-lock-fill"></i> Full version</span></button>
+      <p class="small text-muted mb-2">Or pay by UPI / bank transfer and share the reference with us:</p>
+      <div class="comment small mb-2">{{ studio.bank_details }}</div>
+      <a class="btn btn-wa w-100" target="_blank" rel="noopener" href="{% wa_link studio.whatsapp 'Hi, I have made a payment for '|add:project.name|add:'. Reference: ' %}"><i class="bi bi-whatsapp me-1"></i> Share payment reference</a>
+    </div></div>
+    <p class="small text-muted"><i class="bi bi-shield-check me-1"></i>Every payment gets a GST invoice and appears here within a day.</p>
+  </div>
+</div>
+{% endblock %}

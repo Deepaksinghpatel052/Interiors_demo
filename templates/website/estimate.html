@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Interior cost estimator — {{ studio.name }}{% endblock %}
+{% block meta_description %}Get an indicative interior design cost range for your 1, 2 or 3 BHK, villa or office in {{ studio.city }}.{% endblock %}
+{% block floating %}
+<div class="mobile-cta align-items-center">
+  <div class="flex-grow-1 lh-sm"><div class="small text-muted">Indicative range</div><div class="fw-semibold" id="estRangeMini">—</div></div>
+  <a class="btn btn-accent" style="flex:none" href="#estimateCard">Get exact quote</a>
+</div>
+{% endblock %}
+{% block content %}
+<header class="page-hero pb-4">
+  <div class="container">
+    <span class="eyebrow">Cost estimator</span>
+    <h1>What will my interiors cost?</h1>
+    <p class="lead-text mb-0">Answer four quick questions for an indicative range. The exact quotation comes after a free site visit.</p>
+  </div>
+</header>
+
+<section class="pb-5">
+  <div class="container">
+    <form method="post" id="estimateForm" novalidate data-loading data-api="{% url 'website:api_estimate' %}"
+          data-default-rooms="{{ default_rooms_json }}" data-room-areas="{{ room_areas_json }}">
+      {% csrf_token %}
+      <div class="row g-4 g-lg-5">
+        <div class="col-lg-7">
+          {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+          <div class="book-step">
+            <div class="step-head"><span class="step-badge">1</span><h2 class="h4 mb-0">Property type</h2></div>
+            <div class="d-flex flex-wrap gap-2">
+              {% for v, l in property_types %}
+              <label class="chip-radio"><input type="radio" name="property_type" value="{{ v }}" {% if result.property_type == v or not result and forloop.counter == 2 %}checked{% endif %}><span>{{ l }}</span></label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="book-step">
+            <div class="step-head"><span class="step-badge">2</span><h2 class="h4 mb-0">Rooms to design</h2></div>
+            <div class="d-flex flex-wrap gap-2" id="roomChoices">
+              {% for key, room in rooms.items %}
+              <label class="chip-radio" data-room="{{ key }}"><input type="checkbox" name="rooms" value="{{ key }}" {% if key in posted_rooms %}checked{% endif %}><span>{{ room.0 }}</span></label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="book-step">
+            <div class="step-head"><span class="step-badge">3</span><h2 class="h4 mb-0">Finish level</h2></div>
+            <div class="row g-2 g-sm-3">
+              {% for v, l, hint in finishes %}
+              <div class="col-sm-4">
+                <label class="choice-card h-100">
+                  <input type="radio" name="finish" value="{{ v }}" {% if result.finish == v or not result and forloop.counter == 2 %}checked{% endif %}>
+                  <span class="choice-inner"><span class="fw-semibold d-block">{{ l }}</span><span class="small text-muted">{{ hint }}</span></span>
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="book-step">
+            <div class="step-head"><span class="step-badge">4</span><h2 class="h4 mb-0">Carpet area</h2></div>
+            <div class="input-group" style="max-width:20rem">
+              <input type="number" class="form-control" name="area" id="area" aria-label="Carpet area in square feet" min="50" max="20000" step="10" inputmode="numeric" value="{{ result.area|default:'' }}" aria-describedby="areaHelp">
+              <span class="input-group-text">sq ft</span>
+            </div>
+            <div class="form-text" id="areaHelp">We’ve suggested an area from the rooms you picked. Change it if you know the exact number.</div>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <aside class="booking-summary">
+            <div class="estimate-card" id="estimateCard" aria-live="polite">
+              <div class="fact-label" style="color:rgba(255,255,255,.65)">Indicative range</div>
+              <div class="estimate-range" id="estRange">{% if result %}{{ result.low|inr }} – {{ result.high|inr }}{% else %}—{% endif %}</div>
+              <div class="small" id="estMeta" style="color:rgba(255,255,255,.75)">{% if result %}{{ result.property_label }} · {{ result.area|num }} sq ft · {{ result.finish_label }} finish{% else %}Choose your options to see a range.{% endif %}</div>
+              <hr style="border-color:rgba(255,255,255,.15)">
+              <p class="small mb-0" style="color:rgba(255,255,255,.75)"><i class="bi bi-info-circle me-1"></i><strong>Indicative only;</strong> the final quote comes after a site visit. Includes design, furniture, false ceiling, lighting and painting; civil work, appliances and décor are extra.</p>
+            </div>
+
+            <div class="card-soft p-4 mt-3">
+              <h3 class="h5 mb-1" style="font-family:var(--font-sans)">Get an exact quote</h3>
+              <p class="small text-muted mb-3">We’ll call to plan a free site visit and send an itemised GST quotation.</p>
+              {{ form.website }}
+              <div class="mb-2">
+                <label class="form-label" for="{{ form.name.id_for_label }}">Name <span class="text-accent">*</span></label>{{ form.name }}
+                {% for e in form.name.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="mb-2">
+                <label class="form-label" for="{{ form.mobile.id_for_label }}">Mobile <span class="text-accent">*</span></label>{{ form.mobile }}
+                {% for e in form.mobile.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>{{ form.email }}
+              </div>
+              <button class="btn btn-accent w-100" type="submit" data-loading-text="Sending…">Get an exact quote</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/showcase.js' %}" defer></script>{% endblock %}

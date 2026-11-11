@@ -1,0 +1,93 @@
+{% extends "portal/base.html" %}
+{% block page_title %}{{ project.name }}{% endblock %}
+{% block portal_content %}
+<section class="portal-hero">
+  <div class="row g-4 align-items-center">
+    <div class="col-lg-7">
+      <div class="small text-uppercase fw-semibold" style="letter-spacing:.12em;color:var(--accent-light)">Welcome back, {{ user.first_name|default:user.username }}</div>
+      <h1 class="h2 text-white mb-2">{{ project.name }}</h1>
+      <div class="d-flex flex-wrap gap-2 mb-3"><span class="pill pill-blue">{{ project.get_stage_display }}</span><span class="pill" style="background:rgba(255,255,255,.12);color:#fff">{{ project.code }}</span></div>
+      <div class="d-flex justify-content-between small mb-1" style="color:rgba(255,255,255,.75)"><span>Overall progress</span><strong class="text-white">{{ project.progress }}%</strong></div>
+      <div class="progress-thin portal-progress"><span style="width:{{ project.progress }}%"></span></div>
+      {% if next_milestone %}<p class="small mt-3 mb-0" style="color:rgba(255,255,255,.8)"><i class="bi bi-flag me-1"></i>Next: <strong class="text-white">{{ next_milestone.title }}</strong>{% if next_milestone.due_date %} · by {{ next_milestone.due_date|date:"d M Y" }}{% endif %}</p>{% endif %}
+    </div>
+    <div class="col-lg-5">
+      {% if project.designer %}
+      <div class="designer-card">
+        <span class="avatar" style="width:48px;height:48px;font-size:1.1rem">{{ project.designer.first_name|first }}</span>
+        <div class="flex-grow-1"><div class="small" style="color:rgba(255,255,255,.65)">Your designer</div><div class="fw-semibold text-white">{{ project.designer.get_full_name }}</div></div>
+        <a class="btn btn-sm btn-wa" target="_blank" rel="noopener" href="{% wa_link studio.whatsapp 'Hi '|add:project.designer.first_name|add:', this is '|add:user.get_full_name|add:' about '|add:project.name|add:'.' %}" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+        <a class="btn btn-sm btn-light-outline" href="{{ studio.phone|tel }}" aria-label="Call"><i class="bi bi-telephone"></i></a>
+      </div>
+      {% endif %}
+      <div class="row g-2 mt-1">
+        <div class="col-6"><div class="hero-fact"><span>Started</span><strong>{{ project.start_date|date:"d M Y" }}</strong></div></div>
+        <div class="col-6"><div class="hero-fact"><span>Handover target</span><strong>{{ project.target_date|date:"d M Y"|default:"—" }}</strong></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if waiting_designs or due_invoices %}
+<div class="row g-3 mb-3">
+  {% if waiting_designs %}
+  <div class="col-md-6"><a class="action-card" href="{% url 'portal:designs' %}">
+    <span class="why-icon"><i class="bi bi-images"></i></span>
+    <span class="flex-grow-1"><strong>{{ waiting_designs }} design{{ waiting_designs|pluralize }} waiting for your approval</strong><br><span class="small text-muted">Approve, or tell us what to change</span></span>
+    <i class="bi bi-chevron-right"></i></a></div>
+  {% endif %}
+  {% if due_invoices %}
+  <div class="col-md-6"><a class="action-card" href="{% url 'portal:payments' %}">
+    <span class="why-icon"><i class="bi bi-wallet2"></i></span>
+    <span class="flex-grow-1"><strong>{{ due_total|inr }} due</strong><br><span class="small text-muted">{{ due_invoices|length }} invoice{{ due_invoices|length|pluralize }} · UPI or bank transfer</span></span>
+    <i class="bi bi-chevron-right"></i></a></div>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="panel mb-3">
+      <div class="panel-head"><h2>Timeline</h2><a class="small" href="{% url 'portal:timeline' %}">Details</a></div>
+      <div class="panel-body">
+        <ol class="stepper">
+          {% for m in milestones %}
+          <li class="{{ m.status }}"><span class="stepper-dot">{% if m.status == 'done' %}<i class="bi bi-check-lg"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
+            <span class="stepper-title">{{ m.title }}</span>
+            <span class="stepper-date">{% if m.status == 'done' %}Done{% elif m.due_date %}{{ m.due_date|date:"d M" }}{% endif %}</span></li>
+          {% endfor %}
+        </ol>
+      </div>
+    </div>
+    {% if latest_update %}
+    <div class="panel">
+      <div class="panel-head"><h2>Latest from site</h2><a class="small" href="{% url 'portal:updates' %}">All updates</a></div>
+      <div class="panel-body">
+        <div class="small text-muted mb-1">{{ latest_update.created_at|date:"d M Y, h:i A" }} · {{ latest_update.author.first_name }}</div>
+        <p>{{ latest_update.message }}</p>
+        {% if latest_update.photos.all %}<div class="thumb-grid">{% for ph in latest_update.photos.all %}<a href="{{ ph.image.url }}" data-lightbox="latest"><img src="{{ ph.image.url }}" alt="Site photo" loading="lazy" width="300" height="200"></a>{% endfor %}</div>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  <div class="col-lg-5">
+    {% if latest_design %}
+    <a class="panel d-block text-decoration-none mb-3 design-teaser" href="{% url 'portal:design_detail' latest_design.pk %}">
+      {% with img=latest_design.images.first %}{% if img %}<img src="{{ img.image.url }}" alt="{{ latest_design.title }}" loading="lazy" width="600" height="400">{% endif %}{% endwith %}
+      <div class="panel-body">
+        <div class="d-flex justify-content-between align-items-center gap-2 mb-1"><span class="small text-muted">Latest design · v{{ latest_design.version }}</span>
+          <span class="pill {% if latest_design.status == 'approved' %}pill-green{% elif latest_design.status == 'changes' %}pill-red{% else %}pill-blue{% endif %}">{% if latest_design.status == 'shared' %}Waiting for you{% else %}{{ latest_design.get_status_display }}{% endif %}</span></div>
+        <div class="fw-semibold text-body">{{ latest_design.title }}</div>
+      </div>
+    </a>
+    {% endif %}
+    <div class="panel">
+      <div class="panel-body d-grid gap-2">
+        <a class="btn btn-outline-ink" href="{% url 'portal:documents' %}"><i class="bi bi-folder2-open me-1"></i> Quotations, invoices &amp; drawings</a>
+        <a class="btn btn-outline-ink" href="{% url 'portal:requests' %}"><i class="bi bi-chat-square-dots me-1"></i> Raise a request or snag{% if open_requests %} <span class="pill pill-accent ms-1">{{ open_requests }} open</span>{% endif %}</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% include "partials/lightbox.html" %}
+{% endblock %}

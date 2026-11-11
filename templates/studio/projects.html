@@ -1,0 +1,66 @@
+{% extends "studio/base.html" %}
+{% load static %}
+{% block page_title %}Projects{% endblock %}
+{% block heading %}Projects <span class="text-muted fw-normal small">· {{ projects|length }}</span>{% endblock %}
+{% block actions %}
+<div class="btn-group btn-group-sm" role="group" aria-label="View">
+  <a class="btn {% if view != 'list' %}btn-ink{% else %}btn-light{% endif %}" href="?view=board" aria-label="Board view"><i class="bi bi-kanban"></i></a>
+  <a class="btn {% if view == 'list' %}btn-ink{% else %}btn-light{% endif %}" href="?view=list" aria-label="List view"><i class="bi bi-list-ul"></i></a>
+</div>
+{% if erp_role == "owner" %}<a class="btn btn-accent btn-sm" href="{% url 'studio:project_create' %}"><i class="bi bi-plus-lg"></i><span class="d-none d-sm-inline ms-1">New project</span></a>{% endif %}
+{% endblock %}
+
+{% block erp_content %}
+{% if not projects %}
+<div class="panel"><div class="empty-mini py-5"><i class="bi bi-house-gear"></i>No projects yet. Convert a won lead into a client to start one.
+  <div class="mt-2"><a class="btn btn-ink btn-sm" href="{% url 'studio:leads' %}">Go to leads</a></div></div></div>
+{% elif view == "list" %}
+<div class="panel">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="small text-muted"><tr><th>Project</th><th>Client</th><th>Stage</th><th style="min-width:9rem">Progress</th><th>Designer</th><th class="text-end">Budget</th><th>Target</th></tr></thead>
+      <tbody>
+        {% for p in projects %}
+        <tr>
+          <td><a class="fw-semibold" href="{{ p.get_absolute_url }}">{{ p.name }}</a><div class="small text-muted">{{ p.code }}</div></td>
+          <td class="small">{{ p.client_name }}</td>
+          <td><span class="pill pill-accent">{{ p.get_stage_display }}</span></td>
+          <td><div class="d-flex align-items-center gap-2"><div class="progress-thin flex-grow-1"><span style="width:{{ p.progress }}%"></span></div><span class="small">{{ p.progress }}%</span></div></td>
+          <td class="small">{{ p.designer.first_name|default:"—" }}</td>
+          <td class="text-end small">{{ p.budget|inr }}</td>
+          <td class="small">{{ p.target_date|date:"d-m-Y"|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="kanban" id="projectBoard" data-move-url="{% url 'studio:project_move' %}">
+  {% for col in columns %}
+  <section class="kanban-col" aria-label="{{ col.label }}">
+    <div class="kanban-head"><span>{{ col.label }}</span><span class="kanban-count">{{ col.projects|length }}</span></div>
+    <div class="kanban-list" data-stage="{{ col.value }}">
+      {% for p in col.projects %}
+      <article class="kcard" data-id="{{ p.pk }}">
+        <a class="kname" href="{{ p.get_absolute_url }}">{{ p.name }}</a>
+        <div class="kmeta mb-2">{{ p.code }} · {{ p.client_name }}</div>
+        <div class="d-flex align-items-center gap-2 mb-2"><div class="progress-thin flex-grow-1"><span style="width:{{ p.progress }}%"></span></div><span class="small text-muted">{{ p.progress }}%</span></div>
+        <div class="d-flex flex-wrap gap-1 align-items-center">
+          <span class="pill pill-grey">{{ p.budget|inr_short }}</span>
+          {% if p.open_tasks %}<span class="pill pill-blue"><i class="bi bi-check2-square"></i> {{ p.open_tasks }}</span>{% endif %}
+          {% if p.designer %}<span class="avatar ms-auto" style="width:22px;height:22px;font-size:.7rem" title="{{ p.designer.get_full_name }}">{{ p.designer.first_name|first }}</span>{% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" defer></script>
+<script src="{% static 'js/erp.js' %}" defer></script>
+{% endblock %}
