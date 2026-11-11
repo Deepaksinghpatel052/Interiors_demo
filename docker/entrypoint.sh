@@ -34,9 +34,9 @@ case "$1" in
                 else
                     python manage.py seed_demo
                 fi
-                # Replace the public demo admin password with the private one from .env_server (first start only).
+                # Replace the public demo admin password with the private one from .env (first start only).
                 if [ -n "$ADMIN_PASSWORD" ]; then
-                    python manage.py shell --no-imports -c "import os; from django.contrib.auth.models import User; u = User.objects.filter(username='admin').first(); u and (u.set_password(os.environ['ADMIN_PASSWORD']) or u.save()); print('admin password set from .env_server' if u else 'no admin user')"
+                    python manage.py shell --no-imports -c "import os; from django.contrib.auth.models import User; u = User.objects.filter(username='admin').first(); u and (u.set_password(os.environ['ADMIN_PASSWORD']) or u.save()); print('admin password set from .env' if u else 'no admin user')"
                 fi
             fi
         fi

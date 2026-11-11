@@ -1,6 +1,7 @@
 # Studio OS on the server: https://interiors.devnixplus.com
-#   Start / update:  docker compose --env-file .env_server up -d --build
-#   Logs:            docker compose --env-file .env_server logs -f web
+#   Start / update:  docker compose up -d --build
+#   Logs:            docker compose logs -f web
+# Settings come from .env (the same file Django uses; APP_PORT is read from it too).
 # The app listens on 127.0.0.1:${APP_PORT} only; the host's nginx proxies to it (deploy/nginx/).
 # Data lives in ./docker-data/ (database, uploads, static files) and survives rebuilds.
 name: interiors
@@ -8,7 +9,7 @@ name: interiors
 x-app: &app
   image: interiors-studio:latest
   restart: unless-stopped
-  env_file: .env_server
+  env_file: .env
   environment:
     DATABASE_URL: sqlite:////app/data/db.sqlite3
     CACHE_DIR: /app/data/cache

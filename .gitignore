@@ -6,6 +6,5 @@ __pycache__/
 staticfiles/
 .idea/
 .vscode/
-.env_server
 docker-data/
 deploy/

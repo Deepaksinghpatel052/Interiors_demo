@@ -7,9 +7,8 @@ venv/
 .vscode/
 .idea/
 
-# secrets and settings come from .env_server at run time, never baked into the image
+# secrets and settings come from .env at run time (env_file), never baked into the image
 .env
-.env_server
 .env.*
 !.env.example
 

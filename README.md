@@ -28,7 +28,7 @@ macOS/Linux: use `python3 -m venv venv` and `venv/bin/python` instead.
 ## Run on a server with Docker
 
 The app runs in Docker on port `APP_PORT` (9005) behind the server's own nginx, at https://interiors.devnixplus.com:
-`docker compose --env-file .env_server up -d --build`. Server settings: `.env_server`; nginx config:
+`docker compose up -d --build`. Settings: `.env` (server values are marked in `.env.example`); nginx config:
 `deploy/nginx/interiors.devnixplus.com.conf`. Full steps: **docs/DOCKER_DEPLOY.md**.
 
 ## Demo logins

@@ -14,7 +14,7 @@ Visitor ──HTTPS──> nginx on the server ──> 127.0.0.1:9005 ──> Do
 |---|---|
 | `Dockerfile` | The image. All Python requirements are installed **inside** it — nothing on the server. |
 | `docker-compose.yml` | Two containers: `web` (the site) and `scheduler` (daily automations + nightly demo reset). |
-| `.env_server` | Server settings: port `APP_PORT=9005`, domain, secret key, demo options. **Private.** |
+| `.env` | Settings (same file Django uses): port `APP_PORT=9005`, domain, secret key, demo options. **Private, not in git.** Server values are marked in `.env.example`. |
 | `deploy/nginx/interiors.devnixplus.com.conf` | nginx config for your server. |
 | `docker-data/` (created on the server) | Database, uploads and static files. Survives rebuilds — back this up. |
 
@@ -29,12 +29,13 @@ git clone https://github.com/Deepaksinghpatel052/Interiors_demo.git /opt/interio
 cd /opt/interiors
 
 # 2. Copy the private settings file from your PC (it is not in git):
-#    scp .env_server user@SERVER:/opt/interiors/
+#    create /opt/interiors/.env on the server: cp .env.example .env, then set the "server:" values
+#    (SECRET_KEY, DEBUG=False, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, BEHIND_HTTPS_PROXY, TRUST_X_REAL_IP, ADMIN_PASSWORD)
 #    Check DEVNIX_WHATSAPP, ANTHROPIC_API_KEY etc., then build and start:
-docker compose --env-file .env_server up -d --build
+docker compose up -d --build
 
 # 3. Watch the first start until "Listening at: http://0.0.0.0:8000":
-docker compose --env-file .env_server logs -f web
+docker compose logs -f web
 
 # 4. Check it answers on the port:
 curl -I -H "Host: interiors.devnixplus.com" http://127.0.0.1:9005/
@@ -62,12 +63,12 @@ The snapshot is only loaded when the server database is **empty**. To replace th
 server (this deletes what is there):
 
 ```bash
-docker compose --env-file .env_server down
+docker compose down
 sudo rm -rf docker-data/data docker-data/media
-git pull && docker compose --env-file .env_server up -d --build
+git pull && docker compose up -d --build
 ```
 
-`.env_server` has `RESET_DEMO_NIGHTLY=False`, so the data stays exactly as loaded. Set it to `True` to rebuild
+`.env` has `RESET_DEMO_NIGHTLY=False`, so the data stays exactly as loaded. Set it to `True` to rebuild
 the standard demo data with fresh dates every night at `RESET_AT` (product enquiries are kept).
 
 ## 2. nginx + HTTPS certificate
@@ -90,22 +91,22 @@ sudo nginx -t && sudo systemctl reload nginx
 - Changed `APP_PORT`? Change the port in the `upstream` block too.
 
 Open https://interiors.devnixplus.com — demo logins: owner / designer / client = `demo12345`.
-The **admin** login uses `ADMIN_PASSWORD` from `.env_server` (set on the first start), not the public `admin12345`.
+The **admin** login uses `ADMIN_PASSWORD` from `.env` (set on the first start), not the public `admin12345`.
 
 ## 3. Everyday commands (run in /opt/interiors)
 
 | Task | Command |
 |---|---|
-| Update after code changes | `docker compose --env-file .env_server up -d --build` |
-| Restart | `docker compose --env-file .env_server restart` |
-| Logs | `docker compose --env-file .env_server logs -f web` (or `scheduler`) |
-| Stop | `docker compose --env-file .env_server down` |
-| Status | `docker compose --env-file .env_server ps` |
-| Reset demo now | `docker compose --env-file .env_server exec web python manage.py reset_demo --offline` |
-| Any manage.py command | `docker compose --env-file .env_server exec web python manage.py <command>` |
-| Django shell | `docker compose --env-file .env_server exec web python manage.py shell` |
+| Update after code changes | `docker compose up -d --build` |
+| Restart | `docker compose restart` |
+| Logs | `docker compose logs -f web` (or `scheduler`) |
+| Stop | `docker compose down` |
+| Status | `docker compose ps` |
+| Reset demo now | `docker compose exec web python manage.py reset_demo --offline` |
+| Any manage.py command | `docker compose exec web python manage.py <command>` |
+| Django shell | `docker compose exec web python manage.py shell` |
 
-Always pass `--env-file .env_server`: it carries `APP_PORT`.
+Docker reads `APP_PORT` and all settings from `.env` in the project folder.
 
 ## 4. Daily jobs (no cron needed)
 
@@ -129,18 +130,18 @@ Same files, new folder and port per client (e.g. `/opt/sharma`, `APP_PORT=9006`,
 `ALLOWED_HOSTS`/`CSRF_TRUSTED_ORIGINS`, `DEMO_MODE=False`, new `SECRET_KEY`, `AUTO_SEED=False`), then:
 
 ```bash
-docker compose -p sharma --env-file .env_server up -d --build
-docker compose -p sharma --env-file .env_server exec web python manage.py seed_demo --offline
-docker compose -p sharma --env-file .env_server exec web python manage.py setup_client --owner-username sharma --owner-name "Rohit Sharma"
+docker compose -p sharma up -d --build
+docker compose -p sharma exec web python manage.py seed_demo --offline
+docker compose -p sharma exec web python manage.py setup_client --owner-username sharma --owner-name "Rohit Sharma"
 ```
 
 `setup_client` writes `DEMO_MODE=False` into the container's `.env`, which is lost on rebuild — so also
-keep `DEMO_MODE=False` in that client's `.env_server`. Copy the nginx config with the new domain and port.
+keep `DEMO_MODE=False` in that client's `.env`. Copy the nginx config with the new domain and port.
 See `docs/NEW_CLIENT_SETUP.md` for the rest of the onboarding.
 
 ## Notes
 
 - The app port is bound to `127.0.0.1`, so only nginx can reach it. That is why `TRUST_X_REAL_IP=True`
   is safe (rate limits see the visitor's real IP) — don't publish the port on `0.0.0.0`.
-- A new `SECRET_KEY` is already in `.env_server`. Never share or commit that file.
+- Use a new `SECRET_KEY` on every server. Never share or commit `.env` (it is in `.gitignore`).
 - Image size is about 630 MB (Python + PDF/AI libraries).
