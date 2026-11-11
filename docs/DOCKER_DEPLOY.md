@@ -67,9 +67,8 @@ sudo rm -rf docker-data/data docker-data/media
 git pull && docker compose --env-file .env_server up -d --build
 ```
 
-Note: while `DEMO_MODE=True` and `RESET_DEMO_NIGHTLY=True`, the nightly reset rebuilds the standard demo
-data with fresh dates (product enquiries are kept). Set `RESET_DEMO_NIGHTLY=False` to keep the snapshot
-data exactly as loaded.
+`.env_server` has `RESET_DEMO_NIGHTLY=False`, so the data stays exactly as loaded. Set it to `True` to rebuild
+the standard demo data with fresh dates every night at `RESET_AT` (product enquiries are kept).
 
 ## 2. nginx + HTTPS certificate
 
@@ -90,8 +89,8 @@ sudo nginx -t && sudo systemctl reload nginx
 - Project not in `/opt/interiors`? Change the two `alias` paths in the config.
 - Changed `APP_PORT`? Change the port in the `upstream` block too.
 
-Open https://interiors.devnixplus.com — logins: owner / designer / client = `demo12345`, admin = `admin12345`.
-**Change the admin password** after the first login (Admin → Users), because the site is public.
+Open https://interiors.devnixplus.com — demo logins: owner / designer / client = `demo12345`.
+The **admin** login uses `ADMIN_PASSWORD` from `.env_server` (set on the first start), not the public `admin12345`.
 
 ## 3. Everyday commands (run in /opt/interiors)
 
