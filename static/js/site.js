@@ -37,6 +37,11 @@
       $(".demo-ribbon").slideUp(150);
       document.cookie = "demo_ribbon=hidden; path=/; max-age=" + 60 * 60 * 24 * 7 + "; SameSite=Lax";
     });
+    // ...and bring it back (with the Tour button) from the small "Demo & tour" button
+    $("[data-ribbon-show]").on("click", function () {
+      document.cookie = "demo_ribbon=; path=/; max-age=0; SameSite=Lax";
+      window.location.reload();
+    });
 
     // Navbar border on scroll
     var $nav = $(".site-nav");

@@ -41,7 +41,7 @@ case "$1" in
             fi
         fi
         exec gunicorn config.wsgi:application \
-            --bind 0.0.0.0:8000 \
+            --bind "0.0.0.0:${APP_PORT:?APP_PORT must be set in .env}" \
             --workers "${GUNICORN_WORKERS:-3}" \
             --timeout "${GUNICORN_TIMEOUT:-120}" \
             --access-logfile - --error-logfile -

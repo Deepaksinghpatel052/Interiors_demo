@@ -119,6 +119,11 @@ img { max-width: 100%; height: auto; }
 @media (pointer: coarse) { .demo-ribbon .btn { min-height: 2.25rem; display: inline-flex; align-items: center; } }
 .demo-ribbon .ribbon-close { background: none; border: 0; color: rgba(255,255,255,.82); opacity: .7; padding: 0 .25rem; }
 .demo-ribbon .ribbon-close:hover { opacity: 1; }
+/* Shown instead of the demo bar after it was closed: one click brings the bar (and Tour) back. */
+.demo-reopen { position: fixed; z-index: 1070; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); display: inline-flex; align-items: center; gap: .4rem; border: 0; border-radius: 999px; background: var(--deep); color: #fff; padding: .55rem 1rem; font-size: .85rem; font-weight: 600; box-shadow: 0 10px 30px -10px rgba(0,0,0,.55); }
+.demo-reopen:hover, .demo-reopen:focus-visible { background: var(--accent); color: var(--on-accent, #fff); }
+@media (max-width: 991.98px) { .demo-reopen { bottom: calc(88px + env(safe-area-inset-bottom)); } }   /* above mobile bottom bars */
+@media print { .demo-reopen { display: none; } }
 
 /* Navbar -------------------------------------------------------------------- */
 .site-nav {
@@ -760,6 +765,10 @@ a.chat-source:hover { border-color: var(--accent); color: var(--accent); }
 .tour-bar { height: 4px; background: #EEF1F5; border-radius: 99px; overflow: hidden; margin-bottom: .75rem; }
 .tour-bar span { display: block; height: 100%; background: var(--gradient, var(--accent)); }
 .tour-actions { display: flex; gap: .5rem; justify-content: space-between; align-items: center; }
+/* Never taller than the visible window (above the taskbar); text scrolls, Back / Next stay visible. */
+.tour-card { max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; }
+.tour-card.sheet { max-height: calc(100dvh - 24px - env(safe-area-inset-bottom)); }
+.tour-card .tour-actions { position: sticky; bottom: -1rem; background: #fff; padding: .5rem 0 1rem; margin-bottom: -1rem; }
 .tour-actions .tour-next { margin-left: auto; min-width: 6rem; }
 .tour-resume { position: fixed; z-index: 1080; left: 50%; transform: translateX(-50%); bottom: calc(84px + env(safe-area-inset-bottom)); border: 0; border-radius: 999px; background: var(--deep); color: #fff; padding: .55rem .6rem .55rem 1rem; font-size: .85rem; font-weight: 600; box-shadow: 0 10px 30px -10px rgba(0,0,0,.55); display: flex; align-items: center; gap: .25rem; white-space: nowrap; }
 .tour-resume:hover { background: var(--accent); }

@@ -115,7 +115,8 @@
     if (!$el) {
       shade(0, 0, 0, 0, vw, vh);
       $spot.css({ top: vh / 2, left: vw / 2, width: 0, height: 0 });
-      $card.toggleClass("sheet", mobile).css(mobile ? { top: "", left: "" } : { top: Math.max(16, (vh - ch) / 2), left: (vw - cw) / 2 });
+      $card.toggleClass("sheet", mobile).css(mobile ? { top: "", left: "" }
+        : { top: clamp((vh - ch) / 2, 12, vh - ch - 12), left: clamp((vw - cw) / 2, 12, vw - cw - 12) });
       return;
     }
     var r = $el[0].getBoundingClientRect(), pad = 8;
@@ -125,11 +126,23 @@
     shade(top, left, w, h, vw, vh);
     if (mobile) { $card.addClass("sheet").css({ top: "", left: "" }); return; }
     $card.removeClass("sheet");
-    var y = top + h + 14, x = Math.min(Math.max(12, left), vw - cw - 12);
-    if (y + ch > vh - 12) y = top - ch - 14;          // not enough room below: go above
-    if (y < 12) { y = vh - ch - 20; x = vw - cw - 20; }  // tall target: pin to the bottom-right corner
-    $card.css({ top: y, left: x });
+    var m = 12, gap = 14, x, y;
+    var fitsBelow = top + h + gap + ch <= vh - m, fitsAbove = top - gap - ch >= m;
+    if (fitsBelow || fitsAbove) {                       // below the highlight, else above it
+      y = fitsBelow ? top + h + gap : top - ch - gap;
+      x = left;
+    } else if (left + w + gap + cw <= vw - m) {         // tall target: beside it, on the right
+      x = left + w + gap; y = top;
+    } else if (left - gap - cw >= m) {                  // ... or on the left
+      x = left - cw - gap; y = top;
+    } else {                                            // no free side: bottom-right corner
+      x = vw - cw - 20; y = vh - ch - 20;
+    }
+    // Always keep the whole card (and its Next button) inside the visible window.
+    $card.css({ top: clamp(y, m, vh - ch - m), left: clamp(x, m, vw - cw - m) });
   }
+
+  function clamp(v, min, max) { return Math.max(min, Math.min(v, Math.max(min, max))); }
 
   // four dim panels around the highlighted box (more reliable than a huge box-shadow)
   function shade(t, l, w, h, vw, vh) {

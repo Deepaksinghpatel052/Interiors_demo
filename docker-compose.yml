@@ -1,9 +1,8 @@
-# Studio OS on the server: https://interiors.devnixplus.com
+# Studio OS in Docker.
 #   Start / update:  docker compose up -d --build
 #   Logs:            docker compose logs -f web
-# Settings come from .env (the same file Django uses; APP_PORT is read from it too).
-# The app listens on 127.0.0.1:${APP_PORT} only; the host's nginx proxies to it (deploy/nginx/).
-# Data lives in ./docker-data/ (database, uploads, static files) and survives rebuilds.
+# Every value (port, data folder, database, cache, timezone, ...) comes from .env — see .env.example.
+# The app listens on 127.0.0.1:${APP_PORT}; open http://localhost:${APP_PORT}/
 name: interiors
 
 x-app: &app
@@ -11,8 +10,8 @@ x-app: &app
   restart: unless-stopped
   env_file: .env
   environment:
-    DATABASE_URL: sqlite:////app/data/db.sqlite3
-    CACHE_DIR: /app/data/cache
+    DATABASE_URL: ${DOCKER_DATABASE_URL:?set DOCKER_DATABASE_URL in .env}
+    CACHE_DIR: ${DOCKER_CACHE_DIR:?set DOCKER_CACHE_DIR in .env}
 
 services:
   web:
@@ -20,24 +19,24 @@ services:
     build: .
     command: web
     ports:
-      - "127.0.0.1:${APP_PORT:-9005}:8000"
+      - "127.0.0.1:${APP_PORT:?set APP_PORT in .env}:${APP_PORT}"
     volumes:
-      - ./docker-data/data:/app/data
-      - ./docker-data/media:/app/media
-      - ./docker-data/staticfiles:/app/staticfiles
+      - ${DOCKER_DATA_DIR:?set DOCKER_DATA_DIR in .env}/data:/app/data
+      - ${DOCKER_DATA_DIR}/media:/app/media
+      - ${DOCKER_DATA_DIR}/staticfiles:/app/staticfiles
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen(u.Request('http://127.0.0.1:8000/privacy/', headers={'Host': 'localhost'}), timeout=5)\" > /dev/null 2>&1"]
+      test: ["CMD-SHELL", "python -c \"import os, urllib.request as u; u.urlopen('http://127.0.0.1:%s/privacy/' % os.environ['APP_PORT'], timeout=5)\" > /dev/null 2>&1"]
       interval: 30s
       timeout: 10s
-      start_period: 600s   # first start loads the demo data
+      start_period: 600s   # first start loads the data snapshot
       retries: 3
 
   scheduler:
     <<: *app
     command: scheduler
     volumes:
-      - ./docker-data/data:/app/data
-      - ./docker-data/media:/app/media
+      - ${DOCKER_DATA_DIR}/data:/app/data
+      - ${DOCKER_DATA_DIR}/media:/app/media
     depends_on:
       web:
         condition: service_started

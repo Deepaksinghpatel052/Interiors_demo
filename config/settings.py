@@ -61,6 +61,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",   # serves CSS/JS itself (works with or without nginx)
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -102,7 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # India-first locale
 LANGUAGE_CODE = "en-in"
-TIME_ZONE = "Asia/Kolkata"
+TIME_ZONE = env("TZ", default="Asia/Kolkata")
 USE_I18N = True
 USE_TZ = True
 DATE_FORMAT = "d-m-Y"
@@ -112,9 +113,11 @@ DATE_INPUT_FORMATS = ["%d-%m-%Y", "%Y-%m-%d", "%d/%m/%Y"]
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = env.path("STATIC_ROOT", default=BASE_DIR / "staticfiles")
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = env.path("MEDIA_ROOT", default=BASE_DIR / "media")
+# Let Django serve uploaded photos itself (no nginx in front, e.g. Docker on localhost).
+SERVE_MEDIA = env.bool("SERVE_MEDIA", default=DEBUG)
 
 # Upload limits (validated again per field in forms)
 MAX_UPLOAD_MB = 8
@@ -134,10 +137,9 @@ STORAGES = {
                     else "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"},
 }
 
-if not DEBUG:
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
+# HTTPS-only login cookies: on for a live https site, off for plain http (localhost).
+SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = env.bool("SECURE_COOKIES", default=not DEBUG)
+SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Running behind the server's nginx (Docker deploy). Only enable these when the app port is reachable
 # from nginx alone (docker-compose binds it to 127.0.0.1), otherwise clients could fake the headers.
@@ -157,5 +159,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "test":
     import tempfile
 
     PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+    # Tests must not depend on .env (DEBUG=False there would need a collectstatic manifest).
+    STORAGES["staticfiles"] = {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}
     MEDIA_ROOT = Path(tempfile.mkdtemp(prefix="studio-test-media-"))
     CACHES = {"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}

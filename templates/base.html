@@ -23,7 +23,9 @@
 <body class="{% block body_class %}has-mobile-cta{% endblock %}" data-role="{{ erp_role }}"{% if DEMO_MODE %} data-role-url="{% url 'core:switch_role' 'ROLE' %}"{% endif %}>
   <a class="visually-hidden-focusable position-absolute top-0 start-0 p-2 bg-white z-3" href="#main">Skip to content</a>
 
-  {% block ribbon %}{% if DEMO_MODE and not demo_ribbon_hidden %}{% include "partials/demo_ribbon.html" %}{% endif %}{% endblock %}
+  {% block ribbon %}{% if DEMO_MODE %}{% if demo_ribbon_hidden %}
+  <button type="button" class="demo-reopen" data-ribbon-show title="Show the demo bar again (Tour, roles, WhatsApp)"><i class="bi bi-signpost-2"></i> Demo &amp; tour</button>
+  {% else %}{% include "partials/demo_ribbon.html" %}{% endif %}{% endif %}{% endblock %}
 
   {% block nav %}{% include "partials/nav.html" %}{% endblock %}
 

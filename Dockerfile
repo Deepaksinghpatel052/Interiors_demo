@@ -1,13 +1,12 @@
-# Studio OS (Aangan Interiors demo) — Django + gunicorn. nginx stays on the host server (see deploy/nginx/).
+# Studio OS (Aangan Interiors demo) — Django + gunicorn. All settings come from .env at run time.
 FROM python:3.12-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    TZ=Asia/Kolkata
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# tzdata: the scheduler's daily jobs run on Indian time.
+# tzdata: lets TZ from .env (e.g. Asia/Kolkata) set the clock for the scheduler's daily jobs.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends tzdata \
  && rm -rf /var/lib/apt/lists/*
@@ -28,6 +27,6 @@ RUN sed -i 's/\r$//' docker/*.sh \
  && useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin app \
  && chown -R app:app /app /opt/media_seed
 
-EXPOSE 8000
+# The port comes from APP_PORT in .env (see docker-compose.yml).
 ENTRYPOINT ["/app/docker/entrypoint.sh"]
 CMD ["web"]
