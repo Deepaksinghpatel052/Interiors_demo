@@ -21,11 +21,15 @@ case "$1" in
     web)
         python manage.py migrate --noinput
         python manage.py collectstatic --noinput --verbosity 0
+        # Empty database (first start on a new server): load the data snapshot saved with
+        # `manage.py snapshot_data` (same data as the developer's computer); without one, build the demo data.
         if [ "${AUTO_SEED:-True}" = "True" ]; then
-            if ! python manage.py shell -c "import sys; from django.contrib.auth.models import User; sys.exit(0 if User.objects.exists() else 1)"; then
-                echo "Empty database: loading the demo data (about a minute)..."
+            if ! python manage.py shell --no-imports -c "import sys; from django.contrib.auth.models import User; sys.exit(0 if User.objects.exists() else 1)" > /dev/null 2>&1; then
+                if [ -f /app/docker/initial_data/data.json.gz ]; then
+                    echo "Empty database: loading the saved data snapshot (docker/initial_data/data.json.gz)..."
+                    python manage.py loaddata /app/docker/initial_data/data.json.gz
                 # Demo photos normally ship in media/; if they are missing, seed_demo downloads them.
-                if [ -d /app/media/demo_photos ]; then
+                elif [ -d /app/media/demo_photos ]; then
                     python manage.py seed_demo --offline
                 else
                     python manage.py seed_demo

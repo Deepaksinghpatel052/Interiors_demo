@@ -24,20 +24,52 @@ Needs Docker with the compose plugin (`docker compose version`). Point the DNS *
 `interiors.devnixplus.com` to the server's IP.
 
 ```bash
-# 1. Copy the project to the server, e.g. from your PC (include the media/ folder — demo photos):
-#    scp -r interior_designer_demo user@SERVER:/opt/interiors
-#    (skip venv/, db.sqlite3, docker-data/ and staticfiles/ — they are not needed)
+# 1. Get the code (includes media/ photos and the data snapshot docker/initial_data/data.json.gz):
+git clone https://github.com/Deepaksinghpatel052/Interiors_demo.git /opt/interiors
 cd /opt/interiors
 
-# 2. Check .env_server (DEVNIX_WHATSAPP, ANTHROPIC_API_KEY etc.), then build and start:
+# 2. Copy the private settings file from your PC (it is not in git):
+#    scp .env_server user@SERVER:/opt/interiors/
+#    Check DEVNIX_WHATSAPP, ANTHROPIC_API_KEY etc., then build and start:
 docker compose --env-file .env_server up -d --build
 
-# 3. Watch the first start (it loads the demo data, 1-2 minutes) until "Listening at: http://0.0.0.0:8000":
+# 3. Watch the first start until "Listening at: http://0.0.0.0:8000":
 docker compose --env-file .env_server logs -f web
 
 # 4. Check it answers on the port:
 curl -I -H "Host: interiors.devnixplus.com" http://127.0.0.1:9005/
 ```
+
+### What happens on the first start (automatic)
+
+1. `migrate` creates all tables (migration files are part of the code; never run `makemigrations` on the server).
+2. The database is empty, so the **data snapshot** `docker/initial_data/data.json.gz` is loaded:
+   the same users, studio settings, projects, leads, quotations, enquiries and AI knowledge base as your PC.
+3. The photos from `media/` are copied into `docker-data/media/`.
+4. `collectstatic` prepares CSS/JS for nginx, then the site starts.
+
+On later starts and updates only new migrations run; your server data is never replaced.
+
+### Send your current local data to a new server
+
+```bash
+# on your PC (project venv)
+python manage.py snapshot_data          # writes docker/initial_data/data.json.gz
+git add -A && git commit -m "Update data snapshot" && git push
+```
+
+The snapshot is only loaded when the server database is **empty**. To replace the data on an existing
+server (this deletes what is there):
+
+```bash
+docker compose --env-file .env_server down
+sudo rm -rf docker-data/data docker-data/media
+git pull && docker compose --env-file .env_server up -d --build
+```
+
+Note: while `DEMO_MODE=True` and `RESET_DEMO_NIGHTLY=True`, the nightly reset rebuilds the standard demo
+data with fresh dates (product enquiries are kept). Set `RESET_DEMO_NIGHTLY=False` to keep the snapshot
+data exactly as loaded.
 
 ## 2. nginx + HTTPS certificate
 

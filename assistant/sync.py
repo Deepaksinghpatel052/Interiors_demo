@@ -58,8 +58,9 @@ def sync_project(p):
 
 
 @receiver(post_save, sender=FAQ)
-def _faq_saved(sender, instance, **kwargs):
-    sync_faq(instance)
+def _faq_saved(sender, instance, raw=False, **kwargs):
+    if not raw:   # loaddata: the fixture already holds the synced document
+        sync_faq(instance)
 
 
 @receiver(post_delete, sender=FAQ)
@@ -68,8 +69,9 @@ def _faq_deleted(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=Service)
-def _service_saved(sender, instance, **kwargs):
-    sync_service(instance)
+def _service_saved(sender, instance, raw=False, **kwargs):
+    if not raw:
+        sync_service(instance)
 
 
 @receiver(post_delete, sender=Service)
@@ -78,8 +80,9 @@ def _service_deleted(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=PortfolioProject)
-def _project_saved(sender, instance, **kwargs):
-    sync_project(instance)
+def _project_saved(sender, instance, raw=False, **kwargs):
+    if not raw:
+        sync_project(instance)
 
 
 @receiver(post_delete, sender=PortfolioProject)
@@ -95,8 +98,8 @@ def _project_part_saved(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=KnowledgeDocument)
-def _doc_saved(sender, instance, **kwargs):
-    if not instance.source_key:  # synced docs are indexed by _upsert already
+def _doc_saved(sender, instance, raw=False, **kwargs):
+    if not raw and not instance.source_key:  # synced docs are indexed by _upsert already
         rag.index_document(instance)
 
 

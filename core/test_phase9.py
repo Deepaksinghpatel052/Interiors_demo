@@ -19,6 +19,26 @@ class Phase9Tests(TestCase):
         form = _style_formset(SwatchFormSet(prefix="sw")).forms[0]
         self.assertEqual(form.fields["hex"].widget.attrs.get("aria-label"), str(form.fields["hex"].label))
 
+    def test_loading_a_snapshot_does_not_duplicate_knowledge_documents(self):
+        """loaddata saves rows 'raw'; the knowledge-base sync must not create its own copies then."""
+        from django.core import serializers
+        from assistant.models import KnowledgeDocument
+        from website.models import FAQ
+        data = '[{"model": "website.faq", "pk": 901, "fields": {"question": "Q?", "answer": "A."}}]'
+        for obj in serializers.deserialize("json", data, ignorenonexistent=True):
+            obj.save()
+        self.assertTrue(FAQ.objects.filter(pk=901).exists())
+        self.assertFalse(KnowledgeDocument.objects.filter(source_key="faq:901").exists())
+
+    def test_snapshot_data_writes_a_loadable_file(self):
+        import tempfile, gzip, json, os
+        from django.core.management import call_command
+        path = os.path.join(tempfile.mkdtemp(), "snap.json.gz")
+        call_command("snapshot_data", output=path, stdout=open(os.devnull, "w"))
+        rows = json.loads(gzip.open(path, "rt", encoding="utf-8").read())
+        self.assertIsInstance(rows, list)
+        self.assertFalse(any(r["model"] in ("contenttypes.contenttype", "sessions.session") for r in rows))
+
     def test_client_ip_trusts_x_real_ip_only_behind_own_nginx(self):
         from django.test import RequestFactory
         from core.ratelimit import client_ip
