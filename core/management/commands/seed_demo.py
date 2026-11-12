@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from core import demo_data as D
+from core.demo_more_designs import MORE_ROOMS
 from core.demo_images import room_image, to_jpeg_bytes, to_thumb
 from bookings.models import BlockedDate, Booking, WeeklyAvailability
 from core.models import StudioSettings
@@ -121,9 +122,10 @@ class Command(BaseCommand):
             img = to_thumb(img, 1000)
         field.save(name, ContentFile(to_jpeg_bytes(img)), save=False)
 
-    def seed_portfolio(self):
+    def seed_portfolio(self, rows=None, start=0):
+        """Create the portfolio projects in `rows` (default: all of demo_data.PROJECTS) that don't exist yet."""
         rnd = random.Random(42)
-        for i, row in enumerate(D.PROJECTS):
+        for i, row in enumerate(D.PROJECTS if rows is None else rows, start):
             (title, room, style, budget, prop, area, weeks, location, featured, summary, brief) = row
             if PortfolioProject.objects.filter(title=title).exists():
                 continue
@@ -156,7 +158,7 @@ class Command(BaseCommand):
             self._save_image(ba.after, f"{p.slug}-after.jpg", room_image(style, room, seed), thumb=True)
             ba.save()
 
-            for k, (name, desc) in enumerate(D.ROOMS_BY_TYPE[room]):
+            for k, (name, desc) in enumerate(MORE_ROOMS.get(title) or D.ROOMS_BY_TYPE[room]):
                 ProjectRoom.objects.create(project=p, name=name, description=desc, order=k)
             for k, (name, hex_) in enumerate(D.COLOURS_BY_STYLE[style]):
                 ProjectSwatch.objects.create(project=p, kind="colour", name=name, hex=hex_, order=k)

@@ -197,3 +197,8 @@ BOOKING_PEOPLE = [
     ("Ritu Saxena", "9893123987", "Kolar Road, Bhopal", "2bhk", "5_10", "online", "Modular kitchen only."),
     ("Manish Agrawal", "9425098765", "Sudama Nagar, Indore", "3bhk", "10_20", "studio", "Renovation of a 15-year-old flat."),
 ]
+
+# 45 more portfolio designs (core/demo_more_designs.py) so the website shows a fuller catalogue.
+from core.demo_more_designs import MORE_PROJECTS  # noqa: E402
+
+PROJECTS = PROJECTS + MORE_PROJECTS
