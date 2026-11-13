@@ -15,6 +15,8 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from PIL import Image
 
+from core.demo_more_designs import MORE_PHOTOS
+
 MANIFEST = Path(__file__).with_name("demo_photos.json")
 MAX_BYTES = 15 * 1024 * 1024
 MAX_WIDTH = 1600
@@ -41,6 +43,8 @@ PROJECT_PHOTOS = {
     "Pearl White Island Kitchen": {"cover": "kitchen-32", "gallery": ["kitchen-34", "apartment-16", "kitchen-18"], "before": "construction-05"},
     "Riverside Family Home": {"cover": "apartment-03", "gallery": ["apartment-00", "apartment-02", "apartment-20", "bathroom-04", "apartment-17"]},
 }
+PROJECT_PHOTOS.update(MORE_PHOTOS)
+
 SERVICE_PHOTOS = {
     "residential-interiors": "living-00", "modular-kitchens": "kitchen-17", "wardrobes-storage": "bedroom-21",
     "office-commercial": "office-22", "renovation": "construction-06", "turnkey-execution": "living-38",
@@ -144,47 +148,72 @@ def _set(field, key, name, max_width=None):
     return True
 
 
+def apply_project(project, used, stdout=None):
+    """Put the real photos listed in PROJECT_PHOTOS on one portfolio project. Adds used keys to `used`."""
+    from website.models import BeforeAfter, ProjectImage
+
+    spec = PROJECT_PHOTOS.get(project.title)
+    if not spec or not available(spec["cover"]):
+        return False
+    _set(project.cover, spec["cover"], f"{project.slug}-cover")
+    project.save()
+    used.add(spec["cover"])
+    gallery = [k for k in spec["gallery"] if available(k)]
+    if gallery:
+        for img in project.images.all():
+            img.image.delete(save=False)
+        project.images.all().delete()
+        for i, key in enumerate(gallery):
+            room, label = ROOM_OF.get(key.split("-")[0], ("living", "Interior"))
+            im = ProjectImage(project=project, room=room, order=i, caption=f"{label} — {project.title}")
+            _set(im.image, key, f"{project.slug}-{i}", 1200)
+            im.save()
+            used.add(key)
+    if not spec.get("before"):
+        for ba in project.before_afters.all():
+            ba.before.delete(save=False)
+            ba.after.delete(save=False)
+        project.before_afters.all().delete()
+    elif available(spec["before"]):
+        for ba in project.before_afters.all():
+            ba.before.delete(save=False)
+            ba.after.delete(save=False)
+        project.before_afters.all().delete()
+        ba = BeforeAfter(project=project, caption="Before work started, and the finished space at handover.")
+        _set(ba.before, spec["before"], f"{project.slug}-before", 1400)
+        _set(ba.after, spec["cover"], f"{project.slug}-after", 1400)
+        ba.save()
+        used.add(spec["before"])
+    if stdout:
+        stdout.write(f"  · {project.title}")
+    return True
+
+
+def add_credits(keys):
+    """Add a photo-credits row for each photo key that is not credited yet."""
+    from website.models import PhotoCredit
+
+    have = set(PhotoCredit.objects.values_list("url", flat=True))
+    added = 0
+    for p in manifest():
+        url = p["landing"] or p["url"]
+        if p["key"] in keys and url not in have:
+            PhotoCredit.objects.create(description=(p["title"] or p["category"].title())[:200],
+                                       author=p["creator"][:120] or "Unknown",
+                                       source=f"{p['source'].title()} · {p['license'].upper()}", url=url)
+            have.add(url)
+            added += 1
+    return added
+
+
 def apply(stdout=None):
     """Put real photos on existing demo records (keeps all leads, bookings and projects)."""
     from studio.models import ClientProject, ProposalImage, SiteUpdatePhoto
-    from website.models import BeforeAfter, PhotoCredit, PortfolioProject, ProjectImage, Service
+    from website.models import PhotoCredit, PortfolioProject, Service
 
     used = set()
     for project in PortfolioProject.objects.all():
-        spec = PROJECT_PHOTOS.get(project.title)
-        if not spec or not available(spec["cover"]):
-            continue
-        _set(project.cover, spec["cover"], f"{project.slug}-cover")
-        project.save()
-        used.add(spec["cover"])
-        gallery = [k for k in spec["gallery"] if available(k)]
-        if gallery:
-            for img in project.images.all():
-                img.image.delete(save=False)
-            project.images.all().delete()
-            for i, key in enumerate(gallery):
-                room, label = ROOM_OF.get(key.split("-")[0], ("living", "Interior"))
-                im = ProjectImage(project=project, room=room, order=i, caption=f"{label} — {project.title}")
-                _set(im.image, key, f"{project.slug}-{i}", 1200)
-                im.save()
-                used.add(key)
-        if not spec.get("before"):
-            for ba in project.before_afters.all():
-                ba.before.delete(save=False)
-                ba.after.delete(save=False)
-            project.before_afters.all().delete()
-        elif available(spec["before"]):
-            for ba in project.before_afters.all():
-                ba.before.delete(save=False)
-                ba.after.delete(save=False)
-            project.before_afters.all().delete()
-            ba = BeforeAfter(project=project, caption="Before work started, and the finished space at handover.")
-            _set(ba.before, spec["before"], f"{project.slug}-before", 1400)
-            _set(ba.after, spec["cover"], f"{project.slug}-after", 1400)
-            ba.save()
-            used.add(spec["before"])
-        if stdout:
-            stdout.write(f"  · {project.title}")
+        apply_project(project, used, stdout)
 
     for service in Service.objects.all():
         key = SERVICE_PHOTOS.get(service.slug)

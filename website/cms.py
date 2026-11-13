@@ -118,8 +118,39 @@ def item_delete(request, kind, pk):
 # ------------------------------------------------------------------ portfolio
 @owner_required
 def projects(request):
-    items = PortfolioProject.objects.prefetch_related("images")
-    return render(request, "cms/projects.html", {"items": items})
+    from django.db.models import Count, Q
+
+    from .models import RoomType, Style
+
+    all_items = PortfolioProject.objects.all()
+    q = request.GET.get("q", "").strip()[:80]
+    room = request.GET.get("room", "")
+    room = room if room in RoomType.values else ""
+    style = request.GET.get("style", "")
+    style = style if style in Style.values else ""
+    status = request.GET.get("status", "")
+    status = status if status in ("published", "draft", "featured") else ""
+
+    items = all_items.annotate(n_photos=Count("images"))
+    if q:
+        items = items.filter(Q(title__icontains=q) | Q(location__icontains=q) | Q(summary__icontains=q))
+    if room:
+        items = items.filter(room_type=room)
+    if style:
+        items = items.filter(style=style)
+    if status:
+        items = items.filter(**{"published": {"is_published": True}, "draft": {"is_published": False},
+                                "featured": {"is_featured": True}}[status])
+
+    room_counts = dict(all_items.order_by().values_list("room_type").annotate(n=Count("id")))
+    style_counts = dict(all_items.order_by().values_list("style").annotate(n=Count("id")))
+    return render(request, "cms/projects.html", {
+        "items": items, "total": all_items.count(), "shown": items.count(),
+        "rooms": [(v, l, room_counts.get(v, 0)) for v, l in RoomType.choices],
+        "styles": [(v, l, style_counts.get(v, 0)) for v, l in Style.choices],
+        "q": q, "room": room, "style": style, "status": status,
+        "filtered": bool(q or room or style or status),
+    })
 
 
 @owner_required
