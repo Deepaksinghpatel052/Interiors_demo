@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
 
 from core.models import StudioSettings
+from core.modules import extra_on
 from core.templatetags.studio import format_inr
 
 from crm.models import Lead, LeadActivity
@@ -107,7 +108,17 @@ def portfolio(request):
                      and (not budget or p.budget_band == budget))
     def counted(choices, attr):
         return [(v, l, sum(getattr(p, attr) == v for p in projects)) for v, l in choices]
+    tour = tour_data = None
+    if extra_on("tour360"):   # 360° house tour: extra feature, switched on by DEVNIXPLUS on request
+        from .tour360 import published_tour, viewer_data
+        tour = published_tour()
+        if tour:
+            tour_data = viewer_data(tour)
+            first = tour.rooms.all()[0]
+            tour.preview_url = first.preview.url if first.preview else first.panorama.url
+            tour.room_names = " · ".join(r.title for r in tour.rooms.all())
     return render(request, "website/portfolio.html", {
+        "tour": tour, "tour_data": tour_data,
         "projects": projects,
         "visible_count": sum(p.visible for p in projects),
         "collage": [p for p in projects if p.is_featured][:3] or projects[:3],

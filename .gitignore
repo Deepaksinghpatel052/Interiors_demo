@@ -8,3 +8,4 @@ staticfiles/
 .vscode/
 docker-data/
 deploy/
+docs/

@@ -52,6 +52,16 @@
             {% endif %}
             {% endfor %}
           </div>
+          {% if key == "modules" and extras %}
+          <div class="border-top mt-3 pt-3">
+            <div class="small fw-semibold mb-2"><i class="bi bi-stars text-accent me-1"></i>Extra features <span class="text-muted fw-normal">— switched on by {{ DEVNIX_NAME }} on request</span></div>
+            {% for x in extras %}
+            <a class="doc-row" href="{{ x.url }}"><i class="bi bi-{{ x.icon }}"></i><span class="flex-grow-1">{{ x.label }}</span>
+              {% if x.status == "on" %}<span class="pill pill-green">On</span>{% elif x.status == "requested" %}<span class="pill pill-blue">Requested</span>{% else %}<span class="small text-accent fw-semibold">Request</span>{% endif %}
+              <i class="bi bi-chevron-right small text-muted"></i></a>
+            {% endfor %}
+          </div>
+          {% endif %}
         </div>
       </section>
       {% endfor %}

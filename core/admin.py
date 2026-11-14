@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import FeatureInterest, StudioSettings
+from .models import FeatureInterest, ModuleRequest, StudioSettings
 
 
 @admin.register(StudioSettings)
@@ -16,6 +16,7 @@ class StudioSettingsAdmin(admin.ModelAdmin):
         ("Sales", {"fields": ["easy_payment_text"]}),
         ("Modules", {"fields": ["module_website", "module_cms", "module_portal", "module_erp",
                                 "module_automation", "module_ai", "show_locked_teasers"]}),
+        ("Extra features (switch on when the studio requests them)", {"fields": ["module_tour360"]}),
     ]
 
     def has_add_permission(self, request):
@@ -29,6 +30,57 @@ class StudioSettingsAdmin(admin.ModelAdmin):
 class FeatureInterestAdmin(admin.ModelAdmin):
     list_display = ["feature", "created_at"]
     list_filter = ["feature"]
+
+
+@admin.register(ModuleRequest)
+class ModuleRequestAdmin(admin.ModelAdmin):
+    """Studios asking for an extra feature. “Approve & switch on” turns the feature on for the studio."""
+    list_display = ["created_at", "feature_label", "requested_by", "short_note", "status", "decided_at"]
+    list_filter = ["status", "feature"]
+    readonly_fields = ["feature", "requested_by", "note", "created_at", "decided_at"]
+    fields = ["feature", "requested_by", "note", "status", "created_at", "decided_at"]
+    actions = ["approve", "decline"]
+
+    @admin.display(description="Feature")
+    def feature_label(self, obj):
+        return obj.feature_label
+
+    @admin.display(description="Message")
+    def short_note(self, obj):
+        return (obj.note[:80] + "…") if len(obj.note) > 80 else obj.note
+
+    def has_add_permission(self, request):
+        return False
+
+    def _switch(self, keys, on):
+        s = StudioSettings.load()
+        for k in keys:
+            if hasattr(s, "module_" + k):
+                setattr(s, "module_" + k, on)
+        s.save()
+
+    def save_model(self, request, obj, form, change):
+        from django.utils import timezone
+        if "status" in form.changed_data:
+            obj.decided_at = timezone.now() if obj.status != ModuleRequest.Status.PENDING else None
+            if obj.status == ModuleRequest.Status.APPROVED:
+                self._switch([obj.feature], True)
+        super().save_model(request, obj, form, change)
+
+    @admin.action(description="Approve & switch the feature on")
+    def approve(self, request, queryset):
+        from django.utils import timezone
+        keys = set(queryset.values_list("feature", flat=True))
+        self._switch(keys, True)
+        queryset.update(status=ModuleRequest.Status.APPROVED, decided_at=timezone.now())
+        self.message_user(request, "Switched on: " + ", ".join(sorted(
+            ModuleRequest(feature=k).feature_label for k in keys)) + ". The studio can use it right away.")
+
+    @admin.action(description="Decline")
+    def decline(self, request, queryset):
+        from django.utils import timezone
+        n = queryset.update(status=ModuleRequest.Status.DECLINED, decided_at=timezone.now())
+        self.message_user(request, f"{n} request(s) declined.")
 
 
 # ---------------------------------------------------------------- DEVNIXPLUS product enquiries (landing page)

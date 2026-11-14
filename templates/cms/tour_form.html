@@ -1,0 +1,53 @@
+{% extends "studio/base.html" %}
+{% block page_title %}{% if obj %}{{ obj.title }}{% else %}New 360° tour{% endif %}{% endblock %}
+{% block heading %}<a href="{% url 'cms:tours' %}" class="text-muted text-decoration-none" aria-label="Back"><i class="bi bi-arrow-left"></i></a> {% if obj %}{{ obj.title|truncatechars:50 }}{% else %}New 360° tour{% endif %}{% endblock %}
+{% block actions %}{% if obj and studio.module_website %}<a class="btn btn-light btn-sm" href="{% url 'website:portfolio' %}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i><span class="d-none d-sm-inline ms-1">View portfolio</span></a>{% endif %}{% endblock %}
+{% block erp_content %}
+<div class="row g-3">
+  <div class="col-xl-7">
+    {% if obj %}
+    <div class="panel mb-3">
+      <div class="panel-head"><h2>Rooms</h2><a class="btn btn-accent btn-sm" href="{% url 'cms:tour_room_new' obj.pk %}"><i class="bi bi-plus-lg me-1"></i>Add room</a></div>
+      <div class="panel-body py-1">
+        {% for r in rooms %}
+        <a class="doc-row" href="{% url 'cms:tour_room' obj.pk r.pk %}">
+          {% if r.preview %}<img src="{{ r.preview.url }}" alt="" class="cms-thumb" loading="lazy">{% else %}<i class="bi {{ r.icon }}"></i>{% endif %}
+          <span class="flex-grow-1 min-w-0"><span class="fw-semibold d-block text-truncate"><i class="bi {{ r.icon }} text-accent me-1"></i>{{ r.title }}</span>
+            <span class="small text-muted d-block">{{ r.n_spots }} info dot{{ r.n_spots|pluralize }} · {{ r.n_links }} arrow{{ r.n_links|pluralize }}{% if forloop.first %} · opens first{% endif %}</span></span>
+          <i class="bi bi-chevron-right small text-muted"></i>
+        </a>
+        {% empty %}<div class="empty-mini py-4"><i class="bi bi-image"></i>No rooms yet. <a href="{% url 'cms:tour_room_new' obj.pk %}">Add the first room</a> with its 360° photo.</div>{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <div class="panel"><div class="panel-head"><h2>Tour details</h2></div><div class="panel-body">
+      <form method="post" class="form-compact row g-2" novalidate data-loading>{% csrf_token %}
+        {% include "cms/_fields.html" %}
+        <div class="col-12 d-flex gap-2 justify-content-end mt-2">
+          <a class="btn btn-light" href="{% url 'cms:tours' %}">Cancel</a>
+          <button class="btn btn-accent" data-loading-text="Saving…">{% if obj %}Save{% else %}Create tour{% endif %}</button>
+        </div>
+      </form>
+      {% if obj %}
+      <form method="post" action="{% url 'cms:tour_delete' obj.pk %}" class="mt-3 pt-3 border-top" data-confirm="Delete this tour with all its rooms and 360° photos?">
+        {% csrf_token %}<button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash3 me-1"></i> Delete tour</button></form>
+      {% endif %}
+    </div></div>
+  </div>
+  <div class="col-xl-5">
+    <div class="panel"><div class="panel-head"><h2>How it works</h2></div><div class="panel-body small">
+      <ol class="ps-3 mb-2">
+        <li class="mb-1">Add a room and upload its <strong>360° photo</strong> (2:1 “equirectangular” image from a 360° camera or a phone app such as Google Street View).</li>
+        <li class="mb-1">On the room page, <strong>click on the photo</strong> to place an info dot, then write what it is.</li>
+        <li class="mb-1">Add <strong>arrows</strong> on the floor so visitors can walk to the next room.</li>
+        <li>Turn the view to the best angle and click <strong>“Use this view as the start”</strong>.</li>
+      </ol>
+      {% if obj %}
+        {% if obj.is_published and first_published == obj.pk %}<div class="text-success"><i class="bi bi-check-circle me-1"></i>This tour is live on your portfolio page.</div>
+        {% elif obj.is_published %}<div class="text-muted"><i class="bi bi-info-circle me-1"></i>Another tour is shown on the portfolio page first.</div>
+        {% else %}<div class="text-muted"><i class="bi bi-eye-slash me-1"></i>Hidden from the website.</div>{% endif %}
+      {% endif %}
+    </div></div>
+  </div>
+</div>
+{% endblock %}

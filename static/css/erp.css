@@ -223,3 +223,26 @@ a.kpi:hover { box-shadow: var(--shadow-sm); color: inherit; }
 .cms-photo { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; }
 .cms-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
 .cms-row { border: 1px solid var(--line); border-radius: 10px; padding: .65rem; margin-bottom: .6rem; }
+
+/* ===================== 360° house tour (CMS) ===================== */
+.tour-ed { position: relative; }
+.tour-ed .tour-ed-view { height: 460px; background: #111; }   /* beats pannellum's .pnlm-container height:100% */
+@media (max-width: 575.98px) { .tour-ed .tour-ed-view { height: 320px; } }
+.tour-ed-hint { position: absolute; left: .75rem; bottom: .75rem; z-index: 3; padding: .35rem .75rem; border-radius: 999px; background: rgba(17,18,18,.75);
+  color: #fff; font-size: .8rem; pointer-events: none; max-width: calc(100% - 1.5rem); }
+.tour-ed-view .tour-ed-spot.is-active .tour360-label { opacity: 1; }
+.tour-ed-view .tour-ed-spot.is-active .tour360-dot, .tour-ed-view .tour-ed-spot.is-active .tour360-go-arrow { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tour-ed-thumb { display: block; width: 100%; max-width: 320px; aspect-ratio: 2 / 1; object-fit: cover; border-radius: 10px; }
+/* list rows (same look as the client portal) */
+.erp .doc-row { display: flex; align-items: center; gap: .85rem; padding: .8rem 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--deep); }
+.erp .doc-row:last-child { border-bottom: 0; }
+.erp .doc-row > .bi:first-child { font-size: 1.35rem; color: var(--accent); }
+.erp a.doc-row:hover .fw-semibold { color: var(--accent); }
+.doc-row.is-editing { padding-left: .6rem; padding-right: .6rem; background: var(--accent-soft); border-radius: 10px; }
+.tour-req { overflow: hidden; }
+.tour-req-hero { position: relative; height: 180px; background: linear-gradient(120deg, rgba(17,18,18,.15), rgba(17,18,18,.55)),
+  url("../img/tour360-teaser.jpg") center 55% / cover, var(--deep); }
+.tour-req-badge { position: absolute; left: 1rem; bottom: 1rem; display: inline-flex; gap: .35rem; align-items: center; padding: .3rem .8rem; border-radius: 999px;
+  background: rgba(255,255,255,.2); backdrop-filter: blur(6px); color: #fff; font-weight: 700; }
+.tour-req-list { list-style: none; padding: 0; margin: 0 0 1.25rem; display: grid; gap: .4rem; }
+.tour-req-list i { color: var(--success); margin-right: .4rem; }

@@ -86,6 +86,11 @@ class StudioSettings(models.Model):
     show_locked_teasers = models.BooleanField(
         default=True, help_text="Show full-version features as locked teasers instead of hiding them.")
 
+    # Extra features: off until the studio requests them and DEVNIXPLUS switches them on (Django admin only)
+    module_tour360 = models.BooleanField(
+        "360° house tour", default=False,
+        help_text="Extra feature, switched on by DEVNIXPLUS on request: 360° room walk-through on the portfolio page.")
+
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -138,6 +143,34 @@ class FeatureInterest(models.Model):
 
     def __str__(self):
         return f"{self.feature} @ {self.created_at:%d-%m-%Y %H:%M}"
+
+
+class ModuleRequest(models.Model):
+    """The studio asked DEVNIXPLUS to switch on an extra feature (see core.modules.EXTRA_FEATURES)."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Waiting"
+        APPROVED = "approved", "Switched on"
+        DECLINED = "declined", "Declined"
+
+    feature = models.CharField(max_length=30)
+    requested_by = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    note = models.TextField("Message", blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    decided_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Extra-feature request"
+
+    def __str__(self):
+        return f"{self.feature_label} ({self.get_status_display()})"
+
+    @property
+    def feature_label(self):
+        from .modules import EXTRA_FEATURES
+        return EXTRA_FEATURES.get(self.feature, {}).get("label", self.feature)
 
 
 class ProductEnquiry(models.Model):

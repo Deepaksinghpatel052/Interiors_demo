@@ -1,0 +1,19 @@
+{% extends "studio/base.html" %}
+{% block page_title %}360° house tours{% endblock %}
+{% block heading %}<a href="{% url 'cms:index' %}" class="text-muted text-decoration-none" aria-label="Back"><i class="bi bi-arrow-left"></i></a> 360° house tours{% endblock %}
+{% block actions %}<a class="btn btn-accent btn-sm" href="{% url 'cms:tour_new' %}"><i class="bi bi-plus-lg"></i><span class="d-none d-sm-inline ms-1">New tour</span></a>{% endblock %}
+{% block erp_content %}
+<div class="panel" style="max-width:56rem"><div class="panel-body py-1">
+  {% for t in items %}
+  <a class="doc-row" href="{% url 'cms:tour_edit' t.pk %}">
+    <i class="bi bi-arrow-repeat"></i>
+    <span class="flex-grow-1 min-w-0"><span class="fw-semibold d-block text-truncate">{{ t.title }}</span>
+      <span class="small text-muted d-block text-truncate">{{ t.n_rooms }} room{{ t.n_rooms|pluralize }} · {{ t.n_spots }} info dot{{ t.n_spots|pluralize }}</span></span>
+    {% if t.is_sample %}<span class="badge-sample">Sample</span>{% endif %}
+    {% if not t.is_published %}<span class="pill pill-grey">Hidden</span>{% endif %}
+    <i class="bi bi-chevron-right small text-muted"></i>
+  </a>
+  {% empty %}<div class="empty-mini py-5"><i class="bi bi-arrow-repeat"></i>No tours yet. <a href="{% url 'cms:tour_new' %}">Create the first one</a>.</div>{% endfor %}
+</div></div>
+<p class="small text-muted mt-3" style="max-width:56rem"><i class="bi bi-info-circle me-1"></i>The first tour that is shown on the website (and has at least one room) appears as the “360° house tour” card on your portfolio page.</p>
+{% endblock %}

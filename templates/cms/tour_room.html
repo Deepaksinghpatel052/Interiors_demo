@@ -1,0 +1,123 @@
+{% extends "studio/base.html" %}
+{% load static %}
+{% block page_title %}{% if room %}{{ room.title }}{% else %}New room{% endif %} — {{ tour.title }}{% endblock %}
+{% block heading %}<a href="{% url 'cms:tour_edit' tour.pk %}" class="text-muted text-decoration-none" aria-label="Back"><i class="bi bi-arrow-left"></i></a> {% if room %}{{ room.title|truncatechars:40 }}{% else %}New room{% endif %} <span class="text-muted fw-normal small">· {{ tour.title|truncatechars:30 }}</span>{% endblock %}
+{% block erp_content %}
+{% if other_rooms or room %}
+<nav class="erp-tabs mb-3" aria-label="Rooms in this tour">
+  {% for r in tour.rooms.all %}<a class="{% if room and r.pk == room.pk %}active{% endif %}" href="{% url 'cms:tour_room' tour.pk r.pk %}"><i class="bi {{ r.icon }} me-1"></i>{{ r.title }}</a>{% endfor %}
+  <a class="{% if not room %}active{% endif %}" href="{% url 'cms:tour_room_new' tour.pk %}"><i class="bi bi-plus-lg"></i> Add room</a>
+</nav>
+{% endif %}
+<div class="row g-3">
+  {% if room %}
+  <div class="col-xl-8">
+    <div class="panel mb-3">
+      <div class="panel-head flex-wrap gap-2">
+        <h2>360° photo</h2>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-sm btn-light" id="tourEdUseStart"><i class="bi bi-camera me-1"></i>Use this view as the start</button>
+        </div>
+      </div>
+      <div class="tour-ed">
+        <div class="tour-ed-view" id="tourEdView"></div>
+        <div class="tour-ed-hint" id="tourEdHint"><i class="bi bi-hand-index me-1"></i>Drag to look around · <strong>click on the photo</strong> to place {% if editing %}“{{ editing }}”{% else %}a new dot or arrow{% endif %}</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Info dots &amp; arrows ({{ hotspots|length }})</h2>
+        {% if editing %}<a class="btn btn-sm btn-light" href="{% url 'cms:tour_room' tour.pk room.pk %}"><i class="bi bi-plus-lg me-1"></i>New</a>{% endif %}</div>
+      <div class="panel-body py-1">
+        {% for h in hotspots %}
+        <div class="doc-row{% if editing and h.pk == editing.pk %} is-editing{% endif %}">
+          {% if h.kind == "link" %}<i class="bi bi-arrow-up-circle"></i>{% else %}<i class="bi bi-plus-circle"></i>{% endif %}
+          <span class="flex-grow-1 min-w-0">
+            <span class="fw-semibold d-block text-truncate">{% if h.kind == "link" %}Arrow → {{ h.link_to.title|default:"(room deleted)" }}{% else %}{{ h.title }}{% endif %}</span>
+            <span class="small text-muted d-block text-truncate">{% if h.tag %}{{ h.tag }} · {% endif %}{{ h.yaw|floatformat:0 }}° / {{ h.pitch|floatformat:0 }}°</span>
+          </span>
+          <a class="btn btn-sm btn-light" href="?spot={{ h.pk }}#spotForm">Edit</a>
+          <form method="post" class="d-inline" data-confirm="Remove this {% if h.kind == 'link' %}arrow{% else %}info dot{% endif %}?">{% csrf_token %}
+            <input type="hidden" name="action" value="delete_spot"><input type="hidden" name="spot" value="{{ h.pk }}">
+            <button class="btn btn-sm btn-light text-danger" aria-label="Remove"><i class="bi bi-trash3"></i></button></form>
+        </div>
+        {% empty %}<div class="empty-mini py-4"><i class="bi bi-hand-index"></i>Click anywhere on the 360° photo to add the first info dot.</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="{% if room %}col-xl-4{% else %}col-xl-7{% endif %}">
+    {% if room %}
+    <div class="panel mb-3" id="spotForm" style="scroll-margin-top:90px">
+      <div class="panel-head"><h2>{% if editing %}Edit {% if editing.kind == "link" %}arrow{% else %}info dot{% endif %}{% else %}Add a dot or arrow{% endif %}</h2></div>
+      <div class="panel-body">
+        <form method="post" class="form-compact row g-2" novalidate data-loading id="tourSpotForm">{% csrf_token %}
+          <input type="hidden" name="action" value="spot">{% if editing %}<input type="hidden" name="spot" value="{{ editing.pk }}">{% endif %}
+          {% if spot_form.non_field_errors %}<div class="col-12"><div class="alert alert-danger small py-2 mb-0">{{ spot_form.non_field_errors.0 }}</div></div>{% endif %}
+          {% with f=spot_form %}
+          <div class="col-12">
+            <div class="btn-group w-100" role="radiogroup" aria-label="Type">
+              {% for v, l in f.fields.kind.choices %}
+              <input type="radio" class="btn-check" name="{{ f.kind.html_name }}" id="kind-{{ v }}" value="{{ v }}" {% if f.kind.value == v %}checked{% endif %}>
+              <label class="btn btn-sm btn-outline-ink" for="kind-{{ v }}"><i class="bi {% if v == 'link' %}bi-arrow-up-circle{% else %}bi-plus-circle{% endif %} me-1"></i>{{ l }}</label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="col-6"><label class="form-label" for="{{ f.yaw.id_for_label }}">Left / right</label>{{ f.yaw }}{% for e in f.yaw.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}</div>
+          <div class="col-6"><label class="form-label" for="{{ f.pitch.id_for_label }}">Up / down</label>{{ f.pitch }}{% for e in f.pitch.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}</div>
+          <div class="col-12 form-text mt-0" id="posHint">{% if f.yaw.value is None or f.yaw.value == "" %}<i class="bi bi-hand-index me-1"></i>Click on the photo to set the position.{% else %}Click on the photo to move it.{% endif %}</div>
+          <div class="col-12" data-kind="link">
+            <label class="form-label" for="{{ f.link_to.id_for_label }}">{{ f.link_to.label }} <span class="text-accent">*</span></label>{{ f.link_to }}
+            {% for e in f.link_to.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+            {% if not other_rooms %}<div class="form-text">Add another room to this tour first.</div>{% endif %}
+          </div>
+          {% for field in f %}{% if field.name in "title tag text specs" %}
+          <div class="col-12" data-kind="info">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.name == "title" %} <span class="text-accent">*</span>{% endif %}</label>{{ field }}
+            {% for e in field.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+          </div>
+          {% endif %}{% endfor %}
+          {% endwith %}
+          <div class="col-12 d-flex gap-2 justify-content-end mt-2">
+            {% if editing %}<a class="btn btn-light" href="{% url 'cms:tour_room' tour.pk room.pk %}">Cancel</a>{% endif %}
+            <button class="btn btn-accent" data-loading-text="Saving…">{% if editing %}Save{% else %}Add{% endif %}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="panel"><div class="panel-head"><h2>Room details</h2></div><div class="panel-body">
+      <form method="post" enctype="multipart/form-data" class="form-compact row g-2" novalidate data-loading id="tourRoomForm">{% csrf_token %}
+        <input type="hidden" name="action" value="room">
+        {% if form.non_field_errors %}<div class="col-12"><div class="alert alert-danger small py-2 mb-0">{{ form.non_field_errors.0 }}</div></div>{% endif %}
+        {% for field in form %}
+        <div class="{% if field.name in 'start_yaw start_pitch start_hfov' %}col-4{% elif field.name == 'order' %}col-6 col-md-4{% else %}col-12{% endif %}">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-accent">*</span>{% endif %}</label>
+          {% if field.name == "panorama" %}
+            {% if room and room.preview %}<img src="{{ room.preview.url }}" alt="" class="tour-ed-thumb mb-2">{% endif %}
+            <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" accept="image/jpeg,image/png,image/webp" class="form-control {% if field.errors %}is-invalid{% endif %}">
+          {% else %}{{ field }}{% endif %}
+          {% for e in field.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+          {% if field.help_text %}<div class="form-text">{{ field.help_text }}{% if field.name == "panorama" %} Up to 30 MB; resized automatically.{% endif %}</div>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="col-12 form-text mt-0">Start view: where the camera looks when visitors enter this room.{% if room %} Easiest: turn the photo above, then click “Use this view as the start”.{% endif %}</div>
+        <div class="col-12 d-flex gap-2 justify-content-end mt-2">
+          <a class="btn btn-light" href="{% url 'cms:tour_edit' tour.pk %}">Cancel</a>
+          <button class="btn btn-accent" data-loading-text="Saving…">{% if room %}Save room{% else %}Upload &amp; add room{% endif %}</button>
+        </div>
+      </form>
+      {% if room %}
+      <form method="post" action="{% url 'cms:tour_room_delete' tour.pk room.pk %}" class="mt-3 pt-3 border-top" data-confirm="Delete this room, its 360° photo, its dots and the arrows that lead to it?">
+        {% csrf_token %}<button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash3 me-1"></i> Delete room</button></form>
+      {% endif %}
+    </div></div>
+  </div>
+</div>
+{% if editor %}{{ editor|json_script:"tourEdData" }}{% endif %}
+{% endblock %}
+
+{% block extra_js %}{% if room %}<script src="{% static 'js/tour360-editor.js' %}" defer></script>{% endif %}{% endblock %}

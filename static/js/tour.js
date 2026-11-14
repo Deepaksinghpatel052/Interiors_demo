@@ -84,6 +84,7 @@
       $('<div class="tour-actions"></div>').append(
         i > 0 ? $('<button type="button" class="btn btn-light btn-sm tour-back">Back</button>') : $("<span></span>"),
         step.open_chat ? $('<button type="button" class="btn btn-outline-ink btn-sm tour-try"><i class="bi bi-chat-dots me-1"></i>Try it</button>') : null,
+        step.try === "tour360" ? $('<button type="button" class="btn btn-outline-ink btn-sm tour-try"><i class="bi bi-arrow-repeat me-1"></i>Try it</button>') : null,
         $('<button type="button" class="btn btn-accent btn-sm tour-next"></button>').text(last ? "Finish" : "Next →"))
     );
     var $el = target(step);
@@ -98,7 +99,11 @@
     $card.on("click", ".tour-next", function () { last ? end() : goTo(i + 1); })
          .on("click", ".tour-back", function () { goTo(i - 1); })
          .on("click", ".tour-x", end)
-         .on("click", ".tour-try", function () { teardown(); pauseBadge(i + 1); $(".chat-launcher").first().trigger("click"); });
+         .on("click", ".tour-try", function () {
+           teardown(); pauseBadge(i + 1);
+           if (step.try === "tour360") document.getElementById("tour360Open").click();   // 360° house tour
+           else $(".chat-launcher").first().trigger("click");
+         });
     $(document).on("keydown.tour", function (e) {
       if (e.key === "Escape") end();
       else if (e.key === "ArrowRight") last ? end() : goTo(i + 1);

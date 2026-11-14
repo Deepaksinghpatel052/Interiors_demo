@@ -18,6 +18,34 @@ MODULES = [  # flag, label, icon, what it adds
     ("ai", "AI assistant", "stars", "Website and studio assistants that answer from your own knowledge base."),
 ]
 
+# Extra features: not part of any package. Off until the studio requests them (button in the studio) and
+# DEVNIXPLUS switches them on in the Django admin (Studio settings → Extra features, or approve the request).
+EXTRA_FEATURES = {
+    "tour360": {
+        "label": "360° house tour", "icon": "arrow-repeat",
+        "what": "Visitors walk through a finished home in 360° on the portfolio page — room by room, with "
+                "clickable dots that explain the furniture, lighting and materials.",
+        "benefit": "Prospects feel the quality of your work before they ever meet you, and enquire with more confidence.",
+        "manage_url": "cms:tours",
+    },
+}
+
+
+def extra_on(key, studio=None):
+    studio = studio or StudioSettings.load()
+    return bool(getattr(studio, "module_" + key, False))
+
+
+def extra_status(key, studio=None):
+    """'on', 'requested' (waiting for DEVNIXPLUS) or 'off'."""
+    from .models import ModuleRequest
+    if extra_on(key, studio):
+        return "on"
+    if ModuleRequest.objects.filter(feature=key, status=ModuleRequest.Status.PENDING).exists():
+        return "requested"
+    return "off"
+
+
 # studio pages that belong to the ERP; the rest of /studio/ (settings, team, availability) is always available
 ERP_STUDIO_URLS = {
     "dashboard", "leads", "lead_create", "lead_move", "lead_detail", "lead_note", "lead_convert",

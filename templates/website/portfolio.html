@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Portfolio — {{ studio.name }}{% endblock %}
 {% block meta_description %}Interior design projects by {{ studio.name }}: living rooms, bedrooms, modular kitchens, offices and complete homes in {{ studio.city }}.{% endblock %}
 
@@ -16,10 +17,22 @@
           <div><div class="stat-num" style="font-size:2rem">{{ styles|length }}</div><div class="stat-label">design styles</div></div>
         </div>
       </div>
-      <div class="col-lg-6 d-none d-md-block">
-        <div class="hero-collage">
+      <div class="col-lg-6">
+        <div class="hero-collage d-none d-md-grid">
           {% for p in collage %}<a href="{{ p.get_absolute_url }}" class="hc-{{ forloop.counter }}"><img src="{{ p.cover.url }}" alt="{{ p.title }}" width="600" height="450" decoding="async"></a>{% endfor %}
         </div>
+        {% if tour %}
+        {# 360° house tour (extra feature): animated preview; click opens a full-screen viewer with rooms and info points #}
+        <button type="button" class="tour360-card" id="tour360Open" aria-haspopup="dialog" aria-controls="tour360">
+          <span class="tour360-preview" style="background-image:url('{{ tour.preview_url }}')" aria-hidden="true"></span>
+          <span class="tour360-badge"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> 360° house tour</span>
+          <span class="tour360-text">
+            <strong>Walk through the {{ tour.title }}</strong>
+            <small>{{ tour.subtitle|default:tour.room_names }}</small>
+          </span>
+          <span class="tour360-cta"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i> <span>View in 360°</span></span>
+        </button>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -68,4 +81,32 @@
 
 {% include "partials/cta_band.html" with cta_title="Seen something you love? Let’s make it yours." %}
 <div class="pb-5"></div>
+
+{% if tour %}
+<div class="tour360-overlay" id="tour360" role="dialog" aria-modal="true" aria-labelledby="tour360Title" hidden>
+  <div class="tour360-viewer" id="tour360Viewer"></div>
+  <div class="tour360-loading" id="tour360Loading"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Loading 360° view…</div>
+  <div class="tour360-bar">
+    <div class="tour360-bar-title">
+      <span class="tour360-bar-badge">360°</span>
+      <strong id="tour360Title">{{ tour.title }}</strong>
+      <small class="d-none d-lg-inline">Move the mouse towards an edge (or drag) to look around · click a dot for details</small>
+    </div>
+    <button type="button" class="tour360-close" id="tour360Close" aria-label="Close 360° view"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+  </div>
+  <nav class="tour360-rooms" id="tour360Rooms" aria-label="Rooms"></nav>
+  <aside class="tour360-info" id="tour360Info" aria-live="polite" hidden>
+    <button type="button" class="tour360-info-close" id="tour360InfoClose" aria-label="Close details"><i class="bi bi-x" aria-hidden="true"></i></button>
+    <span class="eyebrow" id="tour360InfoTag"></span>
+    <h3 id="tour360InfoTitle"></h3>
+    <p id="tour360InfoText"></p>
+    <ul class="tour360-specs" id="tour360InfoSpecs"></ul>
+    <a class="btn btn-accent btn-sm" href="{% url 'bookings:book' %}">Get this look for your home</a>
+  </aside>
+</div>
+
+{{ tour_data|json_script:"tour360Data" }}
+{% endif %}
 {% endblock %}
+
+{% block extra_js %}{% if tour %}<script src="{% static 'js/tour360.js' %}" defer></script>{% endif %}{% endblock %}
