@@ -814,3 +814,103 @@ a.chat-source:hover { border-color: var(--accent); color: var(--accent); }
   #offer .col-lg-7 { width: 100%; }
   .offer-summary { position: static; box-shadow: none; }
 }
+
+/* ===================== 360° room tour (portfolio hero) ===================== */
+.tour360-card { position: relative; display: block; width: 100%; height: 150px; margin-top: .75rem; padding: 0; border: 0; border-radius: 16px;
+  overflow: hidden; box-shadow: var(--shadow); background: var(--deep); color: #fff; text-align: left; cursor: pointer; }
+.tour360-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.tour360-preview { position: absolute; inset: 0; background-size: 800px 400px; background-position: 0 55%; background-repeat: repeat-x;
+  animation: tour360-pan 60s linear infinite; transition: filter .3s; }
+.tour360-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(17,18,18,.78) 0%, rgba(17,18,18,.25) 60%, rgba(17,18,18,.05) 100%); }
+.tour360-card:hover .tour360-preview { filter: brightness(1.08); }
+@keyframes tour360-pan { from { background-position: 0 55%; } to { background-position: -800px 55%; } }
+.tour360-badge { position: absolute; z-index: 1; top: .8rem; left: .9rem; display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .6rem;
+  border-radius: 999px; background: rgba(255,255,255,.18); backdrop-filter: blur(6px); font-size: .78rem; font-weight: 700; letter-spacing: .04em; }
+.tour360-text { position: absolute; z-index: 1; left: .9rem; right: 9.5rem; bottom: .85rem; display: flex; flex-direction: column; gap: .15rem; }
+.tour360-text strong { font-family: var(--font-serif); font-size: 1.05rem; line-height: 1.25; }
+.tour360-text small { color: rgba(255,255,255,.8); font-size: .8rem; }
+.tour360-cta { position: absolute; z-index: 1; right: .9rem; bottom: .85rem; display: inline-flex; align-items: center; gap: .4rem; padding: .5rem .9rem;
+  border-radius: 999px; background: var(--accent); color: var(--on-accent); font-weight: 600; font-size: .85rem; box-shadow: var(--shadow-blue); transition: transform .2s; }
+.tour360-card:hover .tour360-cta { transform: translateY(-2px); }
+@media (min-width: 1200px) { .tour360-card { height: 165px; } }
+@media (max-width: 575.98px) {
+  .tour360-card { height: 190px; }
+  .tour360-text { right: .9rem; bottom: 3.6rem; }
+  .tour360-cta { left: .9rem; right: auto; }
+}
+
+html.tour360-lock, html.tour360-lock body { overflow: hidden; }
+.tour360-overlay { position: fixed; inset: 0; z-index: 2000; background: #000; }
+.tour360-overlay[hidden] { display: none; }
+.tour360-viewer { position: absolute; inset: 0; }
+.tour360-loading { position: absolute; z-index: 3; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: .7rem 1.1rem; border-radius: 999px;
+  background: rgba(17,18,18,.75); color: #fff; font-size: .9rem; display: inline-flex; gap: .5rem; align-items: center; }
+.tour360-loading[hidden] { display: none; }
+.tour360-bar { position: absolute; z-index: 4; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .8rem 1rem; color: #fff; background: linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,0)); pointer-events: none; }
+.tour360-bar > * { pointer-events: auto; }
+.tour360-bar strong { font-family: var(--font-serif); margin: 0 .5rem; }
+.tour360-bar small { color: rgba(255,255,255,.75); }
+.tour360-bar-badge { padding: .15rem .5rem; border-radius: 999px; background: var(--accent); font-size: .75rem; font-weight: 700; }
+.tour360-close { flex: none; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255,255,255,.18); color: #fff; font-size: 1.1rem;
+  backdrop-filter: blur(6px); }
+.tour360-close:hover { background: rgba(255,255,255,.3); }
+.tour360-overlay .pnlm-controls-container { top: 4.5rem; }
+
+/* info points */
+.tour360-spot { cursor: pointer; width: 34px; height: 34px; }
+.tour360-dot { position: relative; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.92);
+  color: var(--deep); font-size: .95rem; box-shadow: 0 4px 14px rgba(0,0,0,.35); transition: transform .2s, background .2s, color .2s; }
+.tour360-dot::before { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid rgba(255,255,255,.85); animation: tour360-pulse 2s ease-out infinite; }
+.tour360-spot:hover .tour360-dot, .tour360-spot:focus-visible .tour360-dot, .tour360-spot.is-active .tour360-dot { transform: scale(1.15); background: var(--accent); color: #fff; }
+.tour360-spot:focus-visible { outline: none; }
+.tour360-spot.is-active .tour360-dot i { transform: rotate(45deg); }
+.tour360-dot i { transition: transform .2s; }
+@keyframes tour360-pulse { 0% { transform: scale(.8); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+.tour360-label { position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); white-space: nowrap; padding: .3rem .65rem;
+  border-radius: 8px; background: rgba(17,18,18,.85); color: #fff; font-size: .8rem; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.tour360-spot:hover .tour360-label, .tour360-spot:focus-visible .tour360-label { opacity: 1; }
+
+/* details card for the clicked point */
+.tour360-info { position: absolute; z-index: 4; right: 1rem; bottom: 1rem; width: min(360px, calc(100% - 2rem)); padding: 1.25rem 1.25rem 1.1rem;
+  border-radius: var(--radius); background: var(--surface); color: var(--ink); box-shadow: 0 20px 50px rgba(0,0,0,.4); animation: tour360-in .25s ease-out; }
+.tour360-info[hidden] { display: none; }
+.tour360-info h3 { font-size: 1.15rem; margin: .25rem 0 .5rem; }
+.tour360-info p { color: var(--muted); font-size: .92rem; margin-bottom: .75rem; }
+.tour360-specs { list-style: none; padding: 0; margin: 0 0 1rem; display: flex; flex-wrap: wrap; gap: .35rem; }
+.tour360-specs li { padding: .2rem .6rem; border-radius: 999px; background: var(--surface-2); font-size: .78rem; color: var(--ink); }
+.tour360-info-close { position: absolute; top: .55rem; right: .55rem; width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--surface-2);
+  color: var(--ink); font-size: 1.1rem; line-height: 1; }
+@keyframes tour360-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (max-width: 575.98px) { .tour360-info { left: .75rem; right: .75rem; bottom: .75rem; width: auto; } }
+@media (prefers-reduced-motion: reduce) {
+  .tour360-preview, .tour360-dot::before, .tour360-info { animation: none; }
+}
+
+/* 360° tour: room tabs and floor arrows between rooms */
+.tour360-bar-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tour360-rooms { position: absolute; z-index: 4; left: 50%; bottom: 1rem; transform: translateX(-50%); display: flex; gap: .3rem; padding: .3rem;
+  max-width: calc(100% - 2rem); overflow-x: auto; scrollbar-width: none; border-radius: 999px; background: rgba(17,18,18,.6); backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.tour360-rooms::-webkit-scrollbar { display: none; }
+.tour360-room { flex: none; display: inline-flex; align-items: center; gap: .4rem; padding: .5rem .95rem; border: 0; border-radius: 999px;
+  background: transparent; color: rgba(255,255,255,.85); font-size: .85rem; font-weight: 600; white-space: nowrap; transition: background .2s, color .2s; }
+.tour360-room:hover { background: rgba(255,255,255,.15); color: #fff; }
+.tour360-room.is-active { background: #fff; color: var(--deep); }
+.tour360-room:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+.tour360-go { cursor: pointer; }
+.tour360-go-arrow { display: grid; place-items: center; width: 54px; height: 54px; margin: 0 auto; border-radius: 50%; background: rgba(255,255,255,.25);
+  border: 2px solid rgba(255,255,255,.9); color: #fff; font-size: 1.4rem; backdrop-filter: blur(4px); box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transform: perspective(200px) rotateX(35deg); transition: background .2s, transform .2s; }
+.tour360-go-label { display: block; margin-top: .35rem; padding: .25rem .7rem; border-radius: 999px; background: rgba(17,18,18,.8); color: #fff;
+  font-size: .78rem; font-weight: 600; white-space: nowrap; text-align: center; }
+.tour360-go:hover .tour360-go-arrow, .tour360-go:focus-visible .tour360-go-arrow { background: var(--accent); border-color: var(--accent); transform: perspective(200px) rotateX(35deg) scale(1.1); }
+.tour360-go:focus-visible { outline: none; }
+@media (min-width: 576px) { .tour360-info { bottom: 5rem; } }
+@media (max-width: 575.98px) {
+  .tour360-room span { display: none; }
+  .tour360-room { padding: .6rem .8rem; font-size: 1rem; }
+  .tour360-info { bottom: 4.6rem; }
+}
+@media (min-width: 576px) and (max-width: 991.98px) { .tour360-room { padding: .5rem .75rem; } }
+.tour360-overlay .pnlm-panorama-info { display: none !important; }

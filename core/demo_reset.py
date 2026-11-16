@@ -12,7 +12,7 @@ DEMO_USERNAMES = ["admin", "owner", "designer", "client"]
 
 # media sub-folders written by the demo / by users of the demo (never `demo_photos`, the download cache)
 WORK_DIRS = ["documents", "proposals", "site_updates", "requests"]
-CONTENT_DIRS = ["portfolio", "services", "knowledge"]
+CONTENT_DIRS = ["portfolio", "services", "knowledge", "tours"]
 
 
 def _rmtree(rel):
@@ -31,9 +31,9 @@ def wipe(*, keep_content=False, keep_catalogue=False, keep_availability=False, c
     from crm.models import Lead, LeadActivity
     from finance.models import CatalogueItem, Invoice, Quotation, Vendor
     from studio.models import ClientProject
-    from website.models import FAQ, PhotoCredit, PortfolioProject, Service, Testimonial
+    from website.models import FAQ, PhotoCredit, PortfolioProject, Service, Testimonial, Tour
 
-    from .models import FeatureInterest, ProductEnquiry
+    from .models import FeatureInterest, ModuleRequest, ProductEnquiry
 
     counts = {}
 
@@ -59,16 +59,19 @@ def wipe(*, keep_content=False, keep_catalogue=False, keep_availability=False, c
     if keep_content:
         if client_handover:   # samples must never go live as if they were real reviews
             drop("sample testimonials", Testimonial.objects.filter(is_sample=True))
+            drop("sample 360° tours", Tour.objects.filter(is_sample=True))
     else:
         drop("knowledge documents", KnowledgeDocument.objects.all())
         drop("portfolio projects", PortfolioProject.objects.all())
         drop("services", Service.objects.all())
         drop("FAQs", FAQ.objects.all())
         drop("testimonials", Testimonial.objects.all())
+        drop("360° tours", Tour.objects.all())
         PhotoCredit.objects.all().delete()
     if client_handover:   # the seller's own sales data must not stay on a client's server
         drop("feature-interest clicks", FeatureInterest.objects.all())
         drop("DEVNIXPLUS product enquiries", ProductEnquiry.objects.all())
+        drop("extra-feature requests", ModuleRequest.objects.all())
 
     # people: demo logins, portal clients and team members created during demos
     people = User.objects.filter(username__in=DEMO_USERNAMES) | User.objects.filter(groups__name__in=[CLIENT, TEAM])

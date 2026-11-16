@@ -42,7 +42,8 @@
       {% endif %}
       {% if studio.module_cms and erp_role == "owner" %}
       <div class="erp-nav-label">Website</div>
-      <a class="{% if request.resolver_match.namespace == 'cms' %}active{% endif %}" href="{% url 'cms:index' %}"><i class="bi bi-window-stack"></i> Website content</a>
+      <a class="{% if request.resolver_match.namespace == 'cms' and 'tour' not in request.resolver_match.url_name %}active{% endif %}" href="{% url 'cms:index' %}"><i class="bi bi-window-stack"></i> Website content</a>
+      <a class="{% if request.resolver_match.namespace == 'cms' and 'tour' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'cms:tours' %}"><i class="bi bi-arrow-repeat"></i> 360° house tour{% if not studio.module_tour360 %} <i class="bi bi-lock-fill small opacity-50 ms-auto" title="Extra feature — request it"></i>{% endif %}</a>
       {% endif %}
       {% if studio.module_automation or studio.module_ai %}<div class="erp-nav-label">Automation &amp; AI</div>{% endif %}
       {% if studio.module_automation %}<a class="{% active 'automations:index' %}" href="{% url 'automations:index' %}"><i class="bi bi-lightning-charge"></i> Automations</a>{% endif %}

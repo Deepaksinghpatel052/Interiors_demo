@@ -73,6 +73,7 @@ class Command(BaseCommand):
         seed_knowledge(self.stdout, StudioSettings.load())
         seed_automations(self.stdout)
         seed_packages(self.stdout)
+        self.seed_tour()
         self.stdout.write(self.style.SUCCESS("Demo data ready. Logins: owner / designer / client  (demo12345), admin / admin12345"))
 
     # ------------------------------------------------------------------
@@ -86,6 +87,13 @@ class Command(BaseCommand):
                       PortfolioProject, Service, FAQ, Testimonial):
             model.objects.all().delete()
         self.stdout.write("Flushed demo content.")
+
+    def seed_tour(self):
+        """Sample 360° house tour (only visible once the extra feature is switched on)."""
+        from website.models import Tour, TourHotspot, TourRoom
+        from website.tour360 import seed_sample_tour
+        t = seed_sample_tour(Tour, TourRoom, TourHotspot)
+        self.stdout.write("360° tour (sample): " + (f"{t.title}, {t.rooms.count()} rooms" if t else "kept existing"))
 
     def seed_users(self):
         for username, pw, first, last, group, staff, su in USERS:

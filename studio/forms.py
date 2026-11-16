@@ -227,7 +227,7 @@ class StudioSettingsForm(StyledMixin, forms.ModelForm):
                   "legal_name", "gstin", "state_name", "default_gst_percent", "quotation_terms", "bank_details",
                   "rate_essential", "rate_premium", "rate_luxury", "easy_payment_text",
                   "module_website", "module_cms", "module_portal", "module_erp", "module_automation", "module_ai",
-                  "show_locked_teasers"]
+                  "show_locked_teasers", "module_tour360"]
         widgets = {
             "accent_color": forms.TextInput(attrs={"type": "color"}),
             "secondary_color": forms.TextInput(attrs={"type": "color"}),

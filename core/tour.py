@@ -1,4 +1,6 @@
 """Guided demo tour: the whole sales story, one benefit per step. Rendered as JSON for static/js/tour.js."""
+import re
+
 from django.urls import reverse
 
 
@@ -15,6 +17,11 @@ def steps(studio=None):
          "title": "2 · Explores your portfolio",
          "text": "Real projects by room, style and budget, with before/after sliders and mood boards.",
          "benefit": "A professional presentation that builds trust before the first call."},
+        {"role": "visitor", "url": r("website:portfolio"), "el": "#tour360Open", "try": "tour360", "extra": "tour360",
+         "title": "3 · Walks through a home in 360°",
+         "text": "One click opens a full-screen 360° walk-through: room by room, with dots that explain the "
+                 "furniture, lighting and materials. Press “Try it” and move the mouse to look around.",
+         "benefit": "Prospects feel the quality of your work before they ever meet you."},
         {"role": "visitor", "url": r("website:quiz"), "el": "#quizForm",
          "title": "3 · Takes the style quiz",
          "text": "Six quick questions reveal their style and suggest matching projects — and capture their details.",
@@ -59,6 +66,21 @@ def steps(studio=None):
     out = []
     for step in all_steps:
         module = step.pop("module", None)
+        extra = step.pop("extra", None)   # extra features (e.g. 360° tour) only when switched on and set up
+        if extra and not _extra_ready(extra, studio):
+            continue
         if studio is None or module is None or getattr(studio, "module_" + module, True):
             out.append(step)
+    # number the steps after filtering, so switched-off modules leave no gaps
+    for n, step in enumerate(out[:-1], 1):
+        step["title"] = f"{n} · " + re.sub(r"^\d+ · ", "", step["title"])
     return out
+
+
+def _extra_ready(key, studio):
+    if studio is None or not getattr(studio, "module_" + key, False):
+        return False
+    if key == "tour360":
+        from website.tour360 import published_tour
+        return published_tour() is not None
+    return True

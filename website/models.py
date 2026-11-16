@@ -234,3 +234,81 @@ class Package(models.Model):
     @property
     def include_list(self):
         return [line.strip() for line in self.includes.splitlines() if line.strip()]
+
+
+# ------------------------------------------------------------------ 360° house tour (extra feature, on request)
+class Tour(models.Model):
+    """A walk-through made of 360° room photos. The first published tour is shown on the portfolio page."""
+    title = models.CharField(max_length=80, help_text="e.g. “Aangan Residence”")
+    subtitle = models.CharField(max_length=140, blank=True,
+                                help_text="Short line under the title on the portfolio card. Empty: the room names.")
+    is_published = models.BooleanField("Show on the website", default=True)
+    is_sample = models.BooleanField(default=False, help_text="Sample content that came with the system.")
+    order = models.PositiveIntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "360° house tour"
+
+    def __str__(self):
+        return self.title
+
+
+class TourRoom(models.Model):
+    class Icon(models.TextChoices):
+        LIVING = "bi-tv", "Living / lounge"
+        KITCHEN = "bi-cup-hot", "Kitchen"
+        DINING = "bi-egg-fried", "Dining"
+        BEDROOM = "bi-moon-stars", "Bedroom"
+        BATH = "bi-droplet", "Bathroom"
+        STUDY = "bi-laptop", "Study / office"
+        KIDS = "bi-balloon", "Kids’ room"
+        OUTDOOR = "bi-tree", "Balcony / outdoor"
+        ENTRANCE = "bi-door-open", "Entrance / foyer"
+        OTHER = "bi-house", "Other"
+
+    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name="rooms")
+    title = models.CharField(max_length=60, help_text="e.g. “Living lounge”")
+    icon = models.CharField(max_length=20, choices=Icon.choices, default=Icon.LIVING)
+    panorama = models.ImageField("360° photo", upload_to="tours/",
+                                 help_text="A 360° photo in 2:1 shape (equirectangular), e.g. from a 360° camera or phone app.")
+    preview = models.ImageField(upload_to="tours/previews/", blank=True, editable=False)
+    start_yaw = models.FloatField("Start: left/right", default=0)
+    start_pitch = models.FloatField("Start: up/down", default=0)
+    start_hfov = models.FloatField("Start: zoom (field of view)", default=105)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"{self.tour} — {self.title}"
+
+
+class TourHotspot(models.Model):
+    class Kind(models.TextChoices):
+        INFO = "info", "Info dot"
+        LINK = "link", "Arrow to another room"
+
+    room = models.ForeignKey(TourRoom, on_delete=models.CASCADE, related_name="hotspots")
+    kind = models.CharField(max_length=4, choices=Kind.choices, default=Kind.INFO)
+    yaw = models.FloatField(help_text="Left/right angle, -180 to 180")
+    pitch = models.FloatField(help_text="Up/down angle, -90 to 90")
+    tag = models.CharField("Category", max_length=30, blank=True, help_text="e.g. Furniture, Lighting, Flooring")
+    title = models.CharField(max_length=80, blank=True)
+    text = models.TextField("Description", blank=True)
+    specs = models.TextField("Details", blank=True, help_text="One per line, e.g. “Fabric: performance linen”.")
+    link_to = models.ForeignKey(TourRoom, on_delete=models.CASCADE, null=True, blank=True, related_name="+",
+                                verbose_name="Goes to room")
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.title or (f"→ {self.link_to.title}" if self.link_to_id else "Hotspot")
+
+    @property
+    def spec_list(self):
+        return [line.strip() for line in self.specs.splitlines() if line.strip()]

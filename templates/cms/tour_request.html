@@ -1,0 +1,36 @@
+{% extends "studio/base.html" %}
+{% load static %}
+{% block page_title %}360° house tour{% endblock %}
+{% block heading %}<a href="{% url 'cms:index' %}" class="text-muted text-decoration-none" aria-label="Back"><i class="bi bi-arrow-left"></i></a> 360° house tour{% endblock %}
+{% block erp_content %}
+<div class="panel tour-req" style="max-width:56rem">
+  <div class="tour-req-hero" aria-hidden="true"><span class="tour-req-badge"><i class="bi bi-arrow-repeat"></i> 360°</span></div>
+  <div class="panel-body p-4">
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+      <span class="badge-locked"><i class="bi bi-stars me-1"></i>Extra feature</span>
+      {% if pending %}<span class="pill pill-blue"><i class="bi bi-hourglass-split me-1"></i>Requested {{ pending.created_at|date:"j M Y" }}</span>{% endif %}
+    </div>
+    <h2 class="h4 mb-2">{{ feature.label }}</h2>
+    <p class="mb-2">{{ feature.what }}</p>
+    <p class="text-muted"><i class="bi bi-graph-up-arrow text-accent me-1"></i>{{ feature.benefit }}</p>
+    <ul class="tour-req-list">
+      <li><i class="bi bi-check2-circle"></i> Upload a 360° photo of each room (from a 360° camera or a phone app)</li>
+      <li><i class="bi bi-check2-circle"></i> Click on the photo to add info dots: furniture, lighting, materials and prices</li>
+      <li><i class="bi bi-check2-circle"></i> Floor arrows and room tabs let visitors walk from room to room</li>
+      <li><i class="bi bi-check2-circle"></i> Shown as a “360° house tour” card on your portfolio page</li>
+    </ul>
+
+    {% if pending %}
+    <div class="alert alert-info small mb-3"><i class="bi bi-info-circle me-1"></i>Your request is with us. We will switch the feature on and let you know — nothing else to do.</div>
+    {% endif %}
+    <form method="post" action="{% url 'cms:tour_request' %}" class="d-flex flex-column gap-2" data-loading>{% csrf_token %}
+      <label class="form-label mb-0" for="tourNote">{% if pending %}Add a note to your request{% else %}Anything we should know? <span class="text-muted">(optional)</span>{% endif %}</label>
+      <textarea class="form-control" id="tourNote" name="note" rows="2" maxlength="1000" placeholder="e.g. We have 360° photos of two finished villas ready."></textarea>
+      <div class="d-flex flex-wrap gap-2 mt-1">
+        <button class="btn btn-accent" data-loading-text="Sending…"><i class="bi bi-send me-1"></i>{% if pending %}Send note{% else %}Request this feature{% endif %}</button>
+        {% if wa_url %}<a class="btn btn-outline-ink" href="{{ wa_url }}" target="_blank" rel="noopener"><i class="bi bi-whatsapp me-1"></i>Ask on WhatsApp</a>{% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

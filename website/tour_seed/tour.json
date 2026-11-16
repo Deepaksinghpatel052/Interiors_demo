@@ -1,0 +1,701 @@
+{
+ "title": "Aangan Residence",
+ "subtitle": "Living lounge · modular kitchen · dining · master bedroom",
+ "rooms": [
+  {
+   "key": "lounge",
+   "title": "Living lounge",
+   "icon": "bi-tv",
+   "image": "lounge-360.jpg",
+   "start": {
+    "yaw": 0,
+    "pitch": -3,
+    "hfov": 110
+   },
+   "links": [
+    {
+     "to": "kitchen",
+     "yaw": 100,
+     "pitch": -21
+    },
+    {
+     "to": "dining",
+     "yaw": -55,
+     "pitch": -20
+    }
+   ],
+   "spots": [
+    {
+     "yaw": -22,
+     "pitch": -16,
+     "tag": "Furniture",
+     "title": "Deep-seat sectional sofa",
+     "text": "A generous L-shaped sectional in mocha suede that seats the whole family — the heart of the lounge.",
+     "specs": [
+      "Seats 10",
+      "Stain-resistant suede",
+      "Feather-blend cushions"
+     ]
+    },
+    {
+     "yaw": 26,
+     "pitch": -8,
+     "tag": "Feature",
+     "title": "Bio-ethanol fireplace",
+     "text": "A clean-burning, flue-free fireplace set into a floating white plinth below the TV.",
+     "specs": [
+      "No chimney needed",
+      "Remote ignition",
+      "Toughened glass screen"
+     ]
+    },
+    {
+     "yaw": 33,
+     "pitch": 17,
+     "tag": "Walls",
+     "title": "Stacked-stone TV wall",
+     "text": "Natural slate cladding frames the 75-inch TV, with every cable hidden inside the wall.",
+     "specs": [
+      "Natural slate ledgestone",
+      "Concealed conduits",
+      "Recessed TV mount"
+     ]
+    },
+    {
+     "yaw": 0,
+     "pitch": 26,
+     "tag": "Ceiling",
+     "title": "Floating timber-slat ceiling",
+     "text": "A suspended grid of pine slats on steel beams marks out the seating zone and softens the acoustics.",
+     "specs": [
+      "Kiln-dried pine",
+      "Acoustic felt backing"
+     ]
+    },
+    {
+     "yaw": -29,
+     "pitch": 16,
+     "tag": "Lighting",
+     "title": "Paper lantern pendants",
+     "text": "A cluster of pleated paper pendants gives a soft, gallery-like glow over the sofa.",
+     "specs": [
+      "Rice-paper shades",
+      "Warm 2700 K LEDs"
+     ]
+    },
+    {
+     "yaw": -90,
+     "pitch": 52,
+     "tag": "Structure",
+     "title": "Glulam timber arches",
+     "text": "Laminated timber arches on steel shoes span the room without a single column — the signature of this house.",
+     "specs": [
+      "Glued-laminated pine",
+      "Column-free 9 m span"
+     ]
+    },
+    {
+     "yaw": 16,
+     "pitch": -17,
+     "tag": "Décor",
+     "title": "Tree-stump side tables",
+     "text": "Solid log side tables bring the outdoors in and double up as extra seats.",
+     "specs": [
+      "Reclaimed eucalyptus",
+      "Sealed matte finish"
+     ]
+    },
+    {
+     "yaw": 63,
+     "pitch": -22,
+     "tag": "Joinery",
+     "title": "Coffee bar console",
+     "text": "A slim charcoal console with log stools — for a quick coffee, a board game or laptop work.",
+     "specs": [
+      "Powder-coated steel top",
+      "Built-in charging points"
+     ]
+    },
+    {
+     "yaw": 84,
+     "pitch": 4,
+     "tag": "Lighting",
+     "title": "Tripod floor lamps",
+     "text": "Ash-wood tripod lamps add warm pools of light at eye level for the evenings.",
+     "specs": [
+      "Ash-wood legs",
+      "Linen drum shades"
+     ]
+    },
+    {
+     "yaw": 126,
+     "pitch": -16,
+     "tag": "Entertainment",
+     "title": "Games zone",
+     "text": "A full-size pool table under its own pendant turns one end of the lounge into a games room.",
+     "specs": [
+      "8 ft slate-bed table",
+      "Dedicated task pendant",
+      "Wall-mounted TV"
+     ]
+    },
+    {
+     "yaw": 160,
+     "pitch": 10,
+     "tag": "Lighting",
+     "title": "Backlit stone walls",
+     "text": "Curved walls of pale stone are washed by hidden LED strips, so they glow like sculpture at night.",
+     "specs": [
+      "Limestone cladding",
+      "Hidden LED strip",
+      "Dimmable scenes"
+     ]
+    },
+    {
+     "yaw": -114,
+     "pitch": 6,
+     "tag": "Décor",
+     "title": "Landscape art prints",
+     "text": "Large-format landscape photographs echo the timber and earth tones of the room.",
+     "specs": [
+      "Archival print on aluminium",
+      "1.2 m tall"
+     ]
+    },
+    {
+     "yaw": -160,
+     "pitch": -13,
+     "tag": "Furniture",
+     "title": "TV snug",
+     "text": "A second, quieter seating corner with its own TV — for kids’ movie nights.",
+     "specs": [
+      "Charcoal fabric sofa",
+      "Low-pile rug"
+     ]
+    },
+    {
+     "yaw": -90,
+     "pitch": -55,
+     "tag": "Flooring",
+     "title": "Wide-plank oak flooring",
+     "text": "Matte oak planks run seamlessly through the lounge for a warm, continuous base.",
+     "specs": [
+      "Engineered oak, 190 mm planks",
+      "Underfloor-heating ready"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "kitchen",
+   "title": "Modular kitchen",
+   "icon": "bi-cup-hot",
+   "image": "modular-kitchen-360.jpg",
+   "start": {
+    "yaw": 0,
+    "pitch": -8,
+    "hfov": 110
+   },
+   "links": [
+    {
+     "to": "lounge",
+     "yaw": -137.6,
+     "pitch": -21.8
+    },
+    {
+     "to": "dining",
+     "yaw": 102.5,
+     "pitch": -13.1
+    }
+   ],
+   "spots": [
+    {
+     "yaw": 18.9,
+     "pitch": -14.7,
+     "tag": "Kitchen",
+     "title": "Quartz waterfall island",
+     "text": "A 2.2 m island in white Calacatta-look quartz that flows down both sides to the floor — prep space, breakfast bar and storage in one.",
+     "specs": [
+      "20 mm engineered quartz",
+      "Waterfall ends",
+      "Deep drawers on the far side"
+     ]
+    },
+    {
+     "yaw": -31.3,
+     "pitch": -17.0,
+     "tag": "Modular units",
+     "title": "Handle-less base cabinets",
+     "text": "Deep navy lacquer drawers with a hidden finger-pull profile — clean lines and nothing to snag on.",
+     "specs": [
+      "BWP marine plywood carcass",
+      "Soft-close tandem drawers",
+      "Anti-fingerprint matte lacquer"
+     ]
+    },
+    {
+     "yaw": 22.0,
+     "pitch": 9.0,
+     "tag": "Modular units",
+     "title": "Walnut wall cabinets",
+     "text": "Walnut-veneer upper cabinets add warmth above the navy base units, with LED strips lighting the worktop below.",
+     "specs": [
+      "Natural walnut veneer",
+      "Lift-up shutters",
+      "Under-cabinet LED"
+     ]
+    },
+    {
+     "yaw": -19.5,
+     "pitch": -3.2,
+     "tag": "Walls",
+     "title": "Book-matched marble backsplash",
+     "text": "A single run of white marble-look slab from worktop to wall cabinets — no grout lines to clean.",
+     "specs": [
+      "Sintered stone slab",
+      "Heat and stain resistant"
+     ]
+    },
+    {
+     "yaw": 0.0,
+     "pitch": 2.5,
+     "tag": "Appliances",
+     "title": "4-burner hob & chimney",
+     "text": "A glass-top gas hob under a slim stainless-steel chimney with auto-clean and touch controls.",
+     "specs": [
+      "1200 m³/h suction",
+      "Filterless auto-clean",
+      "Toughened glass hob"
+     ]
+    },
+    {
+     "yaw": 18.4,
+     "pitch": 16.2,
+     "tag": "Lighting",
+     "title": "Glass globe pendants",
+     "text": "Three clear glass globes with brass caps hang over the island at just the right height for prep and dinner.",
+     "specs": [
+      "Hand-blown glass",
+      "Brushed brass fittings",
+      "Warm 2700 K"
+     ]
+    },
+    {
+     "yaw": -32.3,
+     "pitch": -30.0,
+     "tag": "Furniture",
+     "title": "Brass bar stools",
+     "text": "Leather-seat bar stools on slim brass stems, with a footrest ring for comfort.",
+     "specs": [
+      "Top-grain leather seat",
+      "Brushed brass frame"
+     ]
+    },
+    {
+     "yaw": -65.5,
+     "pitch": -10.0,
+     "tag": "Kitchen",
+     "title": "Sink under the window",
+     "text": "An undermount steel sink with a matte-black pull-down tap, placed under the window for daylight while you wash up.",
+     "specs": [
+      "SS 304 undermount sink",
+      "Matte-black pull-down tap"
+     ]
+    },
+    {
+     "yaw": -115.1,
+     "pitch": -7.9,
+     "tag": "Appliances",
+     "title": "Built-in oven & microwave",
+     "text": "Oven and microwave stacked at eye level in the tall unit — no bending down to check the food.",
+     "specs": [
+      "60 cm built-in oven",
+      "Built-in microwave",
+      "Pull-out tray below"
+     ]
+    },
+    {
+     "yaw": -100.2,
+     "pitch": 2.2,
+     "tag": "Appliances",
+     "title": "Fridge column",
+     "text": "The refrigerator sits behind a full-height white gloss panel so the tall wall reads as one clean surface.",
+     "specs": [
+      "Integrated door panel",
+      "High-gloss acrylic finish"
+     ]
+    },
+    {
+     "yaw": 70.2,
+     "pitch": 2.1,
+     "tag": "Storage",
+     "title": "Open walnut shelves",
+     "text": "Floating walnut shelves for glass jars and everyday cups — easy to reach and nice to look at.",
+     "specs": [
+      "Solid walnut",
+      "Hidden steel brackets"
+     ]
+    },
+    {
+     "yaw": 67.0,
+     "pitch": -9.8,
+     "tag": "Kitchen",
+     "title": "Coffee station",
+     "text": "A separate counter for the coffee machine and breakfast things keeps the main worktop free.",
+     "specs": [
+      "Quartz top",
+      "Drawers for pods and mugs"
+     ]
+    },
+    {
+     "yaw": 43.9,
+     "pitch": 0.0,
+     "tag": "Storage",
+     "title": "Floor-to-ceiling pantry",
+     "text": "A tall white pantry with pull-out wire baskets swallows groceries, bulk staples and small appliances.",
+     "specs": [
+      "Pull-out tandem baskets",
+      "Soft-close doors"
+     ]
+    },
+    {
+     "yaw": -94.1,
+     "pitch": 43.7,
+     "tag": "Ceiling",
+     "title": "False ceiling with LED cove",
+     "text": "A gypsum false ceiling hides the services, with a warm LED cove and recessed spotlights over the work zones.",
+     "specs": [
+      "Gypsum board",
+      "Warm LED cove",
+      "Anti-glare downlights"
+     ]
+    },
+    {
+     "yaw": 56.3,
+     "pitch": -54.2,
+     "tag": "Flooring",
+     "title": "Large-format stone tiles",
+     "text": "800 × 800 mm stone-look tiles with fine grout lines — easy to mop and hard-wearing in a busy kitchen.",
+     "specs": [
+      "Vitrified, matte finish",
+      "Anti-skid R10"
+     ]
+    },
+    {
+     "yaw": 131.2,
+     "pitch": -23.7,
+     "tag": "Dining",
+     "title": "Six-seater breakfast table",
+     "text": "A solid oak table with upholstered chairs for quick family meals right next to the kitchen.",
+     "specs": [
+      "Solid oak top",
+      "Performance fabric chairs"
+     ]
+    },
+    {
+     "yaw": 131.2,
+     "pitch": 18.1,
+     "tag": "Lighting",
+     "title": "Linear LED pendant",
+     "text": "A slim black linear light gives even, glare-free light over the whole table.",
+     "specs": [
+      "Matte-black aluminium",
+      "Dimmable"
+     ]
+    },
+    {
+     "yaw": -138.4,
+     "pitch": -2.4,
+     "tag": "Doors",
+     "title": "Slim-frame sliding door",
+     "text": "Black-framed glass sliding doors bring in daylight and open onto the garden.",
+     "specs": [
+      "Slim aluminium profile",
+      "Toughened glass"
+     ]
+    },
+    {
+     "yaw": 138.0,
+     "pitch": 3.6,
+     "tag": "Walls",
+     "title": "Sage feature wall & art",
+     "text": "A soft sage-green wall and a two-tone canvas set a calm mood for the dining corner.",
+     "specs": [
+      "Washable matte emulsion",
+      "Framed canvas 1.6 m"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "dining",
+   "title": "Dining with a view",
+   "icon": "bi-egg-fried",
+   "image": "dining-360.jpg",
+   "start": {
+    "yaw": -40,
+    "pitch": 0,
+    "hfov": 110
+   },
+   "links": [
+    {
+     "to": "kitchen",
+     "yaw": -162,
+     "pitch": -18
+    },
+    {
+     "to": "bedroom",
+     "yaw": 172,
+     "pitch": -20
+    }
+   ],
+   "spots": [
+    {
+     "yaw": -115,
+     "pitch": -11,
+     "tag": "Furniture",
+     "title": "Eight-seater dining table",
+     "text": "A solid dark-stained hardwood table with sculptural iron-framed chairs.",
+     "specs": [
+      "Solid sheesham wood",
+      "Seats 8",
+      "Wrought-iron chairs"
+     ]
+    },
+    {
+     "yaw": -18,
+     "pitch": 16,
+     "tag": "Windows",
+     "title": "Floor-to-ceiling glazing",
+     "text": "Full-height sliding glass doors open the dining room straight onto the valley view.",
+     "specs": [
+      "Slimline aluminium frames",
+      "Low-E double glazing"
+     ]
+    },
+    {
+     "yaw": 22,
+     "pitch": -13,
+     "tag": "Outdoor",
+     "title": "Balcony with a lake view",
+     "text": "A slate-tiled balcony with a steel railing — morning tea with the whole lake in front of you.",
+     "specs": [
+      "Slate floor tiles",
+      "Steel railing"
+     ]
+    },
+    {
+     "yaw": -90,
+     "pitch": 56,
+     "tag": "Ceiling",
+     "title": "Curved timber-batten ceiling",
+     "text": "Dark-stained timber battens follow the curve of the roof and hide the services above.",
+     "specs": [
+      "Stained pine battens",
+      "Recessed downlights"
+     ]
+    },
+    {
+     "yaw": 87,
+     "pitch": 0,
+     "tag": "Feature",
+     "title": "Built-in indoor grill",
+     "text": "A cast-iron built-in grill with a hidden chimney — barbecue nights whatever the weather.",
+     "specs": [
+      "Cast-iron firebox",
+      "Concealed flue"
+     ]
+    },
+    {
+     "yaw": 148,
+     "pitch": -7,
+     "tag": "Kitchen",
+     "title": "Stone serving ledge",
+     "text": "A tiled ledge beside the grill for serving dishes, lit by a warm wall sconce above.",
+     "specs": [
+      "Tumbled stone tiles",
+      "Uplighter sconce"
+     ]
+    },
+    {
+     "yaw": -151,
+     "pitch": 6,
+     "tag": "Layout",
+     "title": "Open-plan family lounge",
+     "text": "Beyond the dining area the space flows into the family lounge and kitchen under one long ceiling.",
+     "specs": [
+      "Ceiling fan",
+      "Framed art wall"
+     ]
+    },
+    {
+     "yaw": -99,
+     "pitch": 9,
+     "tag": "Soft furnishing",
+     "title": "Linen drapes",
+     "text": "Floor-length linen drapes soften the glass and filter the evening sun.",
+     "specs": [
+      "Pure linen",
+      "Ceiling-mounted rod"
+     ]
+    },
+    {
+     "yaw": 67,
+     "pitch": -56,
+     "tag": "Flooring",
+     "title": "Large-format floor tiles",
+     "text": "Warm ivory tiles laid on the diagonal make the room feel even wider.",
+     "specs": [
+      "600 × 600 mm vitrified",
+      "Anti-skid matte finish"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "bedroom",
+   "title": "Master bedroom",
+   "icon": "bi-moon-stars",
+   "image": "bedroom-360.jpg",
+   "start": {
+    "yaw": 20,
+    "pitch": -5,
+    "hfov": 105
+   },
+   "links": [
+    {
+     "to": "dining",
+     "yaw": -135,
+     "pitch": -18
+    }
+   ],
+   "spots": [
+    {
+     "yaw": 101,
+     "pitch": -25,
+     "tag": "Furniture",
+     "title": "Upholstered king bed",
+     "text": "A low platform bed dressed in crisp white linen with an olive throw that ties back to the accent chair.",
+     "specs": [
+      "Size: 6 × 6.5 ft",
+      "Hydraulic storage underneath",
+      "Fabric: performance linen"
+     ]
+    },
+    {
+     "yaw": 117,
+     "pitch": 8,
+     "tag": "Joinery",
+     "title": "Wardrobes & mirror niche",
+     "text": "Floor-to-ceiling wardrobes frame the bed. The mirror-backed niche doubles the sense of depth.",
+     "specs": [
+      "Finish: smoked-oak veneer",
+      "Soft-close hinges",
+      "5 mm clear mirror"
+     ]
+    },
+    {
+     "yaw": -10,
+     "pitch": -30,
+     "tag": "Furniture",
+     "title": "Wingback accent chair",
+     "text": "One bold chartreuse piece against a calm grey-and-white palette — the room’s single pop of colour.",
+     "specs": [
+      "Wool-blend upholstery",
+      "Ebonised wooden legs"
+     ]
+    },
+    {
+     "yaw": 38,
+     "pitch": 14,
+     "tag": "Soft furnishing",
+     "title": "Layered curtains",
+     "text": "Sheer curtains for daytime privacy with heavy taupe drapes behind them for full blackout at night.",
+     "specs": [
+      "Ceiling-concealed track",
+      "Blackout lining",
+      "Floor-to-ceiling height"
+     ]
+    },
+    {
+     "yaw": 40,
+     "pitch": 40,
+     "tag": "Lighting",
+     "title": "Warm LED cove",
+     "text": "A hidden LED strip above the window washes the ceiling with a soft evening glow.",
+     "specs": [
+      "2700 K warm white",
+      "Dimmable driver"
+     ]
+    },
+    {
+     "yaw": -17,
+     "pitch": 24,
+     "tag": "Lighting",
+     "title": "Drop pendants",
+     "text": "Two slim black pendants hung at staggered heights light the reading corner without taking floor space.",
+     "specs": [
+      "Matte-black metal",
+      "E14 LED bulbs"
+     ]
+    },
+    {
+     "yaw": -72,
+     "pitch": -27,
+     "tag": "Furniture",
+     "title": "Curved work desk",
+     "text": "A black-oak desk with a curved return gives a proper workstation plus a tea and coffee corner.",
+     "specs": [
+      "Built-in cable management",
+      "Sockets at desk height",
+      "Ergonomic chair"
+     ]
+    },
+    {
+     "yaw": -92,
+     "pitch": 16,
+     "tag": "Walls",
+     "title": "Diamond-pattern feature wall",
+     "text": "Subtle trellis wallpaper behind the wall-mounted TV adds texture without visual noise.",
+     "specs": [
+      "Washable vinyl wallpaper",
+      "Concealed TV wiring"
+     ]
+    },
+    {
+     "yaw": -163,
+     "pitch": 5,
+     "tag": "Décor",
+     "title": "Statement artwork",
+     "text": "A large-format canvas in greens and blues greets you at the entrance, lit by a wall washer above.",
+     "specs": [
+      "Canvas: 3 × 5 ft",
+      "LED wall washer"
+     ]
+    },
+    {
+     "yaw": 50,
+     "pitch": -66,
+     "tag": "Flooring",
+     "title": "Oak floor & hand-tufted rug",
+     "text": "Warm grey oak-look flooring with a black-and-ivory linework rug that marks out the sleeping zone.",
+     "specs": [
+      "8 mm laminate, AC4 rated",
+      "Hand-tufted wool rug"
+     ]
+    },
+    {
+     "yaw": 168,
+     "pitch": 3,
+     "tag": "Doors",
+     "title": "Frosted glass door",
+     "text": "Frosted toughened glass to the ensuite lets daylight through while keeping privacy.",
+     "specs": [
+      "10 mm toughened glass",
+      "Brushed-steel handle"
+     ]
+    }
+   ]
+  }
+ ]
+}

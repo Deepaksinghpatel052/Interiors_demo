@@ -553,6 +553,9 @@ def studio_settings(request):
     from .forms import StudioSettingsForm
     settings_obj = StudioSettings.load()
     form = StudioSettingsForm(request.POST or None, request.FILES or None, instance=settings_obj)
+    # Extra features are switched on by DEVNIXPLUS only (superuser); the studio sees their status and can request them.
+    if not request.user.is_superuser:
+        form.fields.pop("module_tour360", None)
     if request.method == "POST":
         if form.is_valid():
             form.save()
@@ -568,10 +571,14 @@ def studio_settings(request):
                                                  "schedule_text", "quotation_terms", "bank_details", "easy_payment_text"]),
         ("rates", "Estimator rates", "calculator", ["rate_essential", "rate_premium", "rate_luxury"]),
         ("modules", "Modules", "toggles", ["module_website", "module_cms", "module_portal", "module_erp",
-                                           "module_automation", "module_ai", "show_locked_teasers"]),
+                                           "module_automation", "module_ai", "show_locked_teasers"]
+         + (["module_tour360"] if "module_tour360" in form.fields else [])),
     ]
+    from core.modules import EXTRA_FEATURES, extra_status
+    extras = [{"key": k, "label": f["label"], "icon": f["icon"], "status": extra_status(k, settings_obj),
+               "url": reverse(f["manage_url"])} for k, f in EXTRA_FEATURES.items()]
     return render(request, "studio/settings.html", {
-        "form": form,
+        "form": form, "extras": extras,
         "sections": [(key, label, icon, [form[f] for f in fields]) for key, label, icon, fields in sections],
         "error_sections": {key for key, _, _, fields in sections if any(form[f].errors for f in fields)},
     })

@@ -24,6 +24,7 @@
   </div>
   <div class="col-xl-4">
     <div class="panel"><div class="panel-head"><h2>Also editable</h2></div><div class="panel-body py-1">
+      <a class="doc-row" href="{% url 'cms:tours' %}"><i class="bi bi-arrow-repeat"></i><span class="flex-grow-1">360° house tour</span>{% if studio.module_tour360 %}<span class="pill pill-green">On</span>{% else %}<span class="badge-locked">Extra</span>{% endif %}<i class="bi bi-chevron-right small text-muted"></i></a>
       <a class="doc-row" href="{% url 'studio:settings' %}"><i class="bi bi-palette"></i><span class="flex-grow-1">Logo, name, colours &amp; contact</span><i class="bi bi-chevron-right small text-muted"></i></a>
       <a class="doc-row" href="{% url 'studio:availability' %}"><i class="bi bi-clock"></i><span class="flex-grow-1">Booking hours &amp; holidays</span><i class="bi bi-chevron-right small text-muted"></i></a>
       {% if studio.module_ai %}<a class="doc-row" href="{% url 'assistant:kb' %}"><i class="bi bi-journal-text"></i><span class="flex-grow-1">AI knowledge base</span><i class="bi bi-chevron-right small text-muted"></i></a>{% endif %}
