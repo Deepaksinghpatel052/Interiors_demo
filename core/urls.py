@@ -1,7 +1,7 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
-from . import views
+from . import demo_links, views
 
 app_name = "core"
 
@@ -11,4 +11,6 @@ urlpatterns = [
     path("demo/interest/<slug:key>/", views.feature_interest, name="feature_interest"),
     path("demo/role/<slug:role>/", views.switch_role, name="switch_role"),
     path("welcome/", views.after_login, name="after_login"),
+    path("d/<slug:slug>/", demo_links.open_link, name="demo_link"),
+    path("demo/track/", demo_links.track, name="demo_track"),
 ]

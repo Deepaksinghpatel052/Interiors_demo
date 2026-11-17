@@ -2,7 +2,8 @@
   <div class="container d-flex align-items-center gap-2 gap-md-3">
     <i class="bi bi-stars text-warning d-none d-sm-inline"></i>
     <span class="flex-grow-1 small">
-      <strong>Demo by {{ DEVNIX_NAME }}</strong><span class="d-none d-md-inline"> — this system can be built for your studio.</span>
+      {% if demo_link %}<strong>Demo for {{ demo_link.business_name }}</strong><span class="d-none d-md-inline"> — by {{ DEVNIX_NAME }}. This is how your studio's system can look.</span>
+      {% else %}<strong>Demo by {{ DEVNIX_NAME }}</strong><span class="d-none d-md-inline"> — this system can be built for your studio.</span>{% endif %}
     </span>
     <button type="button" class="btn btn-sm btn-light-outline" data-tour-start title="Guided tour of the whole system"><i class="bi bi-signpost-2"></i><span class="d-none d-sm-inline ms-1">Tour</span></button>
     {% if not request.resolver_match.url_name == "why" %}<a class="btn btn-sm btn-light-outline d-none d-lg-inline-block" href="{% url 'website:why' %}"><i class="bi bi-lightbulb"></i> Why this system</a>{% endif %}
@@ -19,8 +20,8 @@
       </ul>
     </div>
     {% if DEVNIX_WHATSAPP %}
-    <a class="btn btn-wa btn-sm" target="_blank" rel="noopener"
-       href="{% wa_link DEVNIX_WHATSAPP 'Hi '|add:DEVNIX_NAME|add:', I saw the interior studio demo and want this for my studio.' %}">
+    <a class="btn btn-wa btn-sm" target="_blank" rel="noopener" data-track="whatsapp"
+       href="{% if demo_link %}{% wa_link DEVNIX_WHATSAPP 'Hi '|add:DEVNIX_NAME|add:', this is '|add:demo_link.business_name|add:'. I saw our studio demo and want to discuss it.' %}{% else %}{% wa_link DEVNIX_WHATSAPP 'Hi '|add:DEVNIX_NAME|add:', I saw the interior studio demo and want this for my studio.' %}{% endif %}">
       <i class="bi bi-whatsapp"></i><span class="d-none d-sm-inline ms-1">Talk to {{ DEVNIX_NAME }}</span>
     </a>
     {% endif %}

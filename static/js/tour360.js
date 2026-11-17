@@ -214,6 +214,7 @@
   function open() {
     lastFocus = document.activeElement;
     overlay.hidden = false;
+    if (window.Studio && window.Studio.track) window.Studio.track("tour360");
     document.documentElement.classList.add("tour360-lock");
     $("tour360Close").focus();
     // Go truly full screen where the browser allows it (not iOS Safari — the overlay still fills the screen).

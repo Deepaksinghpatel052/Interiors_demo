@@ -60,3 +60,11 @@ def palette_from_logo(path_or_file):
     secondary = _from_hls((h + 0.02) % 1, min(l + 0.08, 0.6), min(s + 0.05, 1))
     dark = _from_hls(h, 0.08, min(s, 0.35))
     return _hex(primary), _hex(secondary), _hex(dark)
+
+
+def palette_from_color(primary_hex):
+    """(primary, secondary, dark) matching one brand colour given as #RRGGBB."""
+    r, g, b = (int(primary_hex[i:i + 2], 16) / 255 for i in (1, 3, 5))
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    return (primary_hex.upper(), _hex(_from_hls((h + 0.02) % 1, min(l + 0.08, 0.6), s)),
+            _hex(_from_hls(h, 0.08, min(s, 0.35))))

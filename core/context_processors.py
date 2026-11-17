@@ -13,6 +13,7 @@ def studio(request):
     return {
         "studio": s,
         "DEMO_MODE": settings.DEMO_MODE,
+        "demo_link": getattr(request, "demo_link", None),
         "AI_MOCK": settings.AI_MOCK,
         "DEVNIX_WHATSAPP": settings.DEVNIX_WHATSAPP,
         "DEVNIX_NAME": settings.DEVNIX_NAME,

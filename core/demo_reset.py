@@ -33,7 +33,7 @@ def wipe(*, keep_content=False, keep_catalogue=False, keep_availability=False, c
     from studio.models import ClientProject
     from website.models import FAQ, PhotoCredit, PortfolioProject, Service, Testimonial, Tour
 
-    from .models import FeatureInterest, ModuleRequest, ProductEnquiry
+    from .models import DemoLink, FeatureInterest, ModuleRequest, ProductEnquiry
 
     counts = {}
 
@@ -72,6 +72,7 @@ def wipe(*, keep_content=False, keep_catalogue=False, keep_availability=False, c
         drop("feature-interest clicks", FeatureInterest.objects.all())
         drop("DEVNIXPLUS product enquiries", ProductEnquiry.objects.all())
         drop("extra-feature requests", ModuleRequest.objects.all())
+        drop("client demo links", DemoLink.objects.all())
 
     # people: demo logins, portal clients and team members created during demos
     people = User.objects.filter(username__in=DEMO_USERNAMES) | User.objects.filter(groups__name__in=[CLIENT, TEAM])

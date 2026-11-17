@@ -67,6 +67,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "core.demo_links.DemoBrandMiddleware",      # client demo links: their name on the demo + visit tracking
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "core.modules.ModuleGateMiddleware",
 ]

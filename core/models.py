@@ -101,6 +101,12 @@ class StudioSettings(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
+        # A copy branded for a client demo link (core.demo_links) must never write the client's name into
+        # the real settings: fields still showing the branded value get their real value back.
+        for field, (real, shown) in getattr(self, "_brand_original", {}).items():
+            current = getattr(self, field)
+            if (getattr(current, "name", current) or "") == (shown or ""):
+                setattr(self, field, real)
         self.pk = 1
         super().save(*args, **kwargs)
         cache.delete(CACHE_KEY)
@@ -114,7 +120,8 @@ class StudioSettings(models.Model):
         if obj is None:
             obj, _ = cls.objects.get_or_create(pk=1)
             cache.set(CACHE_KEY, obj, 300)
-        return obj
+        from .demo_links import branded   # a visitor on a client demo link sees that client's name
+        return branded(obj)
 
     @property
     def initials(self):
@@ -224,3 +231,92 @@ class ProductEnquiry(models.Model):
         from .modules import MODULES
         labels = {k: label for k, label, _, _ in MODULES} | {"complete": "Complete system", "not_sure": "Not sure yet"}
         return ", ".join(labels.get(m, m) for m in self.modules) or "—"
+
+
+class DemoLink(models.Model):
+    """A personal demo link for one prospect: the demo shows their business name (and logo/colour) and every
+    open, page and click is recorded, so sales knows who looked at the demo and what they cared about."""
+
+    business_name = models.CharField(max_length=120, help_text="Shown everywhere in the demo, e.g. Sharma Interiors.")
+    contact_name = models.CharField("Contact person", max_length=100, blank=True,
+                                    help_text="Optional. Used in the welcome message: “Welcome, Rahul!”")
+    mobile = models.CharField("Mobile / WhatsApp", max_length=15, blank=True,
+                              help_text="Optional. 10-digit number, for the “Send on WhatsApp” button.")
+    city = models.CharField(max_length=80, blank=True, help_text="Optional. Replaces the demo city.")
+    logo = models.ImageField(upload_to="demo_links/", blank=True,
+                             help_text="Optional. The brand colours are picked from the logo.")
+    accent_color = models.CharField("Brand colour", max_length=7, blank=True, validators=[hex_color],
+                                    help_text="Optional, e.g. #B5651D. Leave empty to pick it from the logo.")
+    secondary_color = models.CharField(max_length=7, blank=True, editable=False)
+    dark_color = models.CharField(max_length=7, blank=True, editable=False)
+    slug = models.SlugField("Link name", max_length=80, unique=True, blank=True,
+                            help_text="The end of the link (…/d/<link name>/). Leave empty to make it from the business name.")
+    enquiry = models.ForeignKey("ProductEnquiry", on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name="demo_links", help_text="Optional: the enquiry this link was made for.")
+    notes = models.TextField("Internal notes", blank=True)
+    is_active = models.BooleanField("Link works", default=True,
+                                    help_text="Untick to switch the link off (it then opens the normal demo).")
+    created_at = models.DateTimeField(auto_now_add=True)
+    first_opened_at = models.DateTimeField(null=True, blank=True)
+    last_seen_at = models.DateTimeField(null=True, blank=True)
+    visits = models.PositiveIntegerField(default=0, help_text="Separate visits (30 minutes apart).")
+    page_views = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Client demo link"
+
+    def __str__(self):
+        return self.business_name
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse("core:demo_link", args=[self.slug])
+
+    def save(self, *args, **kwargs):
+        from django.utils.text import slugify
+
+        from .branding import DEFAULT, palette_from_color, palette_from_logo
+        if not self.slug:
+            base = slugify(self.business_name)[:70] or "studio"
+            slug, n = base, 2
+            while DemoLink.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug, n = f"{base}-{n}", n + 1
+            self.slug = slug
+        if self.accent_color:
+            self.accent_color, self.secondary_color, self.dark_color = palette_from_color(self.accent_color)
+        elif self.logo:
+            try:
+                colours = palette_from_logo(self.logo.file)
+                self.logo.file.seek(0)
+            except Exception:
+                colours = DEFAULT
+            if colours != DEFAULT:
+                self.accent_color, self.secondary_color, self.dark_color = colours
+        else:
+            self.secondary_color = self.dark_color = ""
+        super().save(*args, **kwargs)
+
+
+class DemoVisit(models.Model):
+    """One thing a prospect did on their demo link: opened it, viewed a page, or clicked something."""
+
+    class Kind(models.TextChoices):
+        OPEN = "open", "Opened the link"
+        PAGE = "page", "Viewed a page"
+        ACTION = "action", "Clicked"
+
+    link = models.ForeignKey(DemoLink, on_delete=models.CASCADE, related_name="events")
+    kind = models.CharField(max_length=8, choices=Kind.choices, default=Kind.PAGE)
+    path = models.CharField(max_length=300, blank=True)
+    title = models.CharField(max_length=160, blank=True)
+    device = models.CharField(max_length=20, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Demo link activity"
+        verbose_name_plural = "Demo link activity"
+
+    def __str__(self):
+        return f"{self.link} · {self.get_kind_display()} · {self.title or self.path}"
