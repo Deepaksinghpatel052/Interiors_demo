@@ -24,6 +24,19 @@
   window.Studio.getCookie = getCookie;
   function csrfToken() { return $('meta[name="csrf-token"]').attr("content") || getCookie("csrftoken"); }
   window.Studio.csrfToken = csrfToken;
+  // Client demo links: report a few key clicks (only when the page was opened from a personal demo link)
+  window.Studio.track = function (what) {
+    if (!document.querySelector('meta[name="demo-link"]')) return;
+    var fd = new FormData();
+    fd.append("what", what);
+    fd.append("path", location.pathname);
+    try { navigator.sendBeacon ? navigator.sendBeacon("/demo/track/", fd) : fetch("/demo/track/", { method: "POST", body: fd }); } catch (e) {}
+  };
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest && e.target.closest("[data-track]");
+    if (el) window.Studio.track(el.getAttribute("data-track"));
+    if (e.target.closest && e.target.closest("[data-tour-start]")) window.Studio.track("tour");
+  }, true);
 
   $(function () {
     // Django messages → toasts

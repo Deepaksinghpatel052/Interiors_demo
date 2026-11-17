@@ -7,6 +7,7 @@
   <meta name="description" content="{% block meta_description %}{{ studio.tagline }} Residential and commercial interior design in {{ studio.city }}.{% endblock %}">
   <meta name="theme-color" content="{{ studio.dark_color }}">
   <meta name="csrf-token" content="{{ csrf_token }}">
+  {% if demo_link %}<meta name="demo-link" content="1">{% endif %}
   <meta property="og:title" content="{{ studio.name }}">
   <meta property="og:description" content="{{ studio.tagline }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
