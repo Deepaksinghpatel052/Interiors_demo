@@ -59,6 +59,7 @@ class Command(BaseCommand):
         if opts["flush"]:
             self.flush()
         StudioSettings.load().save()  # ensures the singleton exists
+        self.demo_whatsapp()
         self.seed_users()
         self.seed_services()
         self.seed_faqs()
@@ -87,6 +88,18 @@ class Command(BaseCommand):
                       PortfolioProject, Service, FAQ, Testimonial):
             model.objects.all().delete()
         self.stdout.write("Flushed demo content.")
+
+    def demo_whatsapp(self):
+        """Demo only: the sample studio's WhatsApp buttons go to DEVNIXPLUS's business WhatsApp (DEVNIX_WHATSAPP),
+        so prospects who tap WhatsApp anywhere in the demo reach the seller, not a made-up number."""
+        from django.conf import settings
+        number = "".join(c for c in (settings.DEVNIX_WHATSAPP or "") if c.isdigit())
+        if settings.DEMO_MODE and number:
+            s = StudioSettings.load()
+            if s.whatsapp != number:
+                s.whatsapp = number
+                s.save(update_fields=["whatsapp"])
+            self.stdout.write(f"Demo WhatsApp buttons go to {number}")
 
     def seed_tour(self):
         """Sample 360° house tour (only visible once the extra feature is switched on)."""
